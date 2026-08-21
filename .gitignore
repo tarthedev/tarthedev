@@ -1,0 +1,49 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# production
+/build
+/dist
+
+# environment — never commit real secrets
+.env
+.env.local
+.env.production
+.env.*.local
+!.env.example
+
+# uploaded screenshots and generated storage
+/storage/
+/var/
+
+# database backups
+/backups/
+*.dump
+*.sql.gz
+
+# testing
+/coverage
+
+# logs
+*.log
+npm-debug.log*
+
+# os
+.DS_Store
+Thumbs.db
+
+# editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# prisma generated client
+/src/generated/

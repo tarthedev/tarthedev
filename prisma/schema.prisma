@@ -1,0 +1,509 @@
+// KPI Command Center — data model
+//
+// Design notes
+// ------------
+// * Every row is scoped by `userId` even though v1 ships as a single-user app.
+//   Multi-user support later is a matter of relaxing the session lookup, not a
+//   migration of every table.
+// * Screenshots live on disk/object storage; Postgres holds only metadata.
+// * `MetricObservation` is append-only. Corrections are stored alongside the
+//   original AI value, never on top of it, so extraction quality stays auditable.
+// * Period columns are `@db.Date` (calendar dates, no time-of-day). Event
+//   columns are timestamptz stored in UTC and rendered in the user's timezone.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+// Prisma 7 moved the connection URL out of the schema: `prisma.config.ts`
+// supplies it to the CLI, and the runtime client is constructed with the
+// node-postgres driver adapter (see src/lib/db.ts).
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  OWNER
+  MEMBER
+}
+
+/// How a KPI's value should be formatted and aggregated.
+enum UnitType {
+  COUNT
+  CURRENCY
+  PERCENT
+  RATIO
+}
+
+enum PeriodType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+enum GoalScope {
+  PERSONAL
+  STORE
+}
+
+enum SnapshotStatus {
+  DRAFT // images uploaded, extraction not started
+  PROCESSING // extraction in flight
+  NEEDS_REVIEW // extracted, but something needs a human (low confidence / conflict / unknown KPI)
+  CONFIRMED // human accepted; counts toward the dashboard
+  FAILED // extraction exhausted its retries
+}
+
+enum ObservationStatus {
+  PENDING // extracted, awaiting review
+  ACCEPTED // counts toward the dashboard
+  REJECTED // human discarded it
+  CONFLICT // two images disagree about this KPI
+  UNMAPPED // AI saw a KPI this user has not defined yet
+}
+
+enum AiFeature {
+  SCREENSHOT_EXTRACTION
+  COACH_BRIEF
+  CHAT
+  DEEP_ANALYSIS
+}
+
+enum ExtractionStrategy {
+  STANDARD // default prompt, default model
+  EXPLICIT // more prescriptive prompt, same model
+  ESCALATED // escalation model (higher capability)
+}
+
+enum ShiftKind {
+  WORK
+  OFF
+  PTO
+  HOLIDAY
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+}
+
+enum BriefKind {
+  DAILY_BRIEF
+  DEEP_ANALYSIS
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+}
+
+/// How successive readings of a KPI combine over a period.
+enum AggregationMode {
+  /// Each reading is a period-to-date running total, as printed on the Victra
+  /// dashboard. The newest reading in the period is the current value.
+  LATEST
+  /// Each reading is an increment to be added up, for KPIs logged per shift.
+  SUM
+}
+
+enum NotificationSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+// ---------------------------------------------------------------------------
+// Identity
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String?
+  timezone     String    @default("America/New_York")
+  role         Role      @default(OWNER)
+  onboardedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sessions     Session[]
+  kpis         KpiDefinition[]
+  goals        Goal[]
+  snapshots    Snapshot[]
+  observations MetricObservation[]
+  aiRequests   AiRequest[]
+  briefs       CoachBrief[]
+  chatMessages ChatMessage[]
+  shifts       Shift[]
+  settings      AppSetting[]
+  logs          EventLog[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+/// Opaque server-side sessions. The cookie carries a random token; only its
+/// SHA-256 hash is stored, so a database leak does not hand out live sessions.
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  userAgent  String?
+  ipAddress  String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// ---------------------------------------------------------------------------
+// KPI configuration
+// ---------------------------------------------------------------------------
+
+model KpiDefinition {
+  id             String   @id @default(cuid())
+  userId         String
+  /// Stable machine identifier, e.g. "internet". Never rename in place.
+  key            String
+  displayName    String
+  description    String?
+  category       String?
+  unitType       UnitType @default(COUNT)
+  /// Relative importance in the weighted overall score.
+  weight         Float    @default(1)
+  sortOrder      Int      @default(0)
+  active         Boolean  @default(true)
+  /// Alternate labels seen on Victra screens that map to this KPI.
+  aliases        String[] @default([])
+  higherIsBetter Boolean  @default(true)
+  aggregation    AggregationMode @default(LATEST)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goals        Goal[]
+  observations MetricObservation[]
+
+  @@unique([userId, key])
+  @@index([userId, active, sortOrder])
+  @@map("kpi_definitions")
+}
+
+model Goal {
+  id           String     @id @default(cuid())
+  userId       String
+  kpiId        String
+  periodType   PeriodType
+  periodStart  DateTime   @db.Date
+  periodEnd    DateTime   @db.Date
+  minimumValue Float?
+  targetValue  Float
+  stretchValue Float?
+  /// Lower numbers surface first in "today's target" ordering.
+  priority     Int        @default(0)
+  scope        GoalScope  @default(PERSONAL)
+  notes        String?
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kpi  KpiDefinition @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kpiId, periodType, periodStart, scope])
+  @@index([userId, active, periodStart, periodEnd])
+  @@index([kpiId, periodStart])
+  @@map("goals")
+}
+
+// ---------------------------------------------------------------------------
+// Snapshots and extraction
+// ---------------------------------------------------------------------------
+
+/// One upload session = one snapshot, however many screenshots it took.
+model Snapshot {
+  id                      String         @id @default(cuid())
+  userId                  String
+  capturedAt              DateTime       @default(now())
+  reportingPeriodStart    DateTime?      @db.Date
+  reportingPeriodEnd      DateTime?      @db.Date
+  /// True when the period came from the screenshots rather than a fallback.
+  periodDetected          Boolean        @default(false)
+  status                  SnapshotStatus @default(DRAFT)
+  extractionModel         String?
+  extractionPromptVersion String?
+  overallConfidence       Float?
+  imageCount              Int            @default(0)
+  /// Verbatim model output from the winning attempt, for auditing.
+  rawExtraction           Json?
+  errorMessage            String?
+  notes                   String?
+  confirmedAt             DateTime?
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images       SnapshotImage[]
+  observations MetricObservation[]
+  attempts     ExtractionAttempt[]
+  aiRequests   AiRequest[]
+
+  @@index([userId, capturedAt])
+  @@index([userId, status])
+  @@index([userId, reportingPeriodStart, reportingPeriodEnd])
+  @@map("snapshots")
+}
+
+model SnapshotImage {
+  id           String   @id @default(cuid())
+  snapshotId   String
+  /// Opaque storage key resolved by the storage driver. Never a public URL.
+  storageKey   String   @unique
+  originalName String
+  mimeType     String
+  byteSize     Int
+  width        Int?
+  height       Int?
+  /// SHA-256 of the original bytes; used to skip re-sending identical images.
+  checksum     String
+  orderIndex   Int      @default(0)
+  /// Stable handle the model cites in its output, e.g. "screenshot_1".
+  label        String
+  processed    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  snapshot     Snapshot            @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  observations MetricObservation[]
+
+  @@unique([snapshotId, label])
+  @@index([snapshotId, orderIndex])
+  @@map("snapshot_images")
+}
+
+/// A single KPI reading extracted from a snapshot. Append-only: `aiValue` keeps
+/// what the model said, `correctedValue` keeps what the human said, and `value`
+/// is the effective number the dashboard reads.
+model MetricObservation {
+  id            String            @id @default(cuid())
+  userId        String
+  snapshotId    String
+  kpiId         String?
+  rawLabel      String
+  rawValue      String
+  value         Float?
+  unit          String?
+  confidence    Float             @default(0)
+  sourceImageId String?
+  status        ObservationStatus @default(PENDING)
+  aiValue       Float?
+  correctedValue Float?
+  correctedAt   DateTime?
+  isCorrected   Boolean           @default(false)
+  /// Non-null when several observations disagree about the same KPI.
+  conflictKey   String?
+  /// Denormalised from the parent snapshot so dashboard reads stay single-table.
+  effectiveAt   DateTime
+  periodStart   DateTime?         @db.Date
+  periodEnd     DateTime?         @db.Date
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshot    Snapshot       @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  kpi         KpiDefinition? @relation(fields: [kpiId], references: [id], onDelete: SetNull)
+  sourceImage SnapshotImage? @relation(fields: [sourceImageId], references: [id], onDelete: SetNull)
+
+  @@index([userId, kpiId, effectiveAt])
+  @@index([userId, status])
+  @@index([snapshotId])
+  @@index([userId, periodStart, periodEnd])
+  @@map("metric_observations")
+}
+
+/// One row per model call in the retry ladder, so a failed extraction can be
+/// replayed and compared without guessing what was tried.
+model ExtractionAttempt {
+  id            String             @id @default(cuid())
+  snapshotId    String
+  attemptNumber Int
+  strategy      ExtractionStrategy
+  model         String
+  promptVersion String
+  success       Boolean            @default(false)
+  errorMessage  String?
+  rawResponse   Json?
+  inputTokens   Int                @default(0)
+  outputTokens  Int                @default(0)
+  costUsd       Float              @default(0)
+  latencyMs     Int                @default(0)
+  createdAt     DateTime           @default(now())
+
+  snapshot Snapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@unique([snapshotId, attemptNumber])
+  @@index([snapshotId])
+  @@map("extraction_attempts")
+}
+
+// ---------------------------------------------------------------------------
+// AI usage, cost, and cached output
+// ---------------------------------------------------------------------------
+
+/// Immutable ledger of every model call. The budget guardrail reads this table
+/// before allowing a new request.
+model AiRequest {
+  id                  String    @id @default(cuid())
+  userId              String
+  feature             AiFeature
+  provider            String    @default("anthropic")
+  model               String
+  promptVersion       String?
+  inputTokens         Int       @default(0)
+  outputTokens        Int       @default(0)
+  cacheReadTokens     Int       @default(0)
+  cacheCreationTokens Int       @default(0)
+  /// Estimated USD. Floats are fine here: values are ~1e-3 and the budget is
+  /// a soft guardrail, not an invoice.
+  estimatedCostUsd    Float     @default(0)
+  latencyMs           Int       @default(0)
+  success             Boolean   @default(true)
+  errorMessage        String?
+  snapshotId          String?
+  createdAt           DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshot Snapshot? @relation(fields: [snapshotId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([userId, feature, createdAt])
+  @@index([userId, model, createdAt])
+  @@map("ai_requests")
+}
+
+/// Cached AI narrative output. Regenerated only when `dataFingerprint` changes
+/// (new snapshot, changed goals) or the user explicitly asks for a refresh.
+model CoachBrief {
+  id              String    @id @default(cuid())
+  userId          String
+  kind            BriefKind
+  /// Scope of the brief, e.g. "2026-08-17:2026-08-23".
+  cacheKey        String
+  model           String
+  content         Json
+  /// Hash of the exact numbers the brief was written from.
+  dataFingerprint String
+  generatedAt     DateTime  @default(now())
+  expiresAt       DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kind, cacheKey])
+  @@index([userId, generatedAt])
+  @@map("coach_briefs")
+}
+
+model ChatMessage {
+  id          String   @id @default(cuid())
+  userId      String
+  role        ChatRole
+  content     String
+  /// The compact context block handed to the model, kept for debugging.
+  contextUsed String?
+  model       String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("chat_messages")
+}
+
+// ---------------------------------------------------------------------------
+// Scheduling, settings, observability
+// ---------------------------------------------------------------------------
+
+/// Shift calendar. When a period has shifts recorded, the pace engine paces by
+/// remaining shifts instead of remaining calendar days.
+model Shift {
+  id        String    @id @default(cuid())
+  userId    String
+  date      DateTime  @db.Date
+  kind      ShiftKind @default(WORK)
+  hours     Float?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("shifts")
+}
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@map("app_settings")
+}
+
+/// In-app alerts. Persisted with a dedupe key so the same warning is not raised
+/// twice, and shaped so email/push channels can be added later without a
+/// migration of the generating logic.
+model Notification {
+  id        String               @id @default(cuid())
+  userId    String
+  kind      String
+  title     String
+  body      String
+  severity  NotificationSeverity @default(INFO)
+  meta      Json?
+  /// Stable identity for "this alert, this period" — prevents repeats.
+  dedupeKey String
+  readAt    DateTime?
+  createdAt DateTime             @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, readAt, createdAt])
+  @@map("notifications")
+}
+
+model EventLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  level     LogLevel @default(INFO)
+  category  String
+  message   String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([level, createdAt])
+  @@index([category, createdAt])
+  @@map("event_logs")
+}
