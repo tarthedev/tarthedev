@@ -1,5 +1,5 @@
 import { createHash, randomBytes, timingSafeEqual, createHmac } from "node:crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
@@ -43,6 +43,28 @@ function parseCookieValue(value: string): string | null {
   return token;
 }
 
+/**
+ * Whether the session cookie should carry the `Secure` flag.
+ *
+ * Derived from the actual request rather than only from APP_URL: a misconfigured
+ * APP_URL would otherwise set `Secure` on a plain-HTTP local run, and the browser
+ * would silently drop the cookie — signing you out immediately after login.
+ *
+ * Order: the proxy's X-Forwarded-Proto, then a localhost host header, then
+ * APP_URL as the fallback for a direct production connection.
+ */
+async function useSecureCookie(): Promise<boolean> {
+  const store = await headers();
+
+  const forwarded = store.get("x-forwarded-proto")?.split(",")[0]?.trim().toLowerCase();
+  if (forwarded) return forwarded === "https";
+
+  const host = store.get("host")?.toLowerCase() ?? "";
+  if (/^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host)) return false;
+
+  return env().APP_URL.startsWith("https://");
+}
+
 export async function createSession(
   userId: string,
   meta: { userAgent?: string | null; ipAddress?: string | null } = {},
@@ -65,7 +87,7 @@ export async function createSession(
   store.set(SESSION_COOKIE, `${token}.${sign(token)}`, {
     httpOnly: true,
     sameSite: "lax",
-    secure: config.APP_URL.startsWith("https://"),
+    secure: await useSecureCookie(),
     path: "/",
     expires: expiresAt,
   });
