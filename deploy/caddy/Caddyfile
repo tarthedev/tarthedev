@@ -1,0 +1,40 @@
+# ---------------------------------------------------------------------------
+# Caddy — KPI Command Center
+#
+# Caddy obtains and renews certificates automatically; there is no certbot step.
+#
+# Adding to an EXISTING Caddyfile: append this block. Do not replace the file.
+#   sudo sh -c 'cat deploy/caddy/Caddyfile >> /etc/caddy/Caddyfile'
+#   sudo caddy validate --config /etc/caddy/Caddyfile
+#   sudo systemctl reload caddy
+# ---------------------------------------------------------------------------
+
+kpi.example.com {
+	# Must match APP_PORT in .env.
+	reverse_proxy 127.0.0.1:3020 {
+		header_up X-Real-IP {remote_host}
+		# Vision extraction on a large batch can take a while.
+		transport http {
+			read_timeout 300s
+			write_timeout 300s
+		}
+	}
+
+	request_body {
+		max_size 200MB
+	}
+
+	header {
+		X-Robots-Tag "noindex, nofollow, noarchive"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	encode zstd gzip
+	log {
+		output file /var/log/caddy/kpi.log
+		format json
+	}
+}

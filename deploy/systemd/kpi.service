@@ -1,0 +1,45 @@
+# ---------------------------------------------------------------------------
+# systemd unit for the bare-metal path (no Docker).
+#
+#   sudo cp deploy/systemd/kpi.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now kpi
+#   sudo journalctl -u kpi -f
+#
+# Assumes: checkout at /opt/kpi-command-center, owned by a `kpi` system user,
+# with `npm run build` already run and .env in place.
+# ---------------------------------------------------------------------------
+[Unit]
+Description=KPI Command Center
+Documentation=file:/opt/kpi-command-center/docs/DEPLOYMENT.md
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kpi
+Group=kpi
+WorkingDirectory=/opt/kpi-command-center
+EnvironmentFile=/opt/kpi-command-center/.env
+Environment=NODE_ENV=production
+Environment=PORT=3020
+Environment=HOSTNAME=127.0.0.1
+
+ExecStartPre=/usr/bin/npx prisma migrate deploy
+ExecStart=/usr/bin/node .next/standalone/server.js
+
+Restart=always
+RestartSec=5
+
+# Hardening: the app needs nothing outside its own directory.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/kpi-command-center/storage /opt/kpi-command-center/.next
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
