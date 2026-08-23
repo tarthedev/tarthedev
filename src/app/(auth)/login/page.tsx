@@ -6,6 +6,10 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { needsSetup } from "@/lib/auth/guard";
 
 export const metadata: Metadata = { title: "Sign in" };
+// Queries the database to decide whether an owner account exists yet, so this
+// page can never be prerendered — during a container build there is no
+// database to ask.
+export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
   // A fresh install has no account yet — send the first visitor to setup.

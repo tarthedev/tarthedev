@@ -6,6 +6,10 @@ import { needsSetup } from "@/lib/auth/guard";
 import { env } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Set up" };
+// Queries the database to decide whether an owner account exists yet, so this
+// page can never be prerendered — during a container build there is no
+// database to ask.
+export const dynamic = "force-dynamic";
 
 export default async function SetupPage() {
   const fresh = await needsSetup();

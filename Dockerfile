@@ -24,14 +24,17 @@ FROM deps AS builder
 WORKDIR /app
 
 COPY . .
-RUN npx prisma generate
 
-# `next build` reads env at build time for validation only; real values are
-# supplied at runtime. These placeholders never reach the running container.
+# Placeholders for build-time validation only; real values are supplied at
+# runtime and these never reach the running container. They must be set before
+# `prisma generate`, which loads prisma.config.ts, and before `next build`,
+# which imports the env module while tracing routes.
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 ENV SESSION_SECRET="build-time-placeholder-secret-value-not-used-at-runtime"
 ENV AI_DEV_MODE="true"
+
+RUN npx prisma generate
 RUN npm run build
 
 # ---------------------------------------------------------------------------
