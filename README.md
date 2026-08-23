@@ -46,6 +46,24 @@ then a hard stop. There is no path to a surprise bill.
 
 ## Quick start
 
+### On a VPS — one command
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tarthedev/tarthedev/claude/verizon-kpi-command-center-np4niz/scripts/bootstrap-vps.sh \
+  | sudo bash -s -- kpi.yourdomain.com
+```
+
+Installs Docker if needed, clones the app, generates its secrets on the server,
+brings up the stack, and puts Caddy in front with automatic TLS. Re-runnable,
+and it does not touch anything already serving traffic on the box. It starts in
+mock AI mode so the whole app works before you add an API key.
+
+If the domain sits behind Cloudflare's proxy the script detects it and prints
+the two ways forward, since Let's Encrypt cannot validate through an orange
+cloud.
+
+### Locally
+
 Requires Docker, or Node 20+ with PostgreSQL 16+.
 
 ```bash
