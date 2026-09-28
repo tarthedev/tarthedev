@@ -1,0 +1,28 @@
+# One VPS runs everything: the AI platform (app) and Caddy, which gets the HTTPS
+# certificate for $DOMAIN automatically and proxies web + WebSocket traffic to the app.
+services:
+  app:
+    build: .
+    env_file: .env
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env, e.g. voice.rollinsonnetwork.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

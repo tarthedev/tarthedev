@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rollinson Network — Websites for Elizabeth City businesses</title>
+<meta name="description" content="Aaron Rollinson builds websites for trades and local businesses in Elizabeth City and the Albemarle. $1,200, live in a week. Free preview before you pay.">
+<link rel="canonical" href="https://rollinsonnetwork.com/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241E1A;
+    --muted:#6B635C;
+    --rule:#DDD9D2;
+    --paper:#fff;
+    --green:#14684B;
+    --green-dk:#0D4D38;
+    --wash:#F1EFEB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    color:var(--ink);background:var(--paper);
+    line-height:1.55;font-size:17px;
+  }
+  .wrap{max-width:620px;margin:0 auto;padding:0 22px}
+  a{color:var(--green)}
+
+  header{padding:26px 0 0}
+  .mark{font-weight:700;font-size:16px;letter-spacing:-.01em}
+  .mark span{color:var(--muted);font-weight:400}
+
+  .lede{padding:44px 0 40px}
+  .lede h1{
+    font-size:clamp(30px,7.6vw,44px);font-weight:700;
+    line-height:1.1;letter-spacing:-.03em;margin-bottom:18px;
+  }
+  .lede p{font-size:18px;color:var(--muted);max-width:40ch}
+
+  /* the one loud thing on the page: the number */
+  .quote{
+    border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);
+    padding:26px 0 24px;margin-bottom:42px;
+  }
+  .price{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+  .was{
+    font-size:clamp(28px,7vw,40px);font-weight:700;
+    letter-spacing:-.04em;line-height:.9;
+    color:var(--muted);text-decoration:line-through;
+    text-decoration-thickness:3px;text-decoration-color:#B9444A;
+  }
+  .now{
+    font-size:clamp(60px,17vw,96px);font-weight:700;
+    letter-spacing:-.055em;line-height:.9;color:var(--green);
+  }
+  .price-note{font-size:19px;font-weight:600;margin-top:10px}
+  .price-sub{font-size:16px;color:var(--muted);margin-top:6px}
+
+  h2{font-size:15px;font-weight:700;letter-spacing:.01em;margin-bottom:14px}
+  section{margin-bottom:42px}
+
+  .items{list-style:none;font-size:16.5px}
+  .items li{
+    display:flex;justify-content:space-between;gap:16px;
+    padding:11px 0;border-bottom:1px solid var(--rule);
+  }
+  .items li:first-child{border-top:1px solid var(--rule)}
+  .items span{color:var(--muted);text-align:right;flex:0 0 auto;font-size:15px}
+
+  ol.steps{list-style:none;counter-reset:s}
+  ol.steps li{
+    counter-increment:s;position:relative;
+    padding-left:38px;margin-bottom:18px;font-size:16.5px;
+  }
+  ol.steps li::before{
+    content:counter(s);position:absolute;left:0;top:1px;
+    width:25px;height:25px;border-radius:50%;
+    background:var(--ink);color:var(--paper);
+    font-size:13px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  ol.steps b{font-weight:600}
+
+  /* portfolio card — whole card is the link */
+  .work{
+    display:block;text-decoration:none;color:inherit;
+    border:1px solid var(--rule);border-radius:6px;overflow:hidden;
+    background:#fff;
+  }
+  .work:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+  .chrome{
+    background:var(--wash);border-bottom:1px solid var(--rule);
+    display:flex;align-items:center;gap:11px;padding:11px 14px;
+  }
+  .dots{display:flex;gap:5px;flex:0 0 auto}
+  .dots i{width:9px;height:9px;border-radius:50%;background:#CFCAC2;display:block}
+  .addr{
+    background:#fff;border:1px solid var(--rule);border-radius:20px;
+    font-size:12.5px;color:var(--muted);padding:4px 12px;
+    flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .work .meta{padding:17px 19px 19px}
+  .work .cname{font-weight:700;font-size:17.5px;color:var(--ink);letter-spacing:-.01em}
+  .work .ctype{font-size:14.5px;color:var(--muted);margin-top:2px}
+  .work .cdesc{font-size:15.5px;margin-top:10px}
+  .work .curl{
+    display:inline-block;margin-top:12px;
+    font-size:14.5px;font-weight:600;color:var(--green);
+  }
+  .work .curl::after{content:" →"}
+
+  .me{background:var(--wash);padding:24px 22px;border-radius:5px}  .me p{font-size:16.5px;margin-bottom:13px}
+  .me p:last-child{margin-bottom:0}
+
+  .cta{border-top:2px solid var(--ink);padding-top:30px;margin-bottom:20px}
+  .cta h2{font-size:22px;letter-spacing:-.02em;margin-bottom:8px}
+  .cta p{color:var(--muted);margin-bottom:20px;font-size:16.5px}
+  .btn{
+    display:block;background:var(--green);color:#fff;
+    text-decoration:none;text-align:center;font-weight:700;font-size:19px;
+    padding:17px;border-radius:5px;border-bottom:4px solid var(--green-dk);
+  }
+  .btn:active{transform:translateY(2px);border-bottom-width:2px}
+  .btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+  .btn.alt{background:var(--paper);color:var(--ink);border:1.5px solid var(--ink);border-bottom-width:4px;margin-top:12px}
+
+  footer{padding:34px 0 44px;color:var(--muted);font-size:14.5px;border-top:1px solid var(--rule);margin-top:34px}
+
+  /* swap these before launch — deliberately loud so it can't ship by accident */
+  .todo{background:#FFE9A8;padding:0 4px;border-bottom:2px dotted #A67C00}
+
+  /* AI receptionist + "call me now" form */
+  .addon{border-top:2px solid var(--ink);padding-top:26px}
+  .addon .lead{font-size:18px;margin-bottom:18px}
+  .addon .fee{font-size:19px;font-weight:600;margin:18px 0 4px}
+  .addon .fee b{color:var(--green)}
+  .addon .fee-sub{font-size:16px;color:var(--muted);margin-bottom:18px}
+  .demo-line{display:none}
+  .demo-line.on{display:block}
+  .callme{background:var(--wash);border-radius:5px;padding:22px;margin-top:22px}
+  .callme h3{font-size:18px;letter-spacing:-.01em;margin-bottom:6px}
+  .callme p{font-size:15.5px;color:var(--muted);margin-bottom:14px}
+  .callme label{display:block;font-size:14px;font-weight:600;margin:12px 0 5px}
+  .callme input,.callme select{
+    width:100%;font:inherit;font-size:17px;color:var(--ink);background:var(--paper);
+    border:1.5px solid var(--rule);border-radius:5px;padding:12px;
+  }
+  .callme input:focus-visible,.callme select:focus-visible{outline:3px solid var(--green);outline-offset:1px;border-color:var(--green)}
+  .callme .consent{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:13.5px;color:var(--muted);line-height:1.45;margin-top:16px}
+  .callme .consent input{width:20px;height:20px;flex:0 0 auto;margin-top:1px;accent-color:var(--green)}
+  .callme button.btn{width:100%;border:0;border-bottom:4px solid var(--green-dk);cursor:pointer;font-family:inherit;margin-top:16px}
+  .callme button.btn[disabled]{opacity:.6;cursor:wait}
+  .callme .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .callme .status{font-size:16px;font-weight:600;margin-top:14px;min-height:1px}
+  .callme .status.err{color:#B9444A}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="mark">Rollinson Network <span>— websites for local business</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="lede">
+    <h1>Somebody in Elizabeth City is looking for what you do. Right now.</h1>
+    <p>If nothing comes up when they search, they call the next name on the list. That's the whole problem, and it's a cheap one to fix.</p>
+  </div>
+
+  <div class="quote">
+    <div class="price">
+      <span class="was">$2,000</span>
+      <span class="now">$1,200</span>
+    </div>
+    <div class="price-note">A five-page website, live in a week.</div>
+    <div class="price-sub">Introductory rate for my first five clients. $129/month after that if you want me to keep it running &mdash; no contract, cancel whenever.</div>
+  </div>
+
+  <section>
+    <h2>What's in it</h2>
+    <ul class="items">
+      <li>Built for a phone first <span>most of your traffic</span></li>
+      <li>Tap-to-call on every screen <span>no forms to fill out</span></li>
+      <li>Your services, hours, and area <span>written in plain English</span></li>
+      <li>Google Maps and your reviews <span>pulled in and linked</span></li>
+      <li>Your Google Business Profile cleaned up <span>included, not extra</span></li>
+      <li>Hosting and the domain <span>I handle it</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>How it goes</h2>
+    <ol class="steps">
+      <li><b>I build it first.</b> Before you spend a dollar, I put together a real page with your name, your number, and your reviews on it. You look at it on your phone.</li>
+      <li><b>You tell me what's wrong with it.</b> Wrong services listed, wrong hours, hate the color. I fix it.</li>
+      <li><b>It goes live.</b> You pay when you're happy with it, not before. Usually about a week start to finish.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Work I've done</h2>
+
+    <!-- To add another: copy this whole <a class="work"> block and swap the image, name, and link. -->
+    <a class="work" href="https://dwrgheatingandcooling.net" target="_blank" rel="noopener">
+      <div class="chrome">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="addr">dwrgheatingandcooling.net</span>
+      </div>
+      <div class="meta">
+        <div class="cname">DWRG Heating &amp; Cooling</div>
+        <div class="ctype">Rick Gilbert Refrigeration · Elizabeth City, NC</div>
+        <p class="cdesc">HVAC, plumbing and refrigeration, in business here since 1974. Services, service area, licensing, and a phone number you can tap from any screen.</p>
+        <span class="curl">dwrgheatingandcooling.net</span>
+      </div>
+    </a>
+  </section>
+
+  <section class="addon" id="receptionist">
+    <h2>Miss calls while you're on a job?</h2>
+    <p class="lead">I also set up an AI receptionist that answers your phone when you can't. It knows your services, hours, and area, takes the message or books the job, and texts you a summary before you're back in the truck.</p>
+    <ul class="items">
+      <li>Answers every call, day or night <span>no voicemail</span></li>
+      <li>Keeps your number <span>forward it when you're busy</span></li>
+      <li>Emergencies ring straight through <span>to your cell</span></li>
+      <li>A text after every call <span>who, what, callback number</span></li>
+    </ul>
+    <div class="fee"><b>$149/month.</b> $99 if I built your website.</div>
+    <div class="fee-sub">500 minutes included. No setup fee, no contract.</div>
+    <div class="demo-line" id="demo-line">
+      <a class="btn alt" id="demo-line-link" href="#">Hear it: call the demo line</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Who you'd be dealing with</h2>
+    <div class="me">
+      <p>I'm Aaron Rollinson. I live here, I sell phones and plans for a living, and I spend most of my day explaining technology to people who'd rather not think about it.</p>
+      <p>That's the same job as this one. You shouldn't have to learn what hosting is or what a domain costs. You should get a website that makes your phone ring.</p>
+      <p>I'm building my client list right now, which is why the price is what it is and why I'll build you a preview for free. That won't be true forever.</p>
+    </div>
+  </section>
+
+  <div class="cta">
+    <h2>Want to see yours before you decide?</h2>
+    <p>Send me your business name. I'll build a preview and text you the link. No charge, no pitch until you've seen it.</p>
+    <a class="btn" href="sms:+12522503044">Text me your business name</a>
+    <a class="btn alt" href="tel:+12522503044">Or call (252) 250-3044</a>
+
+    <form class="callme" id="callme" novalidate>
+      <h3>Or have my AI assistant call you right now</h3>
+      <p>It'll ring you within a minute, answer your questions, and show you what it can do for your business. Same voice your customers would hear.</p>
+      <label for="cm-name">Your name</label>
+      <input id="cm-name" name="name" autocomplete="name" required>
+      <label for="cm-business">Business name</label>
+      <input id="cm-business" name="business" autocomplete="organization" required>
+      <label for="cm-phone">Cell number</label>
+      <input id="cm-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+      <label for="cm-interest">Interested in</label>
+      <select id="cm-interest" name="interest">
+        <option value="website">A website</option>
+        <option value="receptionist">The AI receptionist</option>
+        <option value="both">Both</option>
+      </select>
+      <div class="hp" aria-hidden="true"><label for="cm-website">Leave this empty</label><input id="cm-website" name="website" tabindex="-1" autocomplete="off"></div>
+      <label class="consent"><input type="checkbox" id="cm-consent" name="consent"><span id="cm-consent-text">By checking this box, I agree that Rollinson Network may call and text me at the number above about its services, including calls that use an AI-generated voice and automated technology. Consent isn't required to buy anything. Msg &amp; data rates may apply. Reply STOP to opt out anytime.</span></label>
+      <button class="btn" type="submit">Call me now</button>
+      <div class="status" id="cm-status" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+
+  <footer>
+    Rollinson Network · Elizabeth City, North Carolina<br>
+    Serving Pasquotank, Camden, Currituck, and Perquimans counties.<br>
+    <a href="mailto:aaron@rollinsonnetwork.com">aaron@rollinsonnetwork.com</a>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  // The AI platform runs on its own server (see voice-platform/ in the repo).
+  var API = "https://voice.rollinsonnetwork.com";
+  var form = document.getElementById("callme");
+  var status = document.getElementById("cm-status");
+  var startedAt = Date.now();
+
+  // Show the demo-line button once the platform tells us the number.
+  fetch(API + "/api/public-config").then(function (r) { return r.json(); }).then(function (c) {
+    if (!c.demoLine) return;
+    var link = document.getElementById("demo-line-link");
+    link.href = "tel:" + c.demoLine.e164;
+    link.textContent = "Hear it: call " + c.demoLine.display;
+    document.getElementById("demo-line").className = "demo-line on";
+  }).catch(function () {});
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var f = form.elements;
+    status.className = "status";
+    if (!f.name.value.trim() || !f.business.value.trim() || f.phone.value.replace(/\D/g, "").length < 10) {
+      status.className = "status err";
+      status.textContent = "Please add your name, business, and a 10-digit cell number.";
+      return;
+    }
+    if (!f.consent.checked) {
+      status.className = "status err";
+      status.textContent = "Check the box so the AI is allowed to call you, or just text me instead.";
+      return;
+    }
+    var button = form.querySelector("button");
+    button.disabled = true;
+    status.textContent = "Sending…";
+    fetch(API + "/api/web-lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: f.name.value, business: f.business.value, phone: f.phone.value, interest: f.interest.value,
+        consent: f.consent.checked, consent_text: document.getElementById("cm-consent-text").textContent,
+        website: f.website.value, started_at: startedAt, page: location.href
+      })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (!res.ok) throw new Error(res.error || "failed");
+      status.textContent = res.message;
+      form.reset();
+    }).catch(function () {
+      status.className = "status err";
+      status.textContent = "That didn't go through. Text me at (252) 250-3044 instead.";
+    }).then(function () { button.disabled = false; });
+  });
+})();
+</script>
+
+</body>
+</html>
