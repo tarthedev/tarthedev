@@ -153,7 +153,11 @@ export type PaySheet = {
   hourlyCents: Cents;
   commissionCents: Cents;
   spiffsCents: Cents;
-  /** Net deductions on this sheet (taken this run), zero or negative. */
+  /**
+   * Sum of the deductions group: deduction lines, carried-in amounts and the carry-forward credit.
+   * Usually zero or negative; positive only when a negative cost adjustment or overtime true-up
+   * (shown in its own group) can't be taken and is carried forward.
+   */
   deductionsCents: Cents;
   otAdjustmentCents: Cents;
   /** Deductions that couldn't be taken and carry to the next run (a positive amount). */
@@ -349,33 +353,6 @@ function buildSheet(args: {
     });
   }
 
-  // Deductions: every negative line plus anything carried in, capped against non-overtime pay.
-  const negatives = lines.filter((line) => line.amountCents < 0).map((line) => -line.amountCents);
-  const positives = lines.filter((line) => line.amountCents > 0).map((line) => line.amountCents);
-  const owed = sumCents([args.carriedInCents, ...negatives]);
-  const cap = capDeduction({
-    owedCents: owed,
-    nonOvertimePayCents: sumCents([regularPay, ...positives]),
-    nonOvertimeMinutes: regularMinutes,
-    minimumWageCentsPerHour: args.minimumWage,
-  });
-  if (args.carriedInCents > 0) {
-    sheetLines.push({
-      kind: "deduction_carried_in",
-      group: "deductions",
-      amountCents: -args.carriedInCents,
-      explanation: `Deductions carried from an earlier run: ${formatCents(-args.carriedInCents)}.`,
-    });
-  }
-  if (cap.carryForwardCents > 0) {
-    sheetLines.push({
-      kind: "deduction_carry_forward",
-      group: "deductions",
-      amountCents: cap.carryForwardCents,
-      explanation: cap.explanation,
-    });
-  }
-
   // Overtime regular-rate adjustment for this week, and true-ups for earlier weeks.
   const attributedByWeek = new Map<LocalDate, Cents>();
   for (const line of lines) {
@@ -418,6 +395,36 @@ function buildSheet(args: {
       otMinutes: ot,
       attributedCents: attributed,
       adjustmentPaidCents: alreadyPaid + due,
+    });
+  }
+
+  // Deductions: every negative line (negative overtime true-ups included) plus anything carried
+  // in, capped against non-overtime pay so pay never drops below minimum wage (section 6).
+  const negatives = [...lines, ...sheetLines.filter((line) => line.group === "overtime_adjustment")]
+    .filter((line) => line.amountCents < 0)
+    .map((line) => -line.amountCents);
+  const positives = lines.filter((line) => line.amountCents > 0).map((line) => line.amountCents);
+  const owed = sumCents([args.carriedInCents, ...negatives]);
+  const cap = capDeduction({
+    owedCents: owed,
+    nonOvertimePayCents: sumCents([regularPay, ...positives]),
+    nonOvertimeMinutes: regularMinutes,
+    minimumWageCentsPerHour: args.minimumWage,
+  });
+  if (args.carriedInCents > 0) {
+    sheetLines.push({
+      kind: "deduction_carried_in",
+      group: "deductions",
+      amountCents: -args.carriedInCents,
+      explanation: `Deductions carried from an earlier run: ${formatCents(-args.carriedInCents)}.`,
+    });
+  }
+  if (cap.carryForwardCents > 0) {
+    sheetLines.push({
+      kind: "deduction_carry_forward",
+      group: "deductions",
+      amountCents: cap.carryForwardCents,
+      explanation: cap.explanation,
     });
   }
 

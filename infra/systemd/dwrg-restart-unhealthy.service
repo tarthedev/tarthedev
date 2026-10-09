@@ -1,0 +1,13 @@
+# Restarts containers Docker marks unhealthy (infra/scripts/restart-unhealthy.sh).
+# Install with the other dwrg-* units; enable dwrg-restart-unhealthy.timer.
+# Logs: journalctl -t dwrg-restart-unhealthy
+[Unit]
+Description=Restart unhealthy DWRG containers
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=deploy
+Environment=DWRG_HOME=/opt/dwrg
+ExecStart=/opt/dwrg/production/src/infra/scripts/restart-unhealthy.sh

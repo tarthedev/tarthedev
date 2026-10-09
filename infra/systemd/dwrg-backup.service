@@ -1,0 +1,19 @@
+# Nightly off-site database backup (docs/runbooks/backup-restore.md).
+# Install: sudo cp infra/systemd/dwrg-* /etc/systemd/system/ && sudo systemctl daemon-reload
+#          sudo systemctl enable --now dwrg-backup.timer
+# Run now: sudo systemctl start dwrg-backup.service
+# Logs:    journalctl -u dwrg-backup.service
+[Unit]
+Description=DWRG nightly database backup to off-site storage
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=deploy
+Environment=DWRG_HOME=/opt/dwrg
+ExecStart=/opt/dwrg/production/src/infra/scripts/backup-db.sh production
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=2h

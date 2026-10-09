@@ -1,0 +1,11 @@
+# Checks container health every minute.
+[Unit]
+Description=Check DWRG container health every minute
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

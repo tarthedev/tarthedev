@@ -1,0 +1,107 @@
+# Caddy: HTTPS, the web app's files, and the proxy to the API.
+#
+# One Caddy (in the production compose project) owns ports 80 and 443 and serves
+# both environments:
+#
+#   app.{$DOMAIN}      production  files /srv/production/current  API api-production:8787
+#   staging.{$DOMAIN}  staging     files /srv/staging/current     API api-staging:8787
+#
+# DOMAIN and ACME_EMAIL come from /opt/dwrg/production/app.env through
+# docker-compose.prod.yml. Certificates are automatic (Let's Encrypt) once DNS
+# points both names at the droplet. "current" is a symlink that
+# infra/scripts/deploy.sh switches to the newest web build.
+#
+# URL contract with the API: everything under /api (including /api/auth for
+# Better Auth and the WebSocket, which must live under /api, e.g. /api/ws) and
+# /health go to the API unchanged. Everything else is the web app.
+#
+# After editing, check and apply without downtime (docs/runbooks/deploy.md):
+#   infra/scripts/dc.sh production exec caddy caddy validate --config /etc/dwrg-infra/Caddyfile --adapter caddyfile
+#   infra/scripts/dc.sh production exec caddy caddy reload --config /etc/dwrg-infra/Caddyfile --adapter caddyfile
+{
+	email {$ACME_EMAIL}
+}
+
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Location and camera for the iPad app, microphone for the office phone,
+		# payment for Stripe's Payment Element (Apple Pay / Google Pay).
+		Permissions-Policy "geolocation=(self), camera=(self), microphone=(self), payment=(self \"https://js.stripe.com\"), usb=(), serial=(), hid=()"
+		# Allow-list for the outside services in docs/03-tech-stack.md. When a new
+		# one is wired in, test on staging: a blocked request shows up as a CSP
+		# error in the browser console. Add the exact host here, never a wildcard
+		# for scripts.
+		Content-Security-Policy "default-src 'self'; script-src 'self' https://js.stripe.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.stripe.com https://*.digitaloceanspaces.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' wss://{host} https://api.stripe.com https://maps.googleapis.com https://*.sentry.io wss://*.twilio.com https://*.twilio.com; frame-src https://js.stripe.com https://hooks.stripe.com; media-src 'self' blob: https://*.twilio.com https://*.digitaloceanspaces.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		-Server
+	}
+}
+
+# The site itself. {args[0]} is the folder with the web build, {args[1]} the API.
+(app) {
+	import security_headers
+	encode zstd gzip
+
+	log {
+		output stdout
+		format filter {
+			wrap json
+			# Query strings can carry one-time portal tokens: keep them out of the logs.
+			request>uri regexp \?.*$ ?redacted
+		}
+	}
+
+	# API, Better Auth (/api/auth) and the WebSocket, plus /health for uptime checks.
+	@api path /api /api/* /health
+	handle @api {
+		request_body {
+			# ServiceTitan report exports and job photos come through here.
+			max_size 100MB
+		}
+		reverse_proxy {args[1]} {
+			# While the API container restarts during a deploy, hold requests and
+			# retry the connection for up to 30 s instead of failing them. Only
+			# connection failures are retried, so a POST is never sent twice.
+			lb_try_duration 30s
+			lb_try_interval 250ms
+		}
+	}
+
+	# Vite's hashed files never change: cache them for a year. A missing one is a
+	# real 404, never the app page, so a tab left open across a deploy fails
+	# cleanly (the app reloads on Vite's preload error) instead of parsing HTML as
+	# JavaScript.
+	handle /assets/* {
+		root * {args[0]}
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	# Everything else: index.html, the service worker (sw.js), registerSW.js, the
+	# manifest and icons. Always revalidated (cheap 304s), so a deploy is seen on
+	# the next load. Unknown paths get index.html: they are app routes.
+	handle {
+		root * {args[0]}
+		header Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+
+	handle_errors {
+		# Never let an error response be cached as if it were an asset.
+		header Cache-Control "no-store"
+		respond "{err.status_code} {err.status_text}"
+	}
+}
+
+app.{$DOMAIN} {
+	import app /srv/production/current api-production:8787
+}
+
+staging.{$DOMAIN} {
+	import app /srv/staging/current api-staging:8787
+	header X-Robots-Tag "noindex, nofollow"
+}

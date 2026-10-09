@@ -1,0 +1,33 @@
+# Staging: the same stack as production (docker-compose.prod.yml) as a second
+# compose project on the same droplet. infra/scripts/dc.sh staging ... adds this
+# file and sets DWRG_ENV=staging, which gives staging its own:
+#
+#   project name   dwrg-staging
+#   settings       /opt/dwrg/staging/app.env (its own database, dwrg_staging,
+#                  in the same managed cluster; its own auth secret)
+#   image tag      dwrg-api:staging
+#   API name       api-staging on the dwrg-edge network
+#   web files      /opt/dwrg/staging/web/current
+#   subdomain      staging.<DOMAIN>, served by production's Caddy
+#
+# Every version runs here before production, and features are tried here for
+# real (docs/04-build-plan.md). It holds demo data for now (owner decision: no
+# real customer data yet), so the nightly backup covers production only; once
+# staging holds imported customer data, back it up too
+# (docs/runbooks/backup-restore.md).
+
+services:
+  # Production's Caddy already owns ports 80 and 443 and serves staging.<DOMAIN>.
+  caddy:
+    profiles: [never]
+
+  # Caps so a runaway staging process can't starve production on the shared droplet.
+  api:
+    cpus: 1.0
+    mem_limit: 1g
+  worker:
+    cpus: 1.0
+    mem_limit: 1g
+  migrate:
+    cpus: 1.0
+    mem_limit: 1g

@@ -60,14 +60,22 @@ export function levelFor(
   return level;
 }
 
-/** The next level up and how much more GP reaches it, or null at the top. */
+/**
+ * The next level up and how much more GP reaches it, or null at the top.
+ * A negative week is already on the lowest step (see `levelFor`), so its next level is the
+ * step above that one.
+ */
 export function nextLevel(
   weekScoreCents: Cents,
   ladder: readonly LadderStep[] = DEFAULT_LADDER,
 ): { step: LadderStep; neededCents: Cents } | null {
   assertCents(weekScoreCents, "weekScoreCents");
-  const step = validateLadder(ladder).find(
-    (candidate) => candidate.minWeekGpCents > weekScoreCents,
+  const sorted = validateLadder(ladder);
+  const current = levelFor(weekScoreCents, sorted);
+  const step = sorted.find(
+    (candidate) =>
+      candidate.minWeekGpCents > current.minWeekGpCents &&
+      candidate.minWeekGpCents > weekScoreCents,
   );
   return step ? { step, neededCents: step.minWeekGpCents - weekScoreCents } : null;
 }

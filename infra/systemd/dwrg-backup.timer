@@ -1,0 +1,12 @@
+# Runs dwrg-backup.service every night at 02:30 business time. If the droplet
+# was off at that time, it runs at the next boot (Persistent=true).
+[Unit]
+Description=Nightly DWRG database backup
+
+[Timer]
+OnCalendar=*-*-* 02:30:00 America/New_York
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
