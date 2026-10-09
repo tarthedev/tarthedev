@@ -36,6 +36,8 @@ TypeScript everywhere. React 19 + Vite PWA (`apps/web`), Hono API with WebSocket
 11. **ServiceTitan runs alongside us until the switch, with no API.** Its data arrives through uploaded report exports, imported idempotently on ServiceTitan IDs and kept read-only. Never write anything back to ServiceTitan.
 12. **Only the system that created an invoice posts it to QuickBooks.** Never post imported ServiceTitan invoices.
 13. **Which system owns a crew's jobs comes from `system_of_record`.** Check it before creating a job, invoice or payment.
+14. **Foundation first.** A feature is done only when it meets "Foundation first: what done means" in `docs/04-build-plan.md`: matches the docs, tested (including iPad WebKit tests for tech screens), safe with money and data, observable, recoverable, and tried for real in the practice copy.
+15. **The pay plan isn't live until after the switch.** Until rollout, commission runs in practice mode only; never pay from it before then.
 
 ## Commands
 

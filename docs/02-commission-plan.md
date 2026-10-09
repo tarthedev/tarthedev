@@ -2,7 +2,7 @@
 
 This is the source of truth for pay. The commission engine (`packages/core`) implements exactly this, and every worked example at the bottom is a test that must pass to the cent.
 
-All dollar amounts and percentages are **starting values** stored in settings with effective dates. Changing a setting never rewrites history. Before launch, the ladder steps are tuned by replaying 12 months of ServiceTitan history imported from report exports (see [06-servicetitan-migration.md](06-servicetitan-migration.md)).
+All dollar amounts and percentages are **starting values** stored in settings with effective dates. Changing a setting never rewrites history. Before launch, the ladder steps are tuned by replaying 12 months of ServiceTitan history imported from report exports. The plan starts after the switch (section 9a).
 
 > **Before launch:** the owners' CPA reviews this plan (handled by the owners), and every employee signs the written plan, including the callback deduction authorization. This document is a design spec, not legal advice.
 
@@ -138,25 +138,15 @@ adjustment(W) = 0.5 × (commission + spiffs attributable to W) ÷ total hours wo
 - When lines attributable to an earlier week W are paid in a later run (late customer payment), the engine recomputes adjustment(W) and pays the difference as an "overtime true-up" line.
 - Confirm this method with the CPA before launch.
 
-## 9a. Starting early on ServiceTitan's report exports (optional, recommended)
+## 9a. When the plan starts (owner decision)
 
-The plan can pay everyone before the switch, while techs still work every job in ServiceTitan ([06-servicetitan-migration.md](06-servicetitan-migration.md)). The rules above don't change; only where the inputs come from does. There is no ServiceTitan API: the office uploads report exports.
+The Profit Ladder starts **after the switch, once the whole system is fully operational and tested**, not before. Until then everyone keeps today's pay.
 
-| Input | Source before the switch |
-|---|---|
-| Sale, discounts, line items, item costs | Invoices-with-line-items report (price, cost) |
-| Parts from POs | Purchase order report, if item costs on invoices don't already cover it |
-| Labor time | Timesheet report (job time from Dispatched/Working to Done) |
-| Who gets credit | Technician (and split) columns on the invoice/job report; sold-by technician for replacements |
-| Paid in full | Payments report and invoice balance |
-| Callbacks | Marked in our app by a manager (linked to the original ServiceTitan job number) |
-| Booking spiffs, booking rate | Bookings and calls reports, if they export with booked-by and call outcome; otherwise office spiffs start at the switch |
-| Reviews | Verified in our app |
-
-- **Cadence:** the office uploads the reports every Monday morning before the payroll run (daily uploads make the scoreboard fresher).
-- **Shadow first:** 2–4 pay weeks compared with a hand calculation before paying from the engine.
-- A ServiceTitan invoice or cost that changes after its commission was paid shows up in the next upload; the engine adds a correction line (same rule as section 5).
-- Decimal money strings are parsed straight to integer cents.
+1. **Month 1 onward:** the engine is built in `packages/core` with every worked example below as a test.
+2. **Month 2:** imported ServiceTitan history (invoices with line items and costs, payments, timesheets) is replayed through the engine for the last 12 months. The owners use it to set the final ladder steps. Nobody is paid from this.
+3. **Pilot:** the engine runs in **practice mode** on the pilot crew's real jobs in the new system. Only the office sees it. Its numbers are compared with a hand calculation.
+4. **After the switch:** practice mode runs for 2–4 weeks on everyone's real jobs. The office and the CPA check it (the CPA review is handled by the owners). Every employee reads and signs the written plan.
+5. **Rollout:** the scoreboard turns on in the iPad app and the Profit Ladder pays from the next full pay week.
 
 ## 10. Worked examples (golden tests)
 

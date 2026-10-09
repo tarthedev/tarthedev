@@ -57,7 +57,7 @@ The owners see a weekly report of high-value calls per tech, because pay depends
 
 Runs on the techs' **iPad (A16) Wi-Fi + Cellular**, installed from Safari with **Add to Home Screen** (full screen, own icon). Signatures by finger or Apple Pencil (USB-C).
 
-If the Profit Ladder starts early, the scoreboard is the only screen most techs use before the switch (they still work jobs in the ServiceTitan app). The pilot crew uses everything in this section from the pilot onward.
+Before the switch only the pilot crew uses this app; everyone else stays on ServiceTitan. The **scoreboard** turns on when the pay plan rolls out after the switch.
 
 - **Scoreboard** first: this week's gross profit, level and rate, distance to the next level, commission so far, bonuses, jobs waiting on customer payment. Tap any number to see the jobs behind it.
 - **Day view:** today's jobs in order with address, window, job type, notes and member status.

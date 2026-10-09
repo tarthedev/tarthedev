@@ -69,7 +69,7 @@ Deliberately **after the switch** (phase 2): AI phone receptionist, online booki
 
 ## Pay plan in one paragraph
 
-Techs keep their hourly pay. On top, they earn a percentage of the **gross profit** of the jobs they finish each week (sale minus parts, labor and all other job costs). The percentage depends on the week's total: Starter 5% (under $3,000), Bronze 8% ($3,000+), Silver 10% ($4,500+), Gold 12% ($6,000+), Platinum 14% ($8,000+). The level reached applies to **the whole week**. Each job's commission is paid once the customer pays in full; a tech-caused callback within 30 days takes that job's commission back. Spiffs and combo bonuses pay on top. CSRs and dispatchers earn spiffs for booked sales, memberships and booking rate. Full rules: [02-commission-plan.md](02-commission-plan.md).
+Techs keep their hourly pay. On top, they earn a percentage of the **gross profit** of the jobs they finish each week (sale minus parts, labor and all other job costs). The percentage depends on the week's total: Starter 5% (under $3,000), Bronze 8% ($3,000+), Silver 10% ($4,500+), Gold 12% ($6,000+), Platinum 14% ($8,000+). The level reached applies to **the whole week**. Each job's commission is paid once the customer pays in full; a tech-caused callback within 30 days takes that job's commission back. Spiffs and combo bonuses pay on top. CSRs and dispatchers earn spiffs for booked sales, memberships and booking rate. **It starts after the switch, once the whole system is running and tested** (owner decision). Full rules: [02-commission-plan.md](02-commission-plan.md).
 
 ## Running cost
 
@@ -82,9 +82,9 @@ No hard deadline. ServiceTitan keeps running the business while we build, then a
 | Stage | Target | What happens |
 |---|---|---|
 | 1. Build and load | Months 1–5 | ServiceTitan data imported from report exports; every feature built and tested with real data in a training copy |
-| (Optional) Early Profit Ladder | From about month 2–3 | Pay plan and scoreboards for everyone, from weekly ServiceTitan report uploads (recommended) |
 | 2. Pilot crew | About month 6 | One crew (2 techs + 1 CSR) runs all its work in the new system; everyone else stays on ServiceTitan |
 | 3. Switch | When the pilot passes | Everyone moves, phones are ported, ServiceTitan goes read-only |
+| 4. Pay plan rollout | After the switch, once fully operational | Two to four weeks of practice pay on everyone's real jobs, techs sign the plan, then the Profit Ladder pays |
 
 ## Files in this folder
 

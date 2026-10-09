@@ -1,13 +1,26 @@
 # Build Plan: Build, Pilot, Switch
 
-One builder with Claude Code, starting October 2026. **There is no hard cutover date** (owner decision). ServiceTitan keeps running the business while we build. A pilot crew proves the new system, and then everyone switches; details in [06-servicetitan-migration.md](06-servicetitan-migration.md). Months are targets, not deadlines.
+One builder with Claude Code, starting October 2026. **There is no hard cutover date** (owner decision). ServiceTitan keeps running the business while we build. A pilot crew proves the new system, then everyone switches, and the pay plan rolls out last, once everything is running; details in [06-servicetitan-migration.md](06-servicetitan-migration.md). Months are targets, not deadlines. **The priority is a solid foundation for every part of the system, not speed** (owner decision): a feature isn't done until it meets the definition below.
 
 | Stage | Target | What the business gets |
 |---|---|---|
 | 1. Build and load | Months 1–5 | ServiceTitan data imported from report exports; reports; every feature built and tested in a training copy |
-| (Optional) Early Profit Ladder | From about month 2–3 | Pay plan, scoreboards and payroll sheet for everyone, from weekly report uploads |
 | 2. Pilot crew | About month 6 | One crew (2 techs + 1 CSR) runs all its work in the new system |
 | 3. Switch | When the pilot has proven itself | Everyone moves; phones ported; ServiceTitan read-only |
+| 4. Pay plan rollout | After the switch, once fully operational | Practice-mode pay on everyone's jobs for 2–4 weeks, techs sign the plan, then the Profit Ladder pays |
+
+## Foundation first: what "done" means
+
+Every feature, in every month, meets all of these before the next one starts:
+
+1. **Matches the docs.** Behavior matches `docs/`; any change updates the doc in the same commit.
+2. **Tested.** Unit tests for logic in `packages/core`; API tests for every endpoint; a Playwright test at iPad size in WebKit for every screen a tech uses; money and pay code covered by the worked examples.
+3. **Safe with money and data.** Integer cents, audit log on every money change, role checks on every endpoint, idempotent webhooks and imports.
+4. **Observable.** Errors reach Sentry; slow requests and failed background jobs are visible; anything the office relies on has an alert.
+5. **Recoverable.** Database migrations run forward cleanly on a copy of production data; backups cover it; a runbook exists if it can fail in a way that needs a person.
+6. **Tried for real.** Used in the practice copy on a real iPad (for tech screens) or by the office (for office screens) before it's called done.
+
+If a month runs long, the next month moves; quality on what's built isn't cut.
 
 ## Outside paperwork
 
@@ -35,12 +48,12 @@ The commission plan's legal review is handled by the owners' CPA.
 
 **Exit test:** a full import matches ServiceTitan's summary totals per business unit and year; all commission tests pass.
 
-## Month 2: History, reports, and the optional early Profit Ladder
+## Month 2: History, reports, and the pay engine (practice only)
 
 - Import job, invoice, payment and timesheet history.
 - Reports: job, tech and department gross profit; P&L with QuickBooks overhead (read-only QuickBooks connection).
 - Replay 12 months of history through the commission engine; owners set the final ladder steps.
-- (Optional, recommended) Tech scoreboard as a home-screen web app on the iPads, plus pay sheets and the weekly payroll sheet with overtime true-up, all from weekly report uploads. Shadow-run 2–4 weeks, then pay from it.
+- Pay sheets, the weekly payroll sheet with overtime true-up, and the tech scoreboard, built and tested on imported history. Nothing is paid from them yet: the pay plan starts after the switch.
 
 **Exit test:** the engine matches a hand calculation for two techs over two past weeks.
 
@@ -78,7 +91,9 @@ The commission plan's legal review is handled by the owners' CPA.
 - Fresh import of customers, equipment, memberships and pricebook right before go-live.
 - Daily check-in with the pilot crew; a fix list worked every day.
 
-**Pass test:** four clean weeks of bookings, jobs, invoices, payments and QuickBooks postings; two payroll weeks checked by hand; the crew says it's at least as fast as ServiceTitan.
+- The commission engine runs in practice mode on the pilot crew's jobs (office-only); the crew's pay stays as today.
+
+**Pass test:** four clean weeks of bookings, jobs, invoices, payments and QuickBooks postings; practice-mode pay for two weeks matches a hand calculation; the crew says it's at least as fast as ServiceTitan.
 
 ## Switch (stage 3), when the pilot passes
 
@@ -89,7 +104,14 @@ The commission plan's legal review is handled by the owners' CPA.
 - ServiceTitan read-only until the contract ends; final full exports kept.
 - Restore-from-backup drill.
 
-## If we fall behind (cut list, in order)
+## Pay plan rollout (stage 4), once fully operational
+
+- Practice-mode pay on everyone's real jobs for 2–4 weeks; the office checks it against a hand calculation; the owners' CPA signs off.
+- Every employee reads and signs the written plan (including the callback deduction authorization).
+- Techs see the pay plan explained (the techs' deck), then the scoreboard turns on in the iPad app.
+- The Profit Ladder pays from the next full pay week; office spiffs start the same week.
+
+## If we fall behind (scope cuts, in order; never quality cuts)
 
 1. AI dispatch launches in **suggest** mode (dispatcher clicks to accept) instead of auto-assign.
 2. Inventory launches as **restock lists** only.
@@ -105,7 +127,7 @@ Because ServiceTitan keeps running the business, a slip costs ServiceTitan subsc
 | ServiceTitan exports lack a needed field | Export one of each report in month 1, before building the importer |
 | Data drifts between imports | Weekly re-imports keyed on ServiceTitan IDs, import reports with totals, final import at the switch |
 | Double posting to QuickBooks | Each system posts only the invoices it created |
-| Commission bugs | Pure, tested engine; history replay; shadow-run; CPA sign-off |
+| Commission bugs | Pure, tested engine; 12-month history replay; practice mode in the pilot and after the switch; CPA sign-off |
 | Paying for two systems with no end date | Clear pilot pass test; owners review progress monthly |
 | iPad web-app limits | Text-to-pay and Payment Element now; optional smart reader; App Store wrapper with a Bluetooth reader in phase 2 |
 | iPad GPS gaps (screen locked, other apps, heat) | Paused and stale badges, daily coverage report; if the pilot's coverage is poor, add Spytec plug-in trackers or move the App Store wrapper up |

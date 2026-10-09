@@ -26,8 +26,8 @@ ServiceTitan reports export to CSV or Excel. `tools/st-import` reads them throug
 | Memberships (with start/end, visits remaining) | Member status and pricing | Full at the start, then weekly |
 | Pricebook (services, materials, equipment, prices, member prices, costs) | Our pricebook | Full at the start; again before the pilot and the switch |
 | Technicians and business units | Users, skills, departments | Once, then when staff change |
-| Jobs and invoices with line items (and costs), payments | History, reports, replaying the pay plan | Full history at the start (as many years as the reports allow); weekly if the Profit Ladder starts early |
-| Timesheets / job time | Labor in gross profit | Weekly if the Profit Ladder starts early |
+| Jobs and invoices with line items (and costs), payments | History, reports, replaying the pay plan to set the ladder | Full history at the start (as many years as the reports allow), refreshed before the pilot |
+| Timesheets / job time | Labor in the 12-month pay replay | With the history import |
 | Open invoices and balances | Collections after the switch | At the switch |
 | Future appointments | Jobs already booked past the switch date | At the switch |
 
@@ -46,23 +46,17 @@ Which exact report names and columns DWRG's ServiceTitan offers gets confirmed i
 | Stage | Target | ServiceTitan does | New system does |
 |---|---|---|---|
 | **1. Build and load** | Months 1–5 | Everything, as today | Imports, reports on imported history, and everything built and tested in a training copy with real customer data |
-| **(Optional) Early Profit Ladder** | From about month 2–3 | Everything operational | Pay plan, scoreboards and payroll sheet from weekly report uploads (see below) |
 | **2. Pilot crew** | About month 6 | Everything for all other techs | All work for one pilot crew (2 techs + 1 CSR), end to end |
 | **3. Switch** | When the pilot has proven itself (owner decision) | Read-only lookups until the contract ends | Everything |
+| **4. Pay plan rollout** | After the switch, once fully operational | Nothing | Practice-mode pay on everyone's jobs for 2–4 weeks, then the Profit Ladder pays |
 
-### Optional: start the Profit Ladder early
+### The pay plan waits for the switch
 
-The commission engine is built first anyway, because it is pure code with tests. If the office uploads three ServiceTitan reports every Monday (invoices with line items and costs, payments, timesheets), the Profit Ladder can pay everyone months before the switch:
-
-- The scoreboard on the techs' iPads updates when the reports are uploaded, not live. That means weekly, or daily if the office uploads daily.
-- Shadow-run 2–4 pay weeks against a hand calculation first.
-- Replay the last 12 months of history to set the final ladder steps.
-
-This is **recommended**. The pay plan is the biggest profit lever in the whole plan, and it doesn't need the rest of the system.
+Owner decision: the Profit Ladder starts only after the switch, once everything is running and tested ([02-commission-plan.md](02-commission-plan.md#9a-when-the-plan-starts-owner-decision)). Imported history is used to replay the plan and set the ladder steps, never to pay anyone. During the pilot, the engine runs in practice mode on the pilot crew's jobs, and only the office sees it.
 
 ### Stage 2: the pilot crew
 
-The pilot crew runs **everything** in the new system: the booking screen, the dispatch board, the iPad app, Good/Better/Best, invoices, Stripe payments, posting to QuickBooks, and their pay. Everyone else stays on ServiceTitan. A job lives in exactly one system; `system_of_record` says which system owns each crew.
+The pilot crew runs **everything** in the new system: the booking screen, the dispatch board, the iPad app, Good/Better/Best, invoices, Stripe payments and posting to QuickBooks. Their pay stays as it is today; the commission engine runs in practice mode on their jobs. Everyone else stays on ServiceTitan. A job lives in exactly one system; `system_of_record` says which system owns each crew.
 
 Rules while both run:
 
@@ -75,7 +69,7 @@ Rules while both run:
 **The pilot proves out when:**
 
 - four consecutive weeks have clean bookings, jobs, invoices, payments and QuickBooks postings for the pilot crew
-- two payroll weeks are checked by hand against the engine
+- the practice-mode pay numbers for two weeks match a hand calculation
 - the crew and the CSR say it is at least as fast as ServiceTitan
 
 ### Stage 3: the switch
