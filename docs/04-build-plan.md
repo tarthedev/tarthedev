@@ -64,6 +64,8 @@ The commission plan's legal review is handled by the owners' CPA.
 - AI auto-assign: hard-rule filter, weighted score, replacement-likely calls to the strongest closer, reasons, override reasons, weekly fair-share report.
 - Confirmation and day-before reminder texts (Twilio).
 
+**Exit test:** a week of practice bookings in the practice copy runs clean: every job lands on the right tech with sensible reasons, and the texts go out.
+
 ## Month 4: Field app and getting paid
 
 - iPad field app (PWA): day view, job screen with history and equipment, checklists (UV, surge and air quality always asked on HVAC), photos, signatures, On My Way text with ETA, timesheets.
