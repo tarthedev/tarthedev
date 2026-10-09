@@ -14,12 +14,12 @@ The plan lives in `docs/`. **Read the relevant doc before building a feature**:
 - `docs/03-tech-stack.md`: stack and architecture
 - `docs/04-build-plan.md`: month-by-month scope and exit tests
 - `docs/05-data-model.md`: tables and conventions
-- `docs/06-servicetitan-migration.md`: data import
+- `docs/06-servicetitan-migration.md`: running side by side with ServiceTitan (stages, sync, permission, fallback)
 - `docs/07-open-questions.md`: unanswered questions; don't guess answers to these, ask
 
 ## Stack
 
-TypeScript everywhere. React 19 + Vite PWA (`apps/web`), Hono API with WebSockets (`apps/api`), pg-boss worker (`apps/worker`), PostgreSQL + Drizzle (`packages/db`), pure business logic in `packages/core`, shared Zod schemas in `packages/shared`, ServiceTitan import in `tools/st-import`. pnpm workspaces. Deployed with Docker Compose behind Caddy on a DigitalOcean droplet with managed Postgres.
+TypeScript everywhere. React 19 + Vite PWA (`apps/web`), Hono API with WebSockets (`apps/api`), pg-boss worker (`apps/worker`), PostgreSQL + Drizzle (`packages/db`), pure business logic in `packages/core`, shared Zod schemas in `packages/shared`, ServiceTitan backfill, CSV fallback import and reconciliation in `tools/st-import`; the continuous ServiceTitan mirror and write-back queue run in `apps/worker`. pnpm workspaces. Deployed with Docker Compose behind Caddy on a DigitalOcean droplet with managed Postgres.
 
 ## Rules
 
@@ -31,8 +31,11 @@ TypeScript everywhere. React 19 + Vite PWA (`apps/web`), Hono API with WebSocket
 6. **Webhooks are verified and idempotent** (store provider event IDs in `webhook_events`).
 7. **Settings that affect pay have effective dates.** Changing a setting never rewrites history.
 8. **Every commission or spiff change ships with tests**, including all worked examples in `docs/02-commission-plan.md`.
-9. **The iPad app is a Safari home-screen web app.** Test in Playwright WebKit at iPad size. Don't rely on background location, Bluetooth, or Tap to Pay (not available to web apps).
+9. **The iPad app is a Safari home-screen web app** on iPad (A16) cellular. Test in Playwright WebKit at iPad size. Don't rely on background location or Bluetooth. Tap to Pay is impossible on any iPad. Truck locations come from GPS trackers.
 10. **Keep the docs true.** If behavior changes, update the matching file in `docs/` in the same change.
+11. **ServiceTitan runs alongside us.** Mirrored ServiceTitan data is read-only in our system. Stage 2 writes back only customers, locations, jobs, appointments and tech assignments, never status or money fields. Stamp every write with our ID in `externalData` and ignore our own echoes.
+12. **Only the system that created an invoice posts it to QuickBooks.** Never post mirrored ServiceTitan invoices.
+13. **Which system owns a business unit's jobs comes from `system_of_record`.** Check it before creating a job, invoice or payment.
 
 ## Commands
 

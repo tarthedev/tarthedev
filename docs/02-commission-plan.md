@@ -138,6 +138,25 @@ adjustment(W) = 0.5 × (commission + spiffs attributable to W) ÷ total hours wo
 - When lines attributable to an earlier week W are paid in a later run (late customer payment), the engine recomputes adjustment(W) and pays the difference as an "overtime true-up" line.
 - Confirm this method with the CPA before launch.
 
+## 9a. Stage 1: running the plan on ServiceTitan's data
+
+The plan goes live in stage 1, while techs still work every job in ServiceTitan ([06-servicetitan-migration.md](06-servicetitan-migration.md)). The rules above don't change; only where the inputs come from does.
+
+| Input | Source while ServiceTitan runs the jobs |
+|---|---|
+| Sale, discounts, line items, item costs | Mirrored invoices and invoice items (price, cost, total cost) |
+| Parts from POs | Mirrored purchase orders and receipts |
+| Labor time | Mirrored ServiceTitan timesheets (job activities from Dispatched/Working to Done) |
+| Who gets credit | Mirrored job splits; estimates' sold-by technician for replacements |
+| Paid in full | Mirrored payments and invoice balance |
+| Callbacks | Marked in our app by a manager (linked to the original ServiceTitan job) |
+| Booking spiffs, booking rate | Mirrored bookings and calls (booked-by user, call outcome) |
+| Reviews | Verified in our app |
+
+- **Shadow first:** run 2–4 pay weeks in shadow and compare with a hand calculation before paying from the engine.
+- If a ServiceTitan invoice or cost changes after its commission was paid, the engine adds a correction line on the next run (same rule as section 5).
+- Mirrored decimal money strings are parsed straight to integer cents.
+
 ## 10. Worked examples (golden tests)
 
 Wage $21/hr. The examples pass a burdened cost of exactly **$27.00/hr** as the input, a round number for illustration (the live setting, wage × 1.30, gives $27.30).

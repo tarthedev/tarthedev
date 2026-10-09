@@ -73,3 +73,23 @@ PostgreSQL via Drizzle. Conventions:
 | `settings` | key, value (json), effective_from |
 | `sync_map` | system (qbo, stripe, twilio, servicetitan), local_id, remote_id, last_synced_at |
 | `webhook_events` | provider, event_id (unique), received_at, processed_at — for exactly-once processing |
+
+## ServiceTitan sync (stages 1–3)
+
+| Table | Key fields |
+|---|---|
+| `st_sync_cursor` | feed, continue_from token, last_run_at, last_error, rows_seen |
+| `st_raw_<feed>` | st_id, modified_on, payload (jsonb), received_at — raw landing tables, never edited |
+| `st_writes` | local table/row, ServiceTitan endpoint, request hash, st_id returned, status, attempts — the stage 2 write-back queue |
+| `st_reconciliation` | day, business_unit, metric (count / dollars), ours, theirs, diff, alerted |
+| `system_of_record` | business_unit (or crew), owner (servicetitan / new), switched_at — which system owns a unit's jobs, invoices and payments in stage 3 |
+
+Every core row created from ServiceTitan keeps `st_id`; every record we write to ServiceTitan carries our ID in its `externalData`.
+
+## Trucks and GPS
+
+| Table | Key fields |
+|---|---|
+| `vehicles` | name, assigned_user_id, tracker_provider (bouncie / traccar), tracker_device_id, active |
+| `vehicle_positions` | vehicle_id, at, lat, lng, speed, heading, source — pruned after a retention period *(setting)* |
+| `geo_zones` | vehicle_id, appointment_id, provider_zone_id, radius_m — arrival detection per truck per job |

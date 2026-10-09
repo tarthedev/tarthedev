@@ -1,36 +1,45 @@
 # Open Questions
 
-Questions still to answer. Each one says why it matters and what we'll do if there's no answer yet.
+Each question says why it matters. Answered questions are kept at the bottom with the decision, so the reasoning isn't lost.
 
-## Needed now (they affect the schedule)
+## Needed now (they decide how the side-by-side run works)
 
-1. **What is the exact ServiceTitan renewal date, and does the contract require written notice to cancel?** Many contracts need notice 30–90 days before renewal. This sets the cutover date and when the cancellation letter must go out.
-2. **Has anyone asked ServiceTitan what a 1–3 month extension or month-to-month would cost?** This is our insurance if the build slips.
-3. **Do the trucks have GPS trackers? Which brand?** A home-screen web app can't track location with the iPad screen locked. Trackers with an API would give live map dots and better ETAs. If there are none, we use the iPad's location while the app is open.
-4. **Which iPads do techs use (model and iPadOS version), and are they company-owned with cellular or hotspot data?** Push notifications need iPadOS 16.4 or later and the app installed to the home screen.
+1. **Which ServiceTitan package are you on: The Works, Enterprise Plus, or something lower?** ServiceTitan only allows customer-built API apps on The Works or Enterprise Plus. If you're on a lower package, we need the upgrade price in writing, or we use the report-export fallback (scoreboard updates daily instead of live, and stage 2 is skipped).
+2. **Are you comfortable asking ServiceTitan, in writing, for permission to mirror your data and write bookings back during a gradual move?** As written, their API terms restrict apps whose purpose is moving off ServiceTitan, and restrict keeping copies of the data. A lawyer should read those clauses too. See [06-servicetitan-migration.md](06-servicetitan-migration.md#stage-0-ask-and-connect-weeks-13-before-building-anything).
+3. **How many trucks get a GPS tracker, and are their OBD-II ports easy to reach?** This sets the tracker count (cost runs about $50–$125 a month for 6–15 trucks on Bouncie) and whether plug-in trackers work.
+4. **Who will email Bouncie for written OK on commercial fleet use?** Their consumer terms forbid "commercial purposes" and cap use at 150 ignition-on hours a month. If they won't confirm, we use Teltonika + Traccar.
 
-## Needed by month 2–3
+## Needed by stage 2 (booking and dispatch, about month 4–6)
 
-5. **How many phone numbers are on Phones Pro, including any call-tracking numbers used for advertising?** All of them have to be ported.
-6. **How does ServiceTitan tax invoices today: which items are taxable, and at what rates?** North Carolina treats repair/maintenance work and capital improvements differently for sales tax. We'll copy the current setup and have the CPA confirm it.
-7. **Membership details: exact price, member discount percentage, any priority-service promise, and does it cover plumbing?** Needed for member pricing on invoices and the membership screens.
-8. **Which GreenSky plans do you offer?** Needed to show estimated monthly payments on proposals.
-9. **Which suppliers do you buy from, and do they offer online ordering or price files?** Affects how purchase orders and costs flow in.
+5. **Skills matrix: which techs do HVAC, plumbing, refrigeration and commercial, and which certifications or licenses does each hold?** The AI uses this to decide who can take a job.
+6. **How are after-hours and emergency calls handled today (on-call rotation, after-hours fee, who answers)?** Affects booking rules and phone routing.
+7. **Who besides techs sells replacements (which roles)?** Needed to track the lead source for the $150 lead bonus.
 
-## Needed by month 4 (pay plan)
+## Needed by stage 3 (field, invoices, payments)
 
-10. **What percentage should we add on top of wages for the burdened labor cost (payroll taxes, workers' comp, benefits)?** The decks assume about 30% ($21 wage → $27/hr). Your CPA can give the real number.
-11. **AI fair share: should calls with a likely replacement go to the best closer, or be spread evenly?** Recommendation: spread them, tilted toward stronger closers, with a weekly report so the owners can see it. This matters because pay now depends on the calls each tech gets.
-12. **Is 10% the right discount limit before a manager must approve?**
-13. **Are the two combos (Clean Air: UV + surge + membership; Water Guard: leak shut-off + filter or softener + membership) the right bundles? Any other add-ons to push, such as smart thermostats or water heater flushes?**
-14. **Who besides techs sells replacements (which roles)?** Needed to track the lead source for the $150 lead bonus.
-15. **Skills matrix: which techs do HVAC, plumbing, refrigeration and commercial, and which certifications or licenses does each hold?** The AI uses this to decide who can take a job.
+8. **How does ServiceTitan tax invoices today: which items are taxable, and at what rates?** North Carolina treats repair/maintenance work and capital improvements differently for sales tax. We'll copy the current setup and have the CPA confirm it.
+9. **Which GreenSky plans do you offer?** Needed to show estimated monthly payments on proposals.
+10. **Which suppliers do you buy from, and do they offer online ordering or price files?** Affects how purchase orders and costs flow in.
+11. **Is 10% the right discount limit before a manager must approve?**
+12. **Are the two combos (Clean Air: UV + surge + membership; Water Guard: leak shut-off + filter or softener + membership) the right bundles? Any other add-ons to push, such as smart thermostats or water heater flushes?**
+13. **Do you want card-present payments before the App Store wrapper exists?** If yes: a Stripe S700 smart reader ($299 per truck, no monthly fee) on each iPad's Personal Hotspot. Check that the carrier plans include hotspot.
+14. **Which business unit or crew moves first?** Suggested: one pilot crew, then plumbing, HVAC service, HVAC replacement, commercial, new construction.
 
-## Needed by month 5 (pilot)
+## Needed by stage 4 (phones)
 
-16. **Which two techs and which CSR will pilot?**
-17. **How are after-hours and emergency calls handled today (on-call rotation, after-hours fee, who answers)?** Affects booking rules and phone routing.
+15. **How many phone numbers are on Phones Pro, including any call-tracking numbers used for advertising?** All of them have to be ported.
 
 ## Later (phase 2)
 
-18. **What platform is the website on?** Matters for online booking and the portal link.
+16. **What platform is the website on?** Matters for online booking and the portal link.
+
+## Answered
+
+| Question | Decision |
+|---|---|
+| ServiceTitan renewal date | Doesn't matter. Run both systems side by side and move work over in stages ([06](06-servicetitan-migration.md)). |
+| Truck GPS | Buy new trackers. Bouncie recommended, Teltonika + Traccar runner-up, decided by a two-week pilot ([03](03-tech-stack.md#truck-gps-trackers)). |
+| Tech iPads | iPad (A16) Wi-Fi + Cellular: built-in GPS, web push. Tap to Pay is not possible on any iPad. |
+| Replacement-likely calls | Go to the strongest replacement closer who can make the window; fair share applies to other calls ([01](01-operations.md#how-the-ai-picks-a-tech)). |
+| Burdened labor cost | Wage × 1.30, a dated setting that can be overridden per worker ([02](02-commission-plan.md)). |
+| Membership plan | Keep as drafted: one yearly plan, about $150–$250, two tune-ups, member pricing. The exact price and discount come from the plan already set up in ServiceTitan when it's mirrored. |

@@ -44,14 +44,16 @@ Built by one developer with Claude Code, hosted on a VPS, running cost $200–$6
 | Backblaze B2 (or similar) | Nightly off-site copy of database dumps and files | |
 | Sentry + an uptime checker | Errors and outage alerts | Free tiers |
 | GitHub Actions | Tests and deploys | |
+| ServiceTitan API (V2) | Stage 1–3 mirror (export feeds, polled) and stage 2 write-back of customers, jobs, appointments, assignments | Needs The Works or Enterprise Plus package and written permission; see [06-servicetitan-migration.md](06-servicetitan-migration.md) |
+| Truck GPS trackers: Bouncie (or Teltonika + self-hosted Traccar) | Live truck positions, trip start/end, job-site arrival geo-zones, ETAs | See [Truck GPS trackers](#truck-gps-trackers) |
 
 ## Architecture
 
 ```
- Office browser        Tech iPad (home-screen app)        Customer phone
- (board, phones)       (jobs, sales, scoreboard)          (texts, pay links, portal)
-        \                         |                               /
-         \______________ HTTPS + WebSockets via Caddy ___________/
+ Office browser        Tech iPad (home-screen app)        Customer phone      Truck GPS trackers
+ (board, phones)       (jobs, sales, scoreboard)          (texts, pay links)  (webhooks, or TCP to Traccar)
+        \                         |                               /                 |
+         \______________ HTTPS + WebSockets via Caddy ___________/__________________/
                                   |
         +------------------------ DigitalOcean droplet (Docker Compose) ---+
         |   api (Hono, WebSockets)    worker (pg-boss jobs)                |
@@ -60,11 +62,12 @@ Built by one developer with Claude Code, hosted on a VPS, running cost $200–$6
                Managed PostgreSQL         Spaces (photos, PDFs)
                          |
    Outbound API calls and inbound webhooks:
-   Stripe · Twilio · QuickBooks · Google Maps · Claude API · Postmark
+   Stripe · Twilio · QuickBooks · Google Maps · Claude API · Postmark · Bouncie
+   ServiceTitan API: export feeds polled every 5 min; stage 2 write-back queue
 ```
 
 - **api** handles requests, auth, and pushes live updates over WebSockets.
-- **worker** runs everything slow or scheduled: texts and emails, QuickBooks sync, Stripe and Twilio webhook follow-ups, drive-time refresh, Sunday-night week lock, Monday payroll run, nightly restock lists.
+- **worker** runs everything slow or scheduled: the ServiceTitan mirror (polling, mapping, nightly reconciliation) and stage 2 write-back queue, texts and emails, QuickBooks sync, Stripe, Twilio and tracker webhook follow-ups, drive-time refresh, Sunday-night week lock, Monday payroll run, nightly restock lists.
 - Postgres **LISTEN/NOTIFY** tells the api when the worker changed something.
 - **Staging** runs as a second Compose stack on the same droplet with its own database in the same managed cluster and its own subdomain.
 
@@ -77,7 +80,7 @@ apps/worker       pg-boss jobs
 packages/db       Drizzle schema + migrations
 packages/core     pricing, gross profit, commission, spiffs (pure functions)
 packages/shared   Zod schemas and types shared by app and server
-tools/st-import   ServiceTitan export and import scripts
+tools/st-import   ServiceTitan backfill, CSV fallback import, reconciliation scripts
 docs/             this plan
 CLAUDE.md         house rules for Claude Code
 ```
@@ -97,14 +100,38 @@ Math first, AI for judgment. Scheduling has hard constraints, so a scoring engin
 
 | Works | Doesn't work in a web app |
 |---|---|
-| Home-screen icon, full screen | Tap to Pay on iPad (Stripe offers it in native SDKs, not the JavaScript SDK) |
-| Camera photos, signatures | GPS while the screen is locked (iPadOS suspends the page) |
-| Location while the app is open | Bluetooth card readers |
-| Web push once installed (iPadOS 16.4+) | Card payments with no signal |
-| Text-to-pay links and typed cards | |
+The techs' devices are **iPad (A16) Wi-Fi + Cellular**: built-in GPS/GNSS (Wi-Fi-only iPads have none), current iPadOS, Apple Pencil (USB-C) for signatures.
 
+| Works | Doesn't work in a web app |
+|---|---|
+| Home-screen icon, full screen | GPS while the screen is locked (iPadOS suspends the page); truck trackers cover this |
+| Camera photos, signatures | Bluetooth card readers (need Stripe's native SDK; Safari has no Web Bluetooth) |
+| Location while the app is open | Card payments with no signal |
+| Web push once installed (iPadOS 16.4+) | |
+| Text-to-pay links, typed cards (Payment Element) | |
+| A Stripe smart reader (S700) driven by our server over the internet | |
+
+- **Tap to Pay is impossible on any iPad,** native or web: Apple and Stripe support it on iPhone only (iPads lack the NFC payment reader).
+- **Card-present now (optional):** a Stripe S700 smart reader ($299, no monthly fee, 2.7% + 5¢) using Stripe's **server-driven** integration. Our server sends the invoice amount to the reader assigned to that tech; the reader connects over the iPad's Personal Hotspot. Bench-test the hotspot first (Stripe readers don't support Wi-Fi 6 networks, and the carrier plan must include hotspot). Don't use the Terminal JavaScript SDK in the field: it needs the iPad and reader on the same local network.
 - Web push can occasionally stop delivering on iOS, so emergency alerts also go out by text.
-- **Phase 2 escape hatch:** wrap the same web app in a thin Capacitor App Store app to get Tap to Pay and background GPS without a rewrite.
+- **Phase 2 escape hatch:** wrap the same web app in a thin Capacitor App Store app. That allows a **$59 Stripe Reader M2 per truck over Bluetooth** (chip and tap, 2.7% + 5¢, offline card collection) and locked-screen GPS, without a rewrite. The community Capacitor Stripe Terminal plugin pins Stripe's iOS SDK 5.x (critical fixes only since October 2026), so prototype first and plan for SDK 6.x.
+
+## Truck GPS trackers
+
+Owner decision: new trackers in every truck. Two candidates; a two-week pilot of one of each decides.
+
+| | Bouncie (recommended) | Teltonika + Traccar (runner-up) |
+|---|---|---|
+| Hardware | ~$90 per truck, OBD-II plug-in, 4G LTE | ~$100 per truck (e.g., FMM00A/FMM80A LTE-M OBD, AT&T certified), or hardwired FMx130 |
+| Monthly | $8.35 per truck (3+ devices), no contract | IoT SIM ~$1–2 per truck + maybe $6–12/month more droplet for Traccar |
+| 6 / 15 trucks per month | ~$50 / ~$125 | ~$10–25 / ~$25–35 |
+| API | Self-serve OAuth API; live vehicle snapshot; trip webhooks streaming positions; geo-zones by API for job-site arrival | Open-source Traccar (Apache-2.0) on our server forwards every position to our API as JSON; WebSocket and REST |
+| Catch | Consumer terms forbid "commercial purposes" and cap use at 3,000 miles / 150 hours a month (idle counts); warranty excludes commercial use. **Get written OK from Bouncie first.** | We run it: configure devices, manage SIMs, expose TCP port 5027 outside Caddy, no support line |
+
+- Bouncie webhooks use a shared key (not a signature): check the header, and dedupe on device, transaction ID and timestamp in `webhook_events`. Geo-zones are per device, so arrival zones are per truck per job.
+- Teltonika: tune the Send Period (default 120 s) to about 10–15 s while moving; confirm AT&T LTE-M coverage and SIM attach around Elizabeth City before ordering.
+- Pilot exit test: webhook latency, gaps, and ETA accuracy against the iPad's own GPS; for Bouncie, written confirmation of commercial use.
+- During stages 1–2, ServiceTitan's board keeps using its own mobile-app GPS; trackers feed only our board.
 
 ## Security
 
@@ -128,6 +155,14 @@ Math first, AI for judgment. Scheduling has hard constraints, so a scoring engin
 | Google Maps Platform | $0–$40 |
 | Claude API | $30–$80 |
 | FullCalendar Premium (about $480/yr) | ~$40 |
-| **Total** | **~$270–$440** |
+| Truck GPS trackers, 6–15 trucks (Bouncie; Teltonika + Traccar is ~$10–35) | ~$50–$125 |
+| **Total** | **~$280–$565** |
 
-Not included: Stripe fees (2.9% + 30¢ online cards; up to 3.4% + 30¢ manually entered; ACH 0.8% capped at $5) and GreenSky dealer fees (commonly reported around 7%, varies by plan). Both exist today and both count as job costs.
+One-time: trackers ~$90–$100 per truck. Optional: a Stripe S700 smart reader at $299 per truck.
+
+Not included:
+- Stripe fees: 2.9% + 30¢ for online and Payment Element cards (expected; 3.4% + 30¢ applies to cards keyed in Stripe's Dashboard or Terminal MOTO), 2.7% + 5¢ in person on a reader, ACH 0.8% capped at $5.
+- GreenSky dealer fees (commonly reported around 7%, varies by plan).
+- The ServiceTitan subscription, which continues while both systems run (possibly on a higher package for API access).
+
+Card and dealer fees exist today and count as job costs.

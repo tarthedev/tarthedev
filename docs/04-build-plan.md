@@ -1,108 +1,128 @@
-# Build Plan: Six Months to Cutover
+# Build Plan: Side by Side, in Stages
 
-One builder with Claude Code. Month 1 starts now (October 2026). Cutover lands **at least two weeks before the ServiceTitan renewal date**.
+One builder with Claude Code. Month 1 starts October 2026. **There is no hard cutover date** (owner decision). ServiceTitan keeps running while work moves over in the stages described in [06-servicetitan-migration.md](06-servicetitan-migration.md). Months below are targets, not deadlines; a stage starts only when the one before it is proven.
+
+| Stage | Target | What the business gets |
+|---|---|---|
+| 0. Ask and connect | Weeks 1–3 | ServiceTitan API access confirmed in writing (or the report-export fallback chosen) |
+| 1. Mirror, reports and pay | Live by about month 3 | Reports, the Profit Ladder, tech scoreboards, payroll sheet, office spiffs, all on ServiceTitan data |
+| 2. Booking and dispatch | Live by about month 6 | Booking screen, dispatch board with AI auto-assign, truck GPS; techs still work in the ServiceTitan app |
+| 3. Field, invoices, payments | Pilot crew from about month 8, then one business unit at a time | Our iPad app, Good/Better/Best, Stripe, memberships, customer portal, inventory |
+| 4. Phones and switch-off | When the last business unit has moved | Twilio phones, ServiceTitan read-only, then off |
 
 ## Outside paperwork (long lead times, start early)
 
-| When | What | Why it can't wait |
+| When | What | Why |
 |---|---|---|
-| Week 1 | Request ServiceTitan API credentials (developer portal) and pull report exports as a backup | Nothing else works without the data |
-| Week 1 | Ask ServiceTitan, in writing, about data access after the contract ends and the cost of a 1–3 month extension | Insurance if we slip |
-| Month 1 | Twilio account; A2P 10DLC brand and campaign registration | Carriers block unregistered business texts |
-| Month 1 | Book an NC employment attorney or CPA to review the commission plan | Must be signed off before anyone is paid by it |
-| Month 2 | Stripe account application and verification | Payments must be live for the pilot |
-| Month 2 | Ask GreenSky to move the merchant account off ServiceTitan's sponsorship | Financing must keep working after ServiceTitan |
-| Month 2 | FullCalendar Premium license | Needed for the board |
-| Month 3 | Start porting phone numbers from Phones Pro to Twilio | Ports can take weeks |
-| Month 4 | Pick pilot team: 1 CSR, 2 techs | Training in month 4, live in month 5 |
+| Week 1 | Confirm the ServiceTitan package includes API access (The Works or Enterprise Plus); price an upgrade if not | Decides API sync vs report-export fallback |
+| Week 1 | Written permission from ServiceTitan + a lawyer's read of the API Terms; disclose AI use at app registration | The terms restrict migration apps and data retention as written |
+| Week 1 | Register the app (about 2 business days for approval) | Needed for the mirror |
+| Month 1 | NC employment attorney or CPA reviews the commission plan | Must be signed off before anyone is paid by it |
+| Month 2 | Email Bouncie for written OK on commercial fleet use (their terms restrict "commercial purposes" and over 150 ignition-on hours a month) | Decides the tracker choice |
+| Month 3 | Two-week tracker pilot: one Bouncie, one Teltonika + Traccar | Pick the winner before buying for every truck |
+| Month 3 | Twilio account and A2P 10DLC texting registration | Arrival and reminder texts start in stage 2 |
+| Month 4 | FullCalendar Premium license | Dispatch board |
+| Month 5 | Stripe account application | Payments start in stage 3 |
+| Month 6 | Ask GreenSky to move the merchant account off ServiceTitan's sponsorship | Financing must keep working for moved business units |
+| Stage 4 | Port phone numbers from Phones Pro to Twilio | Ports can take weeks |
 
-## Month 1: Foundation and data
+## Month 1: Foundation and connection
 
-- Monorepo scaffold (pnpm workspaces), `CLAUDE.md`, lint, typecheck, Vitest, GitHub Actions.
+- Monorepo scaffold (pnpm workspaces), `CLAUDE.md` commands, lint, typecheck, Vitest, GitHub Actions.
 - DigitalOcean droplet, managed Postgres, Spaces, Caddy, staging and production stacks, Sentry, uptime checks, backups.
 - Better Auth with roles: owner, manager, dispatcher/CSR, tech, installer.
-- Core tables: customers, locations, contacts, equipment, memberships, pricebook, business units, settings, audit log.
-- `tools/st-import`: ServiceTitan export to raw JSON, then idempotent import keyed on ServiceTitan IDs.
-- QuickBooks Online OAuth connection; customers and items mapping.
+- ServiceTitan connector in `apps/worker`: OAuth, `st_sync_cursor`, raw landing tables, throttled backfill, 5-minute/hourly/nightly/weekly schedules.
+- (Fallback path instead: CSV report import page.)
 
-**Exit test:** imported customer, equipment, membership and invoice counts and yearly dollar totals match ServiceTitan's reports.
+**Exit test:** the mirror has run for a week with no gaps.
 
-## Month 2: Schedule and field
+## Month 2: Mirror mapped, reports, pay engine in shadow
 
-- Jobs, appointments, assignments, statuses; WebSocket live updates.
-- Dispatch board: FullCalendar resource timeline, Waiting column, drag and drop, map view.
-- iPad app (PWA): install flow, day view, job screen with history and equipment, checklists (UV / surge / air quality always asked on HVAC), photos, signatures.
-- On My Way text with tech photo and ETA link; confirmation and day-before reminder texts.
-- Timesheets (clock in/out, On My Way → Done per job) and foreground GPS pings.
-- Push notifications with text fallback.
+- Map raw ServiceTitan rows into core tables: customers, locations, contacts, equipment, memberships, pricebook, technicians, business units, jobs, appointments, invoices and items, payments, estimates, job splits, timesheets, POs, calls.
+- Nightly reconciliation against ServiceTitan's Reporting API, with drift alerts.
+- Reports: job, tech and department gross profit; P&L with QuickBooks overhead (read-only QuickBooks connection).
+- `packages/core` commission engine exactly per [02-commission-plan.md](02-commission-plan.md), with every worked example as a test. Runs in **shadow** (no pay yet).
 
-**Exit test:** a test job goes from booked to done on a real iPad, with the customer texts arriving.
+**Exit test:** mirror totals match ServiceTitan per business unit per day; the engine's results for two techs match a hand calculation for two past weeks.
 
-## Month 3: Sell and get paid
+## Month 3: Stage 1 goes live (the Profit Ladder)
 
-- Proposal builder: Good/Better/Best templates, member vs regular price, GreenSky monthly payment display and apply link, signature.
-- Invoices: member pricing, discounts with approval over 10%, sales tax, PDFs.
-- Stripe: payment links (text-to-pay), Payment Element for typed cards, ACH, saved cards; idempotent webhooks.
-- Memberships: sell, renew, auto-renew with saved card, visit tracking, renewal reminders.
-- Customer portal (one-time links).
-- QuickBooks sync: invoices, payments, classes. Review request texts.
+- Tech scoreboard as a home-screen web app on the iPads, alongside the ServiceTitan app.
+- Pay sheets, weekly payroll sheet with overtime true-up, callbacks (marked in our app), spiffs, combos, review verification, office spiffs and booking rate from the calls feed.
+- Shadow-run 2–4 pay weeks, then pay from it once the owners and CPA sign off.
+- Tracker pilot (one Bouncie, one Teltonika + Traccar).
 
-**Exit test:** a real invoice paid by text link lands in QuickBooks in the right class.
+**Exit test:** two consecutive payroll weeks paid from the engine with no corrections needed.
 
-## Month 4: Profit and pay
+## Months 4–5: Booking and dispatch (built, then stage 2 goes live)
 
-- Job costing: parts from truck stock and POs, labor from time entries × burdened cost, other job costs (fees, permits, subs).
-- Purchase orders and receiving; supplier bills to QuickBooks.
-- `packages/core` commission engine exactly per [02-commission-plan.md](02-commission-plan.md), with every worked example as a test.
-- Tech scoreboard on the iPad; pay sheets; weekly payroll sheet including the overtime true-up.
-- Callbacks (link, tech-caused flag, deductions). Spiff and combo rules. Office spiffs.
-- Commercial: PO-required customers, terms, statements, multi-site, progress billing, builder bids, aging report.
-- Reports: job, tech and department GP; P&L with QuickBooks overhead via the Reports API.
-- Training copy of the system (anonymized data) for practice.
+- Booking screen with script, membership offer, AI note reading (structured output).
+- Dispatch board: FullCalendar resource timeline, Waiting column, map with tracker positions, drag and drop.
+- AI auto-assign: hard-rule filter, weighted score, replacement-likely calls to the strongest closer, reasons, override reasons, weekly fair-share report.
+- Write-back to ServiceTitan: customers, locations, jobs, appointments, tech assignments, through a queue with `externalData` stamps, conflict rules and echo suppression.
+- Execution data back from ServiceTitan every 1–2 minutes (`includeRecentChanges=true`).
+- Trackers installed in every truck (pilot winner).
+- Confirmation, day-before reminder and On My Way texts (Twilio), using tracker ETA.
 
-**Exit test:** last month's real jobs, replayed, produce the right commission to the penny for at least two techs checked by hand.
+**Exit test (end of month 5, then go live):** a full week of bookings made in the new system appear correctly in ServiceTitan, and techs notice nothing different in their ServiceTitan app.
 
-## Month 5: Phones, AI and pilot
+## Months 6–7: Field, money and memberships (built)
 
-- Twilio browser phone: inbound routing, screen pop, recording, call log, non-bookable tagging, booking rate.
-- AI: Claude note reading (structured output), hard-rule filter, weighted scoring, auto-assign with reasons, override reasons, weekly fair-share report. VROOM reshuffle if time allows.
-- Truck inventory and nightly restock lists.
-- **Pilot:** 1 CSR and 2 techs run real work on the new system; everyone else stays on ServiceTitan.
+- iPad field app (PWA): day view, job screen with history and equipment, checklists (UV, surge and air quality always asked on HVAC), photos, signatures, On My Way, timesheets.
+- Proposal builder: Good/Better/Best, member vs regular price, GreenSky monthly payments and apply link.
+- Invoices: member pricing, discount approval over 10%, sales tax, PDFs, progress billing, PO-required customers, terms, statements.
+- Stripe: payment links, Payment Element, ACH, saved cards, idempotent webhooks. Optional server-driven smart reader.
+- Memberships: sell, renew, auto-renew, visit tracking.
+- Customer portal. Review request texts.
+- QuickBooks posting for invoices the new system creates (never for mirrored ServiceTitan invoices).
+- Truck inventory, restock lists, purchase orders and receiving.
 
-**Exit test:** the pilot team runs a full week without touching ServiceTitan.
+**Exit test:** a full job runs on the iPad in staging (booked, worked, sold, invoiced, paid by text, posted to QuickBooks), and nothing is written to ServiceTitan for it.
 
-## Month 6: Cutover
+## Month 8 onward: Stage 3, one business unit at a time
 
-- Final ServiceTitan delta import (everything changed since the last export).
-- Port the phone numbers; everyone switches; cheat sheet at every desk.
-- Fix list from the pilot.
-- Two payroll runs checked by hand against the engine.
+1. Pilot crew (two techs) moves completely: their jobs stop being created in ServiceTitan.
+2. Two clean weeks, then the next business unit. Suggested order: plumbing, HVAC service, HVAC replacement, commercial and refrigeration, new construction.
+3. Each move: techs switch apps, the pricebook owner flips at the first move, memberships move as they renew.
+
+**Exit test per business unit:** two clean payroll weeks and a clean month-end in QuickBooks with no double-posted invoices.
+
+## Stage 4: Phones and switch-off
+
+- Twilio browser phone: screen pop, recording, call tagging. Port the numbers.
+- Final full export; ServiceTitan read-only until the contract ends.
 - Restore-from-backup drill.
-- ServiceTitan kept read-only for lookups until the contract ends.
-
-**Exit test:** two clean payroll weeks and a clean month-end close in QuickBooks.
 
 ## If we fall behind (cut list, in order)
 
 1. AI dispatch launches in **suggest** mode (dispatcher clicks to accept) instead of auto-assign.
-2. Inventory launches as **restock lists** only; full stock counts follow.
+2. Inventory launches as **restock lists** only.
 3. VROOM whole-day reshuffle moves to phase 2.
 4. Builder bids move to phase 2 (progress billing stays).
-5. Last resort: a short ServiceTitan extension (ask in week 1 what it costs).
+
+Because ServiceTitan keeps running, slipping a stage costs ServiceTitan subscription months, not operations.
 
 ## Risks
 
 | Risk | Plan |
 |---|---|
-| Can't get data out of ServiceTitan | Request API access in week 1; monthly exports from month 1; report exports as backup |
-| Phone numbers stuck in Phones Pro | Start the port in month 3; test on a quiet morning |
-| Texts blocked | A2P 10DLC registration in month 1 |
-| GreenSky tied to ServiceTitan | Ask GreenSky in month 2 to move the merchant account |
-| Stripe approval delay | Apply in month 2 |
-| Commission bugs | Pure, tested engine; replay real months; hand-check two techs; attorney/CPA review |
-| iPad web-app limits | Text-to-pay now; Capacitor App Store wrapper in phase 2 |
-| One-person bus factor | Everything in git, docs in `docs/`, infrastructure as Compose files, runbooks for deploy and restore |
+| API not included in our ServiceTitan package, or not permitted | Confirm in week 1; report-export fallback keeps stages 1 and 3 working |
+| Paying for two systems with no end date | Each stage has a target month; owners review the ServiceTitan bill against progress every month |
+| Drift between the systems | One owner per field, `externalData` stamps, nightly reconciliation with alerts |
+| Double posting to QuickBooks | Only the system that created an invoice posts it |
+| Commission bugs | Pure, tested engine; shadow-run 2–4 weeks; attorney/CPA review |
+| Bouncie terms forbid commercial use | Written OK first; Teltonika + Traccar is the runner-up |
+| iPad web-app limits | Text-to-pay and Payment Element now; optional smart reader; App Store wrapper with a Bluetooth reader in phase 2 |
+| One-person bus factor | Everything in git, docs in `docs/`, Compose files, runbooks for deploy and restore |
 
-## Phase 2 (after ServiceTitan is gone)
+## Phase 2 (after ServiceTitan is off)
 
-AI phone receptionist for after-hours and overflow, online booking on the website, Capacitor App Store wrapper (Tap to Pay, background GPS), truck GPS tracker integration, marketing campaigns (tune-ups, renewals, reviews), job-value predictions and pricebook suggestions.
+- AI phone receptionist for after-hours and overflow calls.
+- Online booking on the website.
+- Capacitor App Store wrapper for:
+  - a $59 Stripe Reader M2 per truck over Bluetooth (chip and tap, and offline card collection)
+  - GPS that keeps working with the screen locked
+- Marketing campaigns (tune-ups, renewals, reviews).
+- Job-value predictions and pricebook suggestions.
+
+Tap to Pay is not on this list. Apple supports it only on iPhone, not iPad. A tech's own iPhone could do it later through a separate iPhone app, but that is optional.

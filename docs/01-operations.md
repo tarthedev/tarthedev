@@ -2,9 +2,11 @@
 
 Requirements in plain English, grouped by who uses them. Settings marked *(setting)* are starting values the owners can change.
 
+This page describes the finished system. While both systems run side by side, parts of it still happen in ServiceTitan; [06-servicetitan-migration.md](06-servicetitan-migration.md) says which system owns what in each stage.
+
 ## 1. Phones (CSRs and dispatchers)
 
-- Calls ring in the browser through Twilio. Existing numbers are **ported from ServiceTitan Phones Pro** (start the port in month 3).
+- Calls ring in the browser through Twilio. Existing numbers are **ported from ServiceTitan Phones Pro in stage 4**, the last stage. Until then CSRs answer on Phones Pro and open the caller's file in the new system with a quick search (phone number lookup).
 - **Screen pop:** caller ID opens the customer's file: name, service address(es), member status and renewal date, equipment with install year and age, last visit, open balance, notes.
 - **Replacement flag** when any system at the location is older than 15 years *(setting)*.
 - Calls are recorded. North Carolina is a one-party-consent state (N.C. Gen. Stat. § 15A-287), but the greeting still says calls may be recorded. Recordings are deleted after a retention period *(setting)*.
@@ -32,7 +34,7 @@ Commercial bookings add: which of the customer's locations, and the customer's P
 - Moving a customer who was already told a time needs the dispatcher's one-tap OK.
 - If the AI is unsure (low confidence), the job stays in Waiting and the dispatcher is pinged.
 - Alerts: tech running late (send customer a new ETA after one-tap OK), job over its estimated time, emergency booked (AI proposes who to pull), tech idle.
-- Tech location comes from the iPad while the app is open (web apps can't track with the screen locked). If the trucks have GPS trackers, we use those instead (see open questions).
+- Truck locations come from **GPS trackers in every truck** (owner decision; Bouncie, or Teltonika + Traccar as the runner-up, see [03-tech-stack.md](03-tech-stack.md#truck-gps-trackers)). They also drive arrival detection and customer ETAs. The iPad's own location is a fallback while the app is open (web apps can't track with the screen locked).
 
 ### How the AI picks a tech
 
@@ -53,7 +55,9 @@ The owners see a weekly report of high-value calls per tech, because pay depends
 
 ## 4. Tech iPad app
 
-Installed from Safari with **Add to Home Screen** (full screen, own icon).
+Runs on the techs' **iPad (A16) Wi-Fi + Cellular**, installed from Safari with **Add to Home Screen** (full screen, own icon). Signatures by finger or Apple Pencil (USB-C).
+
+In stage 1 the scoreboard is the only screen techs use (they still work jobs in the ServiceTitan app). The rest of this section arrives with stage 3.
 
 - **Scoreboard** first: this week's gross profit, level and rate, distance to the next level, commission so far, bonuses, jobs waiting on customer payment. Tap any number to see the jobs behind it.
 - **Day view:** today's jobs in order with address, window, job type, notes and member status.
@@ -80,12 +84,15 @@ Installed from Safari with **Add to Home Screen** (full screen, own icon).
 | Method | Best for | Fee to us |
 |---|---|---|
 | Text-to-pay link (Stripe) | Most home visits | 2.9% + 30¢ |
-| Card typed on iPad (Stripe Payment Element) | Customer hands over a card | Up to 3.4% + 30¢ |
+| Card typed on iPad (Stripe Payment Element) | Customer hands over a card | 2.9% + 30¢ expected (Stripe's 3.4% + 30¢ manual-entry rate applies to cards keyed in its Dashboard; confirm with Stripe) |
+| Optional: Stripe smart reader (S700, $299, no monthly fee) driven by our server, on the iPad's Personal Hotspot | Customers who want to tap or insert a card | 2.7% + 5¢ |
 | ACH bank payment (Stripe) | Commercial, big tickets | 0.8%, max $5 |
 | GreenSky financing | Systems and big repairs | Dealer fee (varies by plan) |
 | Check or cash | Anyone who prefers it | None |
 
 - Card fees and dealer fees are job costs, so they reduce gross profit.
+- Never key cards into the Stripe Dashboard app (3.4% + 30¢, and it would give techs access to payouts).
+- Tap to Pay is not possible on any iPad. Card-present options are the optional smart reader now, or a $59 Bluetooth reader once the App Store wrapper exists (phase 2).
 - Sales tax is calculated per item and pushed to QuickBooks. We copy ServiceTitan's current tax setup (see open questions).
 - Reminders for unpaid invoices at 3, 7 and 14 days *(setting)*.
 - **Customer portal** (one-time link by text or email, no password): invoices, payments, membership, equipment, upcoming visits.

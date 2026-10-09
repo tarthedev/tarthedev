@@ -8,7 +8,8 @@ Plain-English summary of what we are building, for whom, and why. Every other fi
 - Work types, **all on day one**: residential HVAC service and replacement, residential plumbing, commercial HVAC and refrigeration, new construction.
 - 6–15 field staff. Service techs are paid **hourly today** (about $18–$24/hr) with no commission yet.
 - Average service/repair ticket: **$700–$1,000**.
-- Runs on **ServiceTitan** today, including ServiceTitan Payments and Phones Pro. The contract renews **within 6 months**, which is our deadline.
+- Runs on **ServiceTitan** today, including ServiceTitan Payments and Phones Pro. **No hard cutover date:** both systems run side by side and work moves over in stages (owner decision).
+- Techs carry **iPad (A16) Wi-Fi + Cellular** tablets: built-in GPS, Home Screen web push, current iPadOS.
 - Books: **QuickBooks Online** and **QuickBooks Online Payroll**, weekly payroll.
 - Pricing: flat-rate pricebook in ServiceTitan (we import it).
 - Memberships: one yearly plan, about $150–$250, two tune-ups.
@@ -22,7 +23,7 @@ Our own ServiceTitan-style system, built around **gross profit**:
 1. Maximize profit per job, with special focus on UV lights, air quality and other add-ons.
 2. Pay techs a share of the gross profit they produce, on a ladder that rewards hitting weekly goals, plus spiffs and combo bonuses.
 3. Make the pay plan simple enough to explain to a five-year-old, and show it live on the tech's iPad.
-4. Get off ServiceTitan before the renewal date.
+4. Move off ServiceTitan in stages, running both side by side, without disrupting daily work.
 
 ## The eleven parts
 
@@ -40,7 +41,9 @@ Our own ServiceTitan-style system, built around **gross profit**:
 | Customer experience | "On my way" text with tech photo and live ETA, review requests, customer portal | Customer texts, portal |
 | Reports and QuickBooks | Job, tech and department gross profit; P&L; QuickBooks sync | Reporting, accounting sync |
 
-Deliberately **after launch** (phase 2): AI phone receptionist, online booking on the website, Tap to Pay on iPad (needs an App Store wrapper), truck GPS tracker integration, marketing campaigns, pricing insights.
+Also in the first release: **GPS trackers in every truck** (Bouncie, or Teltonika + Traccar as the runner-up) feeding the dispatch map and customer ETAs.
+
+Deliberately **after ServiceTitan is off** (phase 2): AI phone receptionist, online booking on the website, an App Store wrapper that adds a Bluetooth card reader (Stripe M2) and locked-screen GPS, marketing campaigns, pricing insights. Tap to Pay is not possible on any iPad (Apple supports it on iPhone only).
 
 ## One job, start to finish
 
@@ -70,18 +73,21 @@ Techs keep their hourly pay. On top, they earn a percentage of the **gross profi
 
 ## Running cost
 
-About **$270–$440 a month** for hosting, phones and texting, email, maps, AI and the calendar license, against a $200–$600 budget. Card fees and GreenSky dealer fees are extra (paid today too). Breakdown in [03-tech-stack.md](03-tech-stack.md).
+About **$280–$565 a month** once everything is live: hosting, phones and texting, email, maps, AI, the calendar license and truck GPS trackers, against a $200–$600 budget. Card fees and GreenSky dealer fees are extra (paid today too). While both systems run, the ServiceTitan subscription continues on top. Breakdown in [03-tech-stack.md](03-tech-stack.md).
 
 ## Timeline
 
-Six months, one builder using Claude Code. Month by month in [04-build-plan.md](04-build-plan.md):
+No hard deadline. ServiceTitan keeps running while work moves over in stages ([06-servicetitan-migration.md](06-servicetitan-migration.md), [04-build-plan.md](04-build-plan.md)):
 
-1. Foundation and data
-2. Schedule and field
-3. Sell and get paid
-4. Profit and pay
-5. Phones, AI, pilot
-6. Cutover
+| Stage | Target | What moves |
+|---|---|---|
+| 0. Ask and connect | Weeks 1–3 | Confirm ServiceTitan API access (package and written permission) or pick the report-export fallback |
+| 1. Mirror, reports and pay | About month 3 | Reports, the Profit Ladder and scoreboards run on ServiceTitan data; techs keep the ServiceTitan app |
+| 2. Booking and dispatch | About month 6 | Booking, dispatch board, AI auto-assign, truck GPS; jobs are written back to ServiceTitan |
+| 3. Field, invoices, payments | Pilot crew from about month 8 | One business unit at a time switches fully to our iPad app, Stripe and memberships |
+| 4. Phones and switch-off | When the last unit has moved | Twilio phones; ServiceTitan read-only, then off |
+
+The pay plan doesn't wait for the rest: it can go live in stage 1, on ServiceTitan's data.
 
 ## Files in this folder
 
@@ -92,5 +98,5 @@ Six months, one builder using Claude Code. Month by month in [04-build-plan.md](
 | [03-tech-stack.md](03-tech-stack.md) | Technology choices, architecture, integrations, iPad limits, costs |
 | [04-build-plan.md](04-build-plan.md) | Month-by-month tasks, exit tests, outside paperwork, risks |
 | [05-data-model.md](05-data-model.md) | Tables and key fields |
-| [06-servicetitan-migration.md](06-servicetitan-migration.md) | Getting the data out of ServiceTitan |
+| [06-servicetitan-migration.md](06-servicetitan-migration.md) | Running side by side with ServiceTitan: stages, sync, permission, fallback |
 | [07-open-questions.md](07-open-questions.md) | Questions still to answer before or during the build |
