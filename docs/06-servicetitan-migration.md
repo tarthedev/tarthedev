@@ -39,7 +39,7 @@ Import rules:
 - **Prove it.** After each import, an import report shows counts and dollar totals per business unit and year next to the totals from ServiceTitan's own summary reports. Differences are explained or fixed.
 - **Read-only.** ServiceTitan data is never written back. ServiceTitan only receives what people type into it.
 
-Which exact report names and columns DWRG's ServiceTitan offers gets confirmed in month 1. We export one of each, and the importer is built to match.
+**Demo data first (owner decision):** development and testing use realistic demo data and demo CSV files shaped like ServiceTitan reports. The column mappings are config, and they're matched to DWRG's real exports (one of each report) before the pilot.
 
 ## Stages
 

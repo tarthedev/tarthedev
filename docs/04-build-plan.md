@@ -26,7 +26,7 @@ If a month runs long, the next month moves; quality on what's built isn't cut.
 
 | When | What | Why |
 |---|---|---|
-| Month 1 | Export one of each ServiceTitan report we need (customers, locations, equipment, memberships, pricebook, invoices with items and costs, payments, timesheets, technicians) | The importer is built to match the real files |
+| Before the pilot | Export one of each ServiceTitan report we need (customers, locations, equipment, memberships, pricebook, invoices with items and costs, payments, timesheets, technicians) | The importer's column mappings are finalized against the real files; until then everything is built and tested on demo data (owner decision) |
 | Month 2 | Twilio account and A2P 10DLC texting registration | Arrival and reminder texts need it before the pilot |
 | Month 3 | FullCalendar Premium license | Dispatch board |
 | Month 4 | Stripe account application | Payments for the pilot |
@@ -43,14 +43,15 @@ The commission plan's legal review is handled by the owners' CPA.
 - DigitalOcean droplet, managed Postgres, Spaces, Caddy, staging and production stacks, Sentry, uptime checks, backups.
 - Better Auth with roles: owner, manager, dispatcher/CSR, tech, installer.
 - Core tables: customers, locations, contacts, equipment, memberships, pricebook, business units, settings, audit log.
-- `tools/st-import` + the office **Import** page: upload, detect, preview, import (idempotent on ServiceTitan IDs), keep the raw file, and show an import report with totals.
+- **Demo data** (owner decision: no real data yet): a deterministic generator for realistic, made-up customers, locations, equipment, memberships, pricebook, technicians, jobs, invoices, payments and timesheets, plus demo CSV files shaped like ServiceTitan reports.
+- `tools/st-import` + the office **Import** page: upload, detect, preview, import (idempotent on ServiceTitan IDs), keep the raw file, and show an import report with totals. Column mappings live in config so they can be matched to the real exports before the pilot.
 - `packages/core` commission engine per [02-commission-plan.md](02-commission-plan.md), with every worked example as a test.
 
-**Exit test:** a full import matches ServiceTitan's summary totals per business unit and year; all commission tests pass.
+**Exit test:** a full import of the demo exports matches their summary totals per business unit and year; all commission tests pass. (The same test runs again on real exports before the pilot.)
 
 ## Month 2: History, reports, and the pay engine (practice only)
 
-- Import job, invoice, payment and timesheet history.
+- Import job, invoice, payment and timesheet history (demo data until real exports arrive).
 - Reports: job, tech and department gross profit; P&L with QuickBooks overhead (read-only QuickBooks connection).
 - Replay 12 months of history through the commission engine; owners set the final ladder steps.
 - Pay sheets, the weekly payroll sheet with overtime true-up, and the tech scoreboard, built and tested on imported history. Nothing is paid from them yet: the pay plan starts after the switch.

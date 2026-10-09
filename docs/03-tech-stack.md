@@ -117,7 +117,7 @@ The techs' devices are **iPad (A16) Wi-Fi + Cellular**: built-in GPS/GNSS (Wi-Fi
 
 ## Truck GPS
 
-**Recommended, because the owner asked for the easiest option** (confirm). No trackers to buy: the techs' iPads (A16 Wi-Fi + Cellular, built-in GPS) report location while our app is on screen. Each truck gets a dash or vent mount out of direct sun and a USB-C car charger (20W or more).
+**Owner decision: iPad GPS for now** (the easiest option). No trackers to buy: the techs' iPads (A16 Wi-Fi + Cellular, built-in GPS) report location while our app is on screen. Each truck gets a dash or vent mount out of direct sun and a USB-C car charger (20W or more).
 
 How it works:
 
