@@ -2,11 +2,11 @@
 
 Requirements in plain English, grouped by who uses them. Settings marked *(setting)* are starting values the owners can change.
 
-This page describes the finished system. While both systems run side by side, parts of it still happen in ServiceTitan; [06-servicetitan-migration.md](06-servicetitan-migration.md) says which system owns what in each stage.
+This page describes the finished system. Until the switch, ServiceTitan still runs everything except the pilot crew's work; see [06-servicetitan-migration.md](06-servicetitan-migration.md).
 
 ## 1. Phones (CSRs and dispatchers)
 
-- Calls ring in the browser through Twilio. Existing numbers are **ported from ServiceTitan Phones Pro in stage 4**, the last stage. Until then CSRs answer on Phones Pro and open the caller's file in the new system with a quick search (phone number lookup).
+- Calls ring in the browser through Twilio. Existing numbers are **ported from ServiceTitan Phones Pro at the switch**. Until then CSRs answer on Phones Pro and open the caller's file in the new system with a quick search (phone number lookup).
 - **Screen pop:** caller ID opens the customer's file: name, service address(es), member status and renewal date, equipment with install year and age, last visit, open balance, notes.
 - **Replacement flag** when any system at the location is older than 15 years *(setting)*.
 - Calls are recorded. North Carolina is a one-party-consent state (N.C. Gen. Stat. § 15A-287), but the greeting still says calls may be recorded. Recordings are deleted after a retention period *(setting)*.
@@ -57,7 +57,7 @@ The owners see a weekly report of high-value calls per tech, because pay depends
 
 Runs on the techs' **iPad (A16) Wi-Fi + Cellular**, installed from Safari with **Add to Home Screen** (full screen, own icon). Signatures by finger or Apple Pencil (USB-C).
 
-In stage 1 the scoreboard is the only screen techs use (they still work jobs in the ServiceTitan app). The rest of this section arrives with stage 3.
+If the Profit Ladder starts early, the scoreboard is the only screen most techs use before the switch (they still work jobs in the ServiceTitan app). The pilot crew uses everything in this section from the pilot onward.
 
 - **Scoreboard** first: this week's gross profit, level and rate, distance to the next level, commission so far, bonuses, jobs waiting on customer payment. Tap any number to see the jobs behind it.
 - **Day view:** today's jobs in order with address, window, job type, notes and member status.

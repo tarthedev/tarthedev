@@ -8,7 +8,7 @@ Plain-English summary of what we are building, for whom, and why. Every other fi
 - Work types, **all on day one**: residential HVAC service and replacement, residential plumbing, commercial HVAC and refrigeration, new construction.
 - 6–15 field staff. Service techs are paid **hourly today** (about $18–$24/hr) with no commission yet.
 - Average service/repair ticket: **$700–$1,000**.
-- Runs on **ServiceTitan** today, including ServiceTitan Payments and Phones Pro. **No hard cutover date:** both systems run side by side and work moves over in stages (owner decision).
+- Runs on **ServiceTitan** today, including ServiceTitan Payments and Phones Pro. **No hard cutover date and no ServiceTitan API** (owner decisions): ServiceTitan keeps running while we build, its data comes over through report exports, a pilot crew proves the new system, then everyone switches.
 - Techs carry **iPad (A16) Wi-Fi + Cellular** tablets: built-in GPS, Home Screen web push, current iPadOS.
 - Books: **QuickBooks Online** and **QuickBooks Online Payroll**, weekly payroll.
 - Pricing: flat-rate pricebook in ServiceTitan (we import it).
@@ -23,7 +23,7 @@ Our own ServiceTitan-style system, built around **gross profit**:
 1. Maximize profit per job, with special focus on UV lights, air quality and other add-ons.
 2. Pay techs a share of the gross profit they produce, on a ladder that rewards hitting weekly goals, plus spiffs and combo bonuses.
 3. Make the pay plan simple enough to explain to a five-year-old, and show it live on the tech's iPad.
-4. Move off ServiceTitan in stages, running both side by side, without disrupting daily work.
+4. Prove the new system with a pilot crew while ServiceTitan keeps running, then switch everyone without disrupting daily work.
 
 ## The eleven parts
 
@@ -43,7 +43,7 @@ Our own ServiceTitan-style system, built around **gross profit**:
 
 Also in the first release: **GPS trackers in every truck** (Bouncie, or Teltonika + Traccar as the runner-up) feeding the dispatch map and customer ETAs.
 
-Deliberately **after ServiceTitan is off** (phase 2): AI phone receptionist, online booking on the website, an App Store wrapper that adds a Bluetooth card reader (Stripe M2) and locked-screen GPS, marketing campaigns, pricing insights. Tap to Pay is not possible on any iPad (Apple supports it on iPhone only).
+Deliberately **after the switch** (phase 2): AI phone receptionist, online booking on the website, an App Store wrapper that adds a Bluetooth card reader (Stripe M2) and locked-screen GPS, marketing campaigns, pricing insights. Tap to Pay is not possible on any iPad (Apple supports it on iPhone only).
 
 ## One job, start to finish
 
@@ -73,21 +73,18 @@ Techs keep their hourly pay. On top, they earn a percentage of the **gross profi
 
 ## Running cost
 
-About **$280–$565 a month** once everything is live: hosting, phones and texting, email, maps, AI, the calendar license and truck GPS trackers, against a $200–$600 budget. Card fees and GreenSky dealer fees are extra (paid today too). While both systems run, the ServiceTitan subscription continues on top. Breakdown in [03-tech-stack.md](03-tech-stack.md).
+About **$280–$565 a month** once everything is live: hosting, phones and texting, email, maps, AI, the calendar license and truck GPS trackers, against a $200–$600 budget. Card fees and GreenSky dealer fees are extra (paid today too). Until the switch, the ServiceTitan subscription continues on top. Breakdown in [03-tech-stack.md](03-tech-stack.md).
 
 ## Timeline
 
-No hard deadline. ServiceTitan keeps running while work moves over in stages ([06-servicetitan-migration.md](06-servicetitan-migration.md), [04-build-plan.md](04-build-plan.md)):
+No hard deadline. ServiceTitan keeps running the business while we build, then a pilot crew proves the new system, then everyone switches ([06-servicetitan-migration.md](06-servicetitan-migration.md), [04-build-plan.md](04-build-plan.md)):
 
-| Stage | Target | What moves |
+| Stage | Target | What happens |
 |---|---|---|
-| 0. Ask and connect | Weeks 1–3 | Confirm ServiceTitan API access (package and written permission) or pick the report-export fallback |
-| 1. Mirror, reports and pay | About month 3 | Reports, the Profit Ladder and scoreboards run on ServiceTitan data; techs keep the ServiceTitan app |
-| 2. Booking and dispatch | About month 6 | Booking, dispatch board, AI auto-assign, truck GPS; jobs are written back to ServiceTitan |
-| 3. Field, invoices, payments | Pilot crew from about month 8 | One business unit at a time switches fully to our iPad app, Stripe and memberships |
-| 4. Phones and switch-off | When the last unit has moved | Twilio phones; ServiceTitan read-only, then off |
-
-The pay plan doesn't wait for the rest: it can go live in stage 1, on ServiceTitan's data.
+| 1. Build and load | Months 1–5 | ServiceTitan data imported from report exports; every feature built and tested with real data in a training copy |
+| (Optional) Early Profit Ladder | From about month 2–3 | Pay plan and scoreboards for everyone, from weekly ServiceTitan report uploads (recommended) |
+| 2. Pilot crew | About month 6 | One crew (2 techs + 1 CSR) runs all its work in the new system; everyone else stays on ServiceTitan |
+| 3. Switch | When the pilot passes | Everyone moves, phones are ported, ServiceTitan goes read-only |
 
 ## Files in this folder
 
@@ -98,5 +95,5 @@ The pay plan doesn't wait for the rest: it can go live in stage 1, on ServiceTit
 | [03-tech-stack.md](03-tech-stack.md) | Technology choices, architecture, integrations, iPad limits, costs |
 | [04-build-plan.md](04-build-plan.md) | Month-by-month tasks, exit tests, outside paperwork, risks |
 | [05-data-model.md](05-data-model.md) | Tables and key fields |
-| [06-servicetitan-migration.md](06-servicetitan-migration.md) | Running side by side with ServiceTitan: stages, sync, permission, fallback |
+| [06-servicetitan-migration.md](06-servicetitan-migration.md) | Running side by side with ServiceTitan: report-export imports, pilot crew, the switch |
 | [07-open-questions.md](07-open-questions.md) | Questions still to answer before or during the build |

@@ -2,7 +2,7 @@
 
 A ServiceTitan-style field-service system for **DWRG Heating & Cooling** (Elizabeth City, NC), built around gross profit: phones, booking, AI-assisted dispatch, a Safari home-screen iPad app for techs, Good/Better/Best sales, invoicing and payments, memberships, inventory, a gross-profit commission plan with a live tech scoreboard, reports, and QuickBooks Online sync.
 
-**Status:** planning. Nothing is built yet. The build starts October 2026. ServiceTitan keeps running alongside the new system while work moves over in stages; there is no hard cutover date.
+**Status:** planning. Nothing is built yet. The build starts October 2026. ServiceTitan keeps running while we build; a pilot crew proves the new system, then everyone switches. There is no hard cutover date and no ServiceTitan API (data comes over through report exports).
 
 ## The plan
 
@@ -14,7 +14,7 @@ A ServiceTitan-style field-service system for **DWRG Heating & Cooling** (Elizab
 | [docs/03-tech-stack.md](docs/03-tech-stack.md) | Stack, architecture, AI dispatch, iPad limits, security, running costs |
 | [docs/04-build-plan.md](docs/04-build-plan.md) | Stage-by-stage scope, exit tests, outside paperwork, risks, cut list |
 | [docs/05-data-model.md](docs/05-data-model.md) | Tables and conventions |
-| [docs/06-servicetitan-migration.md](docs/06-servicetitan-migration.md) | Running side by side with ServiceTitan: stages, sync, permission, fallback |
+| [docs/06-servicetitan-migration.md](docs/06-servicetitan-migration.md) | Running side by side with ServiceTitan: report-export imports, pilot crew, the switch |
 | [docs/07-open-questions.md](docs/07-open-questions.md) | What we still need to decide |
 
 ## Presentations

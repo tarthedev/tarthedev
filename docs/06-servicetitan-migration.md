@@ -1,141 +1,99 @@
-# Running Side by Side with ServiceTitan
+# Running Side by Side with ServiceTitan: Prove It, Then Switch
 
-**Owner decision (October 2026):** the ServiceTitan renewal date is not a deadline. Both systems run side by side, and work moves to the new system **in stages**, so day-to-day operations are never disrupted. ServiceTitan is turned off only when nothing is left in it.
+**Owner decisions (October 2026):**
 
-Research behind this page was done October 2026 against ServiceTitan's public developer docs and API terms. Re-check anything marked *verify* once we are logged in to the developer portal.
+- The ServiceTitan renewal date is not a deadline.
+- **No ServiceTitan API.** Data comes over through ServiceTitan's own report exports. That avoids the API package requirement (The Works or Enterprise Plus) and the API terms that restrict migration apps.
+- Running side by side is only about **proving the new system works** before everyone moves. ServiceTitan keeps running the business until then.
 
-## Stage 0: Ask and connect (weeks 1–3, before building anything)
+## The idea in one paragraph
 
-These can block the whole approach, so they come first.
+ServiceTitan keeps doing everything while we build. We load ServiceTitan's data into the new system from report exports and refresh it regularly. When the new system is ready, one **pilot crew** runs all of its work in it, end to end, while everyone else stays on ServiceTitan. When the pilot has proven itself, everyone switches, the phones move, and ServiceTitan goes read-only until the contract ends.
 
-1. **Confirm the package.** ServiceTitan's help center says customer-built API apps need **The Works** or **Enterprise Plus**. If DWRG is on a lower package, get the upgrade price in writing. Third parties put The Works around $400–$500 per tech per month (unofficial), which could cost far more than our whole running budget. If the upgrade isn't worth it, use the **report-export fallback** below.
-2. **Get written permission.** Read literally, ServiceTitan's API Terms (updated 2026-04-15) and customer Terms of Use restrict several things this plan does. The restrictions cover:
-   - apps whose purpose is moving customers off ServiceTitan (3.4(21))
-   - bulk extraction (3.4(27))
-   - "analysis of Content" (3.4(15))
-   - caching data for more than 24 hours (5.2)
-   - keeping data after disconnecting (5.4)
-   - building a "competitive product" (ToU 7(l))
-   - the related license and usage clauses: 3.2, 3.4(1), 3.4(26), 5.1, 5.3 and 8.2
+## Getting the data in: report exports
 
-   Email integrations@servicetitan.com and the account manager a short, honest description:
+ServiceTitan reports export to CSV or Excel. `tools/st-import` reads them through an **Import** page in the office app:
 
-   > "A customer-built, single-tenant app that mirrors our own data into our own internal system, writes bookings back during a gradual transition, and keeps our data."
+- Upload the file.
+- Pick the report type (or let it be detected from the columns).
+- Preview the rows.
+- Import.
 
-   Ask for written confirmation, and have a lawyer read those clauses. This page reports what the clauses say, not a legal conclusion.
-3. **Disclose AI use** when registering the app. The terms (3.4(37)) require disclosure for any app that relies on an AI system. Our AI dispatch does.
-4. **Register the app** in the developer portal under a DWRG employee's login, not a contractor's. Approval can take about 2 business days. Credentials: client ID and secret, app key, tenant ID.
-5. **Keep a backup channel no matter what:** monthly CSV report exports of customers, memberships, pricebook, invoices and payments, so DWRG never depends on API goodwill.
+| Export | Used for | How often |
+|---|---|---|
+| Customers and locations (with contacts) | Customer files, screen lookups, history | Full at the start, then weekly until the switch |
+| Installed equipment | Equipment ages, replacement flags | Full at the start, then weekly |
+| Memberships (with start/end, visits remaining) | Member status and pricing | Full at the start, then weekly |
+| Pricebook (services, materials, equipment, prices, member prices, costs) | Our pricebook | Full at the start; again before the pilot and the switch |
+| Technicians and business units | Users, skills, departments | Once, then when staff change |
+| Jobs and invoices with line items (and costs), payments | History, reports, replaying the pay plan | Full history at the start (as many years as the reports allow); weekly if the Profit Ladder starts early |
+| Timesheets / job time | Labor in gross profit | Weekly if the Profit Ladder starts early |
+| Open invoices and balances | Collections after the switch | At the switch |
+| Future appointments | Jobs already booked past the switch date | At the switch |
 
-## How the sync works (when the API is allowed)
+Import rules:
 
-- **Webhooks:** not practical today (beta, account-gated). We **poll** ServiceTitan's `/export` feeds. They use continuation tokens, return active, inactive and deleted rows, and run about 15 minutes behind unless `includeRecentChanges=true`.
-- **Rate limit:** 600 calls per 10 seconds per app per tenant. Our plan uses about 400 calls an hour. The first backfill is throttled too, so we stay well within the bulk-extraction clause.
-- **Polling schedule:**
-  - Every 5 minutes: jobs, appointments, appointment assignments, job history, invoices, invoice items, payments, estimates, customers, locations, contacts, memberships, membership status changes, recurring-service events, job splits, timesheets, payroll adjustments, purchase orders and receipts, calls, bookings, leads.
-  - Hourly: pricebook, technicians, employees, business units, tag types, membership and recurring-service types, installed equipment.
-  - Nightly (full pull or `modifiedOnOrAfter`): job types, campaigns, zones, arrival windows, shifts, payment types, tax zones.
-  - Weekly: re-pull customers, locations and contacts to catch merges, un-merges and deletes.
-  - Monthly: full re-baseline of every feed.
-- **Storage:**
-  - Each feed has a `st_sync_cursor` row (token, last run, last error).
-  - Raw JSON lands in `st_raw_*` tables keyed by ServiceTitan ID and `modifiedOn`.
-  - Mapping into our core tables is idempotent.
-  - Money in invoice items arrives as decimal strings and is parsed straight to integer cents (CLAUDE.md rule 1).
-- **Nightly reconciliation:** counts and dollar totals per business unit per day, compared with ServiceTitan's Reporting API. Any drift raises an alert.
-- **If the API is ever cut off,** the new system keeps working on its last mirrored copy.
+- **Idempotent.** Every row keeps its ServiceTitan ID (customer ID, location ID, job number, invoice number), so re-importing updates rows instead of duplicating them.
+- **Raw files kept.** Each upload is stored unchanged, with who uploaded it and when.
+- **Money parsed straight to integer cents** (CLAUDE.md rule 1).
+- **Prove it.** After each import, an import report shows counts and dollar totals per business unit and year next to the totals from ServiceTitan's own summary reports. Differences are explained or fixed.
+- **Read-only.** ServiceTitan data is never written back. ServiceTitan only receives what people type into it.
 
-## The stages
+Which exact report names and columns DWRG's ServiceTitan offers gets confirmed in month 1. We export one of each, and the importer is built to match.
 
-| Stage | New system owns | ServiceTitan owns | Sync |
+## Stages
+
+| Stage | Target | ServiceTitan does | New system does |
 |---|---|---|---|
-| **1. Mirror, reports and pay** | Reports, Profit Ladder commission, tech scoreboard, payroll sheet, office spiffs | Everything operational: booking, dispatch, field app, invoices, payments, memberships, pricebook, phones, QuickBooks posting | ServiceTitan → new only |
-| **2. Booking and dispatch** | New customers, locations and contacts; jobs; appointments; tech assignment, including AI auto-assign | Job execution (dispatched, working, done), timesheets, estimates, invoices, payments, memberships, pricebook, phones, QuickBooks posting | New → ServiceTitan writes within seconds. Execution data comes back every 1–2 minutes |
-| **3. Field, invoices and payments** | Everything for business units (or crews) that have moved | Everything for business units not yet moved | Mirror continues for the rest |
-| **4. Phones and switch-off** | Everything, including phones (Twilio) | Read-only until the contract ends | Final full export, then disconnect |
+| **1. Build and load** | Months 1–5 | Everything, as today | Imports, reports on imported history, and everything built and tested in a training copy with real customer data |
+| **(Optional) Early Profit Ladder** | From about month 2–3 | Everything operational | Pay plan, scoreboards and payroll sheet from weekly report uploads (see below) |
+| **2. Pilot crew** | About month 6 | Everything for all other techs | All work for one pilot crew (2 techs + 1 CSR), end to end |
+| **3. Switch** | When the pilot has proven itself (owner decision) | Read-only lookups until the contract ends | Everything |
 
-### Stage 1: Mirror, reports and pay (no risk to operations)
+### Optional: start the Profit Ladder early
 
-- Techs keep working in the ServiceTitan mobile app. Our scoreboard is a **second icon** on their iPads.
-- Gross profit inputs come from the mirror:
-  - invoice items (price, cost, total cost, sold hours)
-  - job splits
-  - timesheets (labor)
-  - estimates (sold by)
-  - purchase orders
-- Office spiffs come from the calls and bookings feeds.
-- **Set the ladder from real history:** replay the last 12 months of mirrored jobs through the engine. The owners review what the plan would have cost and where each tech lands, then set the final ladder steps before the plan is signed.
-- **Shadow-run 2–4 pay weeks:** the engine's numbers are checked against a hand calculation before anyone is paid from them.
-- If a ServiceTitan invoice changes after pay was calculated, the engine writes **correction lines**, never edits (CLAUDE.md rule 3).
-- This is how the **Profit Ladder can go live in about month 3**, long before the rest of the system is done.
+The commission engine is built first anyway, because it is pure code with tests. If the office uploads three ServiceTitan reports every Monday (invoices with line items and costs, payments, timesheets), the Profit Ladder can pay everyone months before the switch:
 
-### Stage 2: Booking and dispatch move over
+- The scoreboard on the techs' iPads updates when the reports are uploaded, not live. That means weekly, or daily if the office uploads daily.
+- Shadow-run 2–4 pay weeks against a hand calculation first.
+- Replay the last 12 months of history to set the final ladder steps.
 
-- CSRs book in the new system, and the AI assigns the tech. The new system writes back to ServiceTitan:
-  - customers and locations (`Customers_Create`, `Locations_Create`)
-  - jobs (`Jobs_Create`, with appointments, technician IDs, business unit, job type and campaign)
-  - schedule changes: reschedule, assign/unassign technicians, cancel, hold
-- Techs still run the job in the ServiceTitan mobile app. So ServiceTitan still produces the invoices, payments and timesheets and still posts to QuickBooks.
-- **Who wins a conflict:**
-  - Schedule fields: the new system wins.
-  - Status and money fields: ServiceTitan wins.
-  - Customer contact fields: last writer wins, with an alert on every conflict.
-  - Merges happen only in ServiceTitan (there is no merge API) and are copied across through `mergedToId`.
-  - Nobody edits the schedule in ServiceTitan. Restrict it with ServiceTitan user roles where possible (*verify*).
-- **No echo loops:** every record we write carries our ID in ServiceTitan's `externalData`. Inbound changes stamped as ours, with unchanged content, are ignored.
-- **Phones stay on Phones Pro during stage 2.** ServiceTitan can't create calls through the API, so moving phones early would break its call and campaign tracking. Set `campaignId` on every job we create. Evaluate the Marketing Ads attribution endpoints (*verify*).
-- **Truck GPS trackers** feed our board. ServiceTitan's board keeps using its own mobile-app GPS.
+This is **recommended**. The pay plan is the biggest profit lever in the whole plan, and it doesn't need the rest of the system.
 
-### Stage 3: Field, invoices and payments, one business unit at a time
+### Stage 2: the pilot crew
 
-This has to be a **hard switch** per business unit or crew. The API can't set appointment or tech statuses, and the public spec has no endpoint to create payments, so one job can't run half in each system.
+The pilot crew runs **everything** in the new system: the booking screen, the dispatch board, the iPad app, Good/Better/Best, invoices, Stripe payments, posting to QuickBooks, and their pay. Everyone else stays on ServiceTitan. A job lives in exactly one system; `system_of_record` says which system owns each crew.
 
-For each business unit:
+Rules while both run:
 
-1. Stop creating ServiceTitan jobs for that business unit.
-2. Its techs switch to our iPad app.
-3. From then on the new system owns that unit's jobs, estimates, invoices, Stripe payments and memberships, and posts its own invoices to QuickBooks.
-4. **Each invoice is posted to QuickBooks only by the system that created it,** matched to the existing QuickBooks customer, so nothing is ever double-posted.
-5. Memberships move when their payments move. ServiceTitan bills members with stored cards, so members re-enter a card through a Stripe link at renewal (*verify* whether stored cards can transfer).
-6. The pricebook moves to the new system when the first crew moves. Optionally push price changes back to ServiceTitan while other crews remain.
+- **Phones stay on Phones Pro.** CSRs book pilot-crew jobs in the new system and everyone else's in ServiceTitan. The caller's file opens in the new system by phone-number search.
+- **QuickBooks: each system posts only its own invoices.** ServiceTitan keeps posting its invoices. The new system posts only the pilot crew's, matched to the existing QuickBooks customer, with a review list for possible duplicates.
+- **New customers.** A customer first created for the pilot crew lives in the new system. If ServiceTitan also needs them later (booked to a non-pilot tech), the CSR adds them there too. This is the only double entry, and only for new customers.
+- **Memberships** stay billed and renewed in ServiceTitan until the switch. If a pilot tech does a member's tune-up, the office marks the visit used in ServiceTitan as well.
+- **Pricebook:** imported before the pilot. Price changes during the pilot are made in both systems; there should be few.
 
-Suggested order (owners decide):
+**The pilot proves out when:**
 
-1. One pilot crew
-2. Plumbing
-3. HVAC service
-4. HVAC replacement
-5. Commercial and refrigeration
-6. New construction
+- four consecutive weeks have clean bookings, jobs, invoices, payments and QuickBooks postings for the pilot crew
+- two payroll weeks are checked by hand against the engine
+- the crew and the CSR say it is at least as fast as ServiceTitan
 
-### Stage 4: Phones and switch-off
+### Stage 3: the switch
 
-- Port the phone numbers to Twilio (ports can take weeks, so start early in this stage).
-- Final full export. ServiceTitan stays read-only for lookups until the contract ends.
-- Keep the raw exports permanently, subject to the written permission in stage 0.
+All at once, or one business unit at a time if the owners prefer:
 
-## Fallback: report-export mode (if the API isn't available or allowed)
+1. Final import: customers, equipment, memberships, open invoices and balances, and future appointments, everything changed since the last import.
+2. Everyone moves to the new system. Port the phone numbers from Phones Pro to Twilio (start the port a few weeks ahead; ports can take weeks).
+3. Memberships move as they renew: members save a card through a Stripe link, because cards stored in ServiceTitan's payment system can't be exported.
+4. GreenSky merchant account moved off ServiceTitan's sponsorship (ask GreenSky a month ahead).
+5. ServiceTitan stays read-only for lookups until the contract ends. Keep a full set of final exports permanently.
 
-- The office downloads ServiceTitan report exports (customers, memberships, invoices with items, payments, technicians, timesheets) and drops them into an import page. Nightly or weekly; scheduled report emails, if available, *verify*.
-- **Stage 1 still works.** The scoreboard updates daily instead of live.
-- **Stage 2 is skipped,** because there are no write-backs.
-- **Stage 3 still works** one business unit at a time. Each business unit lives fully in one system, so nothing has to be written back.
+## Risks
 
-## Risks, most serious first
-
-1. **Contract terms.** ServiceTitan can suspend immediately or terminate on 30 days' notice. Mitigation: written permission, CSV backups, and a design that keeps working on the last mirrored data.
-2. **Cost of running both systems** with no end date. The full ServiceTitan subscription continues, possibly on a higher package to get API access.
-3. **Write gaps** (statuses, payments, merges) force a hard switch per business unit in stage 3.
-4. **Drift and double entry:** export lag, duplicate rows, merges and deletes, staff editing in the wrong system. Mitigation: ownership per field, `externalData` stamps, nightly reconciliation and alerts.
-5. **Double posting to QuickBooks** once both systems create invoices. Rule: only the system that created an invoice posts it.
-6. **Pay correctness** when ServiceTitan invoices are edited after pay has run. Mitigation: correction lines plus the worked-example tests.
-7. **Unannounced API changes.** Mitigation: contract tests against ServiceTitan's integration environment and tolerant parsing.
-
-## Still to verify after logging in to the developer portal
-
-- Private API list: payment creation and webhook events may exist there.
-- Export page sizes, token expiry and how deletes appear in each feed.
-- Whether API-created records carry an identifiable user.
-- Whether ServiceTitan roles can block schedule edits.
-- Whether stored member cards can move to Stripe.
-- How ServiceTitan's QuickBooks sync behaves when another system posts to the same QuickBooks company.
+| Risk | Plan |
+|---|---|
+| Exports missing a field we need (e.g., item costs, IDs) | Export one of each report in month 1, before building the importer; check for custom report options in ServiceTitan |
+| Import drift (new or changed records between imports) | Weekly re-imports keyed on ServiceTitan IDs; import report with totals; final import at the switch |
+| Double posting to QuickBooks | Each system posts only the invoices it created |
+| Pilot customers also booked in ServiceTitan | Only new customers need double entry; phone-number search finds existing ones |
+| Paying for two systems with no end date | The pilot has a clear pass/fail test; owners review progress monthly |

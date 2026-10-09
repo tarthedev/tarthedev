@@ -44,7 +44,6 @@ Built by one developer with Claude Code, hosted on a VPS, running cost $200–$6
 | Backblaze B2 (or similar) | Nightly off-site copy of database dumps and files | |
 | Sentry + an uptime checker | Errors and outage alerts | Free tiers |
 | GitHub Actions | Tests and deploys | |
-| ServiceTitan API (V2) | Stage 1–3 mirror (export feeds, polled) and stage 2 write-back of customers, jobs, appointments, assignments | Needs The Works or Enterprise Plus package and written permission; see [06-servicetitan-migration.md](06-servicetitan-migration.md) |
 | Truck GPS trackers: Bouncie (or Teltonika + self-hosted Traccar) | Live truck positions, trip start/end, job-site arrival geo-zones, ETAs | See [Truck GPS trackers](#truck-gps-trackers) |
 
 ## Architecture
@@ -63,11 +62,11 @@ Built by one developer with Claude Code, hosted on a VPS, running cost $200–$6
                          |
    Outbound API calls and inbound webhooks:
    Stripe · Twilio · QuickBooks · Google Maps · Claude API · Postmark · Bouncie
-   ServiceTitan API: export feeds polled every 5 min; stage 2 write-back queue
+   ServiceTitan: no API; report exports uploaded on the office Import page
 ```
 
 - **api** handles requests, auth, and pushes live updates over WebSockets.
-- **worker** runs everything slow or scheduled: the ServiceTitan mirror (polling, mapping, nightly reconciliation) and stage 2 write-back queue, texts and emails, QuickBooks sync, Stripe, Twilio and tracker webhook follow-ups, drive-time refresh, Sunday-night week lock, Monday payroll run, nightly restock lists.
+- **worker** runs everything slow or scheduled: ServiceTitan report imports and import reports, texts and emails, QuickBooks sync, Stripe, Twilio and tracker webhook follow-ups, drive-time refresh, Sunday-night week lock, Monday payroll run, nightly restock lists.
 - Postgres **LISTEN/NOTIFY** tells the api when the worker changed something.
 - **Staging** runs as a second Compose stack on the same droplet with its own database in the same managed cluster and its own subdomain.
 
@@ -80,7 +79,7 @@ apps/worker       pg-boss jobs
 packages/db       Drizzle schema + migrations
 packages/core     pricing, gross profit, commission, spiffs (pure functions)
 packages/shared   Zod schemas and types shared by app and server
-tools/st-import   ServiceTitan backfill, CSV fallback import, reconciliation scripts
+tools/st-import   ServiceTitan report-export parsers, import mapping, import reports
 docs/             this plan
 CLAUDE.md         house rules for Claude Code
 ```
@@ -131,7 +130,7 @@ Owner decision: new trackers in every truck. Two candidates; a two-week pilot of
 - Bouncie webhooks use a shared key (not a signature): check the header, and dedupe on device, transaction ID and timestamp in `webhook_events`. Geo-zones are per device, so arrival zones are per truck per job.
 - Teltonika: tune the Send Period (default 120 s) to about 10–15 s while moving; confirm AT&T LTE-M coverage and SIM attach around Elizabeth City before ordering.
 - Pilot exit test: webhook latency, gaps, and ETA accuracy against the iPad's own GPS; for Bouncie, written confirmation of commercial use.
-- During stages 1–2, ServiceTitan's board keeps using its own mobile-app GPS; trackers feed only our board.
+- Until the switch, ServiceTitan's board keeps using its own mobile-app GPS.
 
 ## Security
 
@@ -163,6 +162,6 @@ One-time: trackers ~$90–$100 per truck. Optional: a Stripe S700 smart reader a
 Not included:
 - Stripe fees: 2.9% + 30¢ for online and Payment Element cards (expected; 3.4% + 30¢ applies to cards keyed in Stripe's Dashboard or Terminal MOTO), 2.7% + 5¢ in person on a reader, ACH 0.8% capped at $5.
 - GreenSky dealer fees (commonly reported around 7%, varies by plan).
-- The ServiceTitan subscription, which continues while both systems run (possibly on a higher package for API access).
+- The ServiceTitan subscription, which continues until the switch.
 
 Card and dealer fees exist today and count as job costs.

@@ -74,17 +74,16 @@ PostgreSQL via Drizzle. Conventions:
 | `sync_map` | system (qbo, stripe, twilio, servicetitan), local_id, remote_id, last_synced_at |
 | `webhook_events` | provider, event_id (unique), received_at, processed_at — for exactly-once processing |
 
-## ServiceTitan sync (stages 1–3)
+## ServiceTitan imports (until the switch)
 
 | Table | Key fields |
 |---|---|
-| `st_sync_cursor` | feed, continue_from token, last_run_at, last_error, rows_seen |
-| `st_raw_<feed>` | st_id, modified_on, payload (jsonb), received_at — raw landing tables, never edited |
-| `st_writes` | local table/row, ServiceTitan endpoint, request hash, st_id returned, status, attempts — the stage 2 write-back queue |
-| `st_reconciliation` | day, business_unit, metric (count / dollars), ours, theirs, diff, alerted |
-| `system_of_record` | business_unit (or crew), owner (servicetitan / new), switched_at — which system owns a unit's jobs, invoices and payments in stage 3 |
+| `st_import_batches` | report_type, file storage_key, uploaded_by, uploaded_at, rows_read, rows_inserted, rows_updated, rows_rejected, status |
+| `st_import_rows` | batch_id, row_number, st_id, payload (jsonb), result (inserted / updated / unchanged / rejected), error — raw rows, never edited |
+| `st_import_totals` | batch_id, business_unit, year, metric (count / dollars), ours, servicetitan_summary, diff — the import report |
+| `system_of_record` | crew or business_unit, owner (servicetitan / new), switched_at — which system owns that crew's jobs, invoices and payments |
 
-Every core row created from ServiceTitan keeps `st_id`; every record we write to ServiceTitan carries our ID in its `externalData`.
+Every core row created from an import keeps `st_id` (ServiceTitan customer ID, location ID, job number, invoice number). Nothing is ever written back to ServiceTitan.
 
 ## Trucks and GPS
 

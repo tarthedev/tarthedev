@@ -2,9 +2,9 @@
 
 This is the source of truth for pay. The commission engine (`packages/core`) implements exactly this, and every worked example at the bottom is a test that must pass to the cent.
 
-All dollar amounts and percentages are **starting values** stored in settings with effective dates. Changing a setting never rewrites history. Before launch, the ladder steps are tuned by replaying 12 months of ServiceTitan jobs (see [06-servicetitan-migration.md](06-servicetitan-migration.md)).
+All dollar amounts and percentages are **starting values** stored in settings with effective dates. Changing a setting never rewrites history. Before launch, the ladder steps are tuned by replaying 12 months of ServiceTitan history imported from report exports (see [06-servicetitan-migration.md](06-servicetitan-migration.md)).
 
-> **Before launch:** an NC employment attorney or CPA reviews this plan, and every employee signs the written plan, including the callback deduction authorization. This document is a design spec, not legal advice.
+> **Before launch:** the owners' CPA reviews this plan (handled by the owners), and every employee signs the written plan, including the callback deduction authorization. This document is a design spec, not legal advice.
 
 ## 1. Who is on the plan
 
@@ -138,24 +138,25 @@ adjustment(W) = 0.5 × (commission + spiffs attributable to W) ÷ total hours wo
 - When lines attributable to an earlier week W are paid in a later run (late customer payment), the engine recomputes adjustment(W) and pays the difference as an "overtime true-up" line.
 - Confirm this method with the CPA before launch.
 
-## 9a. Stage 1: running the plan on ServiceTitan's data
+## 9a. Starting early on ServiceTitan's report exports (optional, recommended)
 
-The plan goes live in stage 1, while techs still work every job in ServiceTitan ([06-servicetitan-migration.md](06-servicetitan-migration.md)). The rules above don't change; only where the inputs come from does.
+The plan can pay everyone before the switch, while techs still work every job in ServiceTitan ([06-servicetitan-migration.md](06-servicetitan-migration.md)). The rules above don't change; only where the inputs come from does. There is no ServiceTitan API: the office uploads report exports.
 
-| Input | Source while ServiceTitan runs the jobs |
+| Input | Source before the switch |
 |---|---|
-| Sale, discounts, line items, item costs | Mirrored invoices and invoice items (price, cost, total cost) |
-| Parts from POs | Mirrored purchase orders and receipts |
-| Labor time | Mirrored ServiceTitan timesheets (job activities from Dispatched/Working to Done) |
-| Who gets credit | Mirrored job splits; estimates' sold-by technician for replacements |
-| Paid in full | Mirrored payments and invoice balance |
-| Callbacks | Marked in our app by a manager (linked to the original ServiceTitan job) |
-| Booking spiffs, booking rate | Mirrored bookings and calls (booked-by user, call outcome) |
+| Sale, discounts, line items, item costs | Invoices-with-line-items report (price, cost) |
+| Parts from POs | Purchase order report, if item costs on invoices don't already cover it |
+| Labor time | Timesheet report (job time from Dispatched/Working to Done) |
+| Who gets credit | Technician (and split) columns on the invoice/job report; sold-by technician for replacements |
+| Paid in full | Payments report and invoice balance |
+| Callbacks | Marked in our app by a manager (linked to the original ServiceTitan job number) |
+| Booking spiffs, booking rate | Bookings and calls reports, if they export with booked-by and call outcome; otherwise office spiffs start at the switch |
 | Reviews | Verified in our app |
 
-- **Shadow first:** run 2–4 pay weeks in shadow and compare with a hand calculation before paying from the engine.
-- If a ServiceTitan invoice or cost changes after its commission was paid, the engine adds a correction line on the next run (same rule as section 5).
-- Mirrored decimal money strings are parsed straight to integer cents.
+- **Cadence:** the office uploads the reports every Monday morning before the payroll run (daily uploads make the scoreboard fresher).
+- **Shadow first:** 2–4 pay weeks compared with a hand calculation before paying from the engine.
+- A ServiceTitan invoice or cost that changes after its commission was paid shows up in the next upload; the engine adds a correction line (same rule as section 5).
+- Decimal money strings are parsed straight to integer cents.
 
 ## 10. Worked examples (golden tests)
 
