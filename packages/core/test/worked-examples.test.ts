@@ -94,6 +94,7 @@ describe("Example 2: example week", () => {
         postedOn: "2026-03-05",
         verifiedAt: "2026-03-06T15:00:00Z",
         reviewSpiffsAlreadyOnJob: 0,
+        jobPaidInFull: true,
       }),
     );
     expect(invoiceA.totalCents).toBe(18_500);

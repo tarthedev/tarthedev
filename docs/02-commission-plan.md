@@ -4,7 +4,7 @@ This is the source of truth for pay. The commission engine (`packages/core`) imp
 
 All dollar amounts and percentages are **starting values** stored in settings with effective dates. Changing a setting never rewrites history. Before launch, the ladder steps are tuned by replaying 12 months of ServiceTitan history imported from report exports. The plan starts after the switch (section 9a).
 
-> **Open details:** a few rules here can be read two ways (combos sharing a membership, refund caps, review spiff timing, the callback window's end date, the cost-change threshold, negative rounding). They're listed as questions 16–22 in [07](07-open-questions.md#pay-plan-details-needed-before-the-pay-plan-rolls-out) with the reading the engine uses until the owners decide.
+> **Open details:** three rules here can still be read two ways (the cost-change threshold, rounding a negative half cent, and how deductions interact with the overtime adjustment). They're questions 16–18 in [07](07-open-questions.md#pay-plan-details-needed-before-the-pay-plan-rolls-out), with the reading the engine uses until the owners decide.
 >
 > **Before launch:** the owners' CPA reviews this plan (handled by the owners), and every employee signs the written plan, including the callback deduction authorization. This document is a design spec, not legal advice.
 
@@ -56,11 +56,11 @@ All dollar amounts and percentages are **starting values** stored in settings wi
 - Payable lines go on the **next weekly payroll run** after they become payable, at the **rate locked for the week the job was finished**.
 - Example: a commercial job finished in week 1 (tech was Gold) and paid on net-30 terms in week 6 pays at 12% in week 6's run.
 - If a job's costs change **after** its commission line was paid (late supplier bill, etc.) by more than $50 *(setting)*, the engine adds an adjustment line (positive or negative) on the next run. Smaller changes are ignored.
-- **Refunds and chargebacks** after commission was paid create a deduction line for the commission on the refunded amount.
+- **Refunds and chargebacks** after commission was paid create a deduction line for the commission on the refunded amount. A clawback only takes back commission: it is never more than the commission paid on that job (owner decision). Example 1 fully refunded deducts $62.00, not 10% of the $850 sale.
 
 ## 6. Callbacks (the 30-day "oops rule")
 
-- A **callback** is a job at the same location for the same problem within **30 days** of the original job's finish date. The dispatcher links it to the original job when booking.
+- A **callback** is a return visit to the same location for the same problem, booked within **30 days** after the original job was finished (day 30 counts). The dispatcher links it to the original job when booking. Only callbacks for something the tech did wrong cost the tech anything (owner decision).
 - A manager marks it **tech-caused** or **not tech-caused**, with a reason the tech can see. Examples of not tech-caused: a new part failed from the factory, the customer changed something, a different problem.
 - **Tech-caused:** a deduction line equal to the commission on the original job (or the original tech's share of it). If that commission wasn't paid yet, it is cancelled instead.
 - Spiffs on the original job stay, unless the item itself was refunded or removed.
@@ -87,11 +87,11 @@ Rules:
 
 - Item spiffs are set on pricebook items (any item can carry one), credited to the tech(s) on the invoice using the same split as GP.
 - **Membership spiff:** paid when the membership payment is collected. A membership refunded within 30 days creates a deduction line.
-- **Review spiff:** the review must be 5 stars on Google, mention the tech by name, and be posted within 30 days of the visit. The office verifies it in the app before it pays. One per job.
+- **Review spiff:** the review must be 5 stars on Google, mention the tech by name, and be posted within 30 days of the visit. The office verifies it in the app. One per job. It is paid like any other spiff: once the reviewed job's invoice is paid in full (owner decision).
 
 ### Combo bonuses
 
-Paid **in addition to** each item's own spiff, once per invoice per combo, when every item in the combo is on the **same invoice**:
+Paid **in addition to** each item's own spiff, once per invoice per combo, when every item in the combo is on the **same invoice**. One membership can complete both combos (owner decision): an invoice with a UV light, surge protector, leak shut-off valve, water filter and one membership pays both combo bonuses.
 
 | Combo | Items on one invoice | Combo bonus | Total bonuses |
 |---|---|---|---|

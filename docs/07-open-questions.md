@@ -33,13 +33,9 @@ Each question says why it matters. Answered questions are kept at the bottom wit
 
 Building the engine turned up places where [02](02-commission-plan.md) can be read two ways. The engine uses the reading in *italics* for now, and its tests pin that reading, so changing it is a small, tested change. The owners (and the CPA where noted) should confirm each before rollout.
 
-16. **Can one membership complete both combos?** An invoice with a UV light, surge protector, leak shut-off valve, water filter and one membership: does it pay both combo bonuses? *Currently yes: both pay ($150 in combo bonuses).*
-17. **Can a refund deduction be bigger than the commission paid on the job?** *Currently no: it is capped at the commission still standing on the job.* Example 1 fully refunded deducts $62, not $85.
-18. **Does the review spiff wait until the job's invoice is paid in full?** Other spiffs do; a review isn't on an invoice. *Currently it pays once the office verifies the review.*
-19. **The 30-day callback window ends on which date: when the callback is booked, or when it's run?** *Currently the booking date, and day 30 counts.*
-20. **The $50 cost-change threshold: per change, or the total change since the commission was settled?** *Currently the total, so several small late bills add up.*
-21. **Rounding a negative half cent: away from zero (−$6.18) or in the employee's favor (−$6.17)?** It only matters for deduction lines that land on exactly half a cent. *Currently away from zero.*
-22. **For the CPA, with the overtime method in section 9:** callback and refund deductions don't lower the commission counted in that week's overtime adjustment, but negative cost adjustments do. *That's the current behavior.*
+16. **The $50 cost-change threshold: per change, or the total change since the commission was settled?** *Currently the total, so several small late bills add up.*
+17. **Rounding a negative half cent: away from zero (−$6.18) or in the employee's favor (−$6.17)?** It only matters for deduction lines that land on exactly half a cent. *Currently away from zero.*
+18. **For the CPA, with the overtime method in section 9:** callback and refund deductions don't lower the commission counted in that week's overtime adjustment, but negative cost adjustments do. *That's the current behavior.*
 
 ## Answered
 
@@ -56,3 +52,7 @@ Building the engine turned up places where [02](02-commission-plan.md) can be re
 | Replacement-likely calls | Go to the strongest replacement closer who can make the window; fair share applies to other calls ([01](01-operations.md#how-the-ai-picks-a-tech)). |
 | Burdened labor cost | Wage × 1.30, a dated setting that can be overridden per worker ([02](02-commission-plan.md)). |
 | Membership plan | Keep as drafted: one yearly plan, about $150–$250, two tune-ups, member pricing. The exact price and discount come from the plan in ServiceTitan when it's imported. |
+| Combos sharing a membership | One membership can complete both combos; both bonuses pay ([02](02-commission-plan.md#combo-bonuses)). |
+| Refund and chargeback clawbacks | Only take back commission: never more than the commission paid on that job ([02](02-commission-plan.md#5-when-commission-is-paid)). |
+| Review spiff timing | Paid like any other spiff, once the reviewed job's invoice is paid in full ([02](02-commission-plan.md#7-tech-spiffs)). |
+| What counts as a callback | A return visit for something the tech did wrong, booked within 30 days after the original job (day 30 counts) ([02](02-commission-plan.md#6-callbacks-the-30-day-oops-rule)). |

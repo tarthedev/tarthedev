@@ -215,6 +215,7 @@ describe("reviewSpiff", () => {
     postedOn: "2026-04-01",
     verifiedAt: "2026-04-02T14:00:00Z",
     reviewSpiffsAlreadyOnJob: 0,
+    jobPaidInFull: true,
   };
 
   it("pays $20 for a verified 5-star Google review naming the tech within 30 days", () => {

@@ -214,6 +214,7 @@ describe("Review spiff: 5 stars on Google, names the tech, within 30 days, verif
     postedOn: "2026-10-08",
     verifiedAt: "2026-10-09T14:00:00Z",
     reviewSpiffsAlreadyOnJob: 0,
+    jobPaidInFull: true,
   };
 
   it("pays $20 when every condition holds", () => {
@@ -241,5 +242,12 @@ describe("Review spiff: 5 stars on Google, names the tech, within 30 days, verif
 
   it("Google is matched regardless of capitalization", () => {
     expect(reviewSpiff({ ...good, platform: "Google" }).eligible).toBe(true);
+  });
+
+  it("waits for the job's invoice to be paid in full, like any spiff (owner decision)", () => {
+    expect(reviewSpiff(good)).toMatchObject({ eligible: true, status: "payable" });
+    const unpaid = reviewSpiff({ ...good, jobPaidInFull: false });
+    expect(unpaid).toMatchObject({ eligible: true, amountCents: 2_000, status: "pending_payment" });
+    expect(unpaid.explanation).toContain("once the job's invoice is paid in full");
   });
 });

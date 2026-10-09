@@ -94,6 +94,7 @@ describe("Example 2: example week", () => {
         postedOn: "2026-10-07",
         verifiedAt: "2026-10-08T15:00:00Z",
         reviewSpiffsAlreadyOnJob: 0,
+        jobPaidInFull: true,
       });
     const reviews = ["J1", "J2", "J3"].map(review);
     const reviewCents = reviews.reduce((sum, r) => sum + (r.eligible ? r.amountCents : 0), 0);

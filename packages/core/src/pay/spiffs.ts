@@ -427,9 +427,15 @@ export type ReviewInput = {
   verifiedAt: string | null;
   /** Review spiffs already created for this job (one per job). */
   reviewSpiffsAlreadyOnJob: number;
+  /** Whether the reviewed job's invoices are paid in full. The spiff waits for it, like any spiff. */
+  jobPaidInFull: boolean;
 };
 
-/** Review spiff: 5 stars on Google, names the tech, within 30 days of the visit, verified, one per job. */
+/**
+ * Review spiff: 5 stars on Google, names the tech, within 30 days of the visit, verified, one per
+ * job. Like every other spiff it becomes payable when the job's invoice is paid in full (owner
+ * decision, docs/07 question 18).
+ */
 export function reviewSpiff(
   input: ReviewInput,
   rule: ReviewSpiffRule = DEFAULT_REVIEW_SPIFF_RULE,
@@ -469,8 +475,10 @@ export function reviewSpiff(
     ruleKind: "review",
     payLineKind: "spiff",
     amountCents: rule.amountCents,
-    status: "payable",
-    explanation: `Job ${input.jobId}: verified ${rule.minStars}-star review naming you, posted ${days} days after the visit = ${formatCents(rule.amountCents)}.`,
+    status: lineStatusFor(input.jobPaidInFull),
+    explanation:
+      `Job ${input.jobId}: verified ${rule.minStars}-star review naming you, posted ${days} days after the visit = ${formatCents(rule.amountCents)}` +
+      (input.jobPaidInFull ? "." : ", paid once the job's invoice is paid in full."),
   };
 }
 
