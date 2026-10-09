@@ -17,7 +17,8 @@ One builder with Claude Code, starting October 2026. **There is no hard cutover 
 | Month 2 | Twilio account and A2P 10DLC texting registration | Arrival and reminder texts need it before the pilot |
 | Month 3 | FullCalendar Premium license | Dispatch board |
 | Month 4 | Stripe account application | Payments for the pilot |
-| Month 5 | GPS setup for the pilot trucks (see [03-tech-stack.md](03-tech-stack.md#truck-gps)) | Map and ETAs for the pilot |
+| Month 1 | Test one iPad: location prompts across cold launches, wake lock, Low Power Mode, heat on the dash | Confirms iPad GPS is good enough before we build on it |
+| Month 5 | Dash mounts and USB-C car chargers for the pilot trucks | Map and ETAs for the pilot ([03-tech-stack.md](03-tech-stack.md#truck-gps)) |
 | A month before the switch | Ask GreenSky to move the merchant account off ServiceTitan's sponsorship | Financing must keep working |
 | A few weeks before the switch | Start porting phone numbers from Phones Pro to Twilio | Ports can take weeks |
 
@@ -66,7 +67,7 @@ The commission plan's legal review is handled by the owners' CPA.
 - Purchase orders and receiving; supplier bills to QuickBooks; truck stock and restock lists.
 - Commercial: PO-required customers, terms, statements, multi-site, progress billing, builder bids, aging.
 - Memberships: sell, renew, auto-renew, visit tracking. Customer portal. Review request texts.
-- GPS for the pilot trucks.
+- iPad GPS: *Start day* tap, wake lock, pings, paused beacons, stale detection, arrival radius, daily coverage report.
 - Training copy refreshed with the latest import; pilot crew and CSR practice in it.
 
 **Exit test:** the pilot crew completes a practice week in the training copy.
@@ -107,6 +108,7 @@ Because ServiceTitan keeps running the business, a slip costs ServiceTitan subsc
 | Commission bugs | Pure, tested engine; history replay; shadow-run; CPA sign-off |
 | Paying for two systems with no end date | Clear pilot pass test; owners review progress monthly |
 | iPad web-app limits | Text-to-pay and Payment Element now; optional smart reader; App Store wrapper with a Bluetooth reader in phase 2 |
+| iPad GPS gaps (screen locked, other apps, heat) | Paused and stale badges, daily coverage report; if the pilot's coverage is poor, add Spytec plug-in trackers or move the App Store wrapper up |
 | One-person bus factor | Everything in git, docs in `docs/`, Compose files, runbooks for deploy and restore |
 
 ## Phase 2 (after the switch)

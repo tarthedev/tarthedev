@@ -41,9 +41,9 @@ Our own ServiceTitan-style system, built around **gross profit**:
 | Customer experience | "On my way" text with tech photo and live ETA, review requests, customer portal | Customer texts, portal |
 | Reports and QuickBooks | Job, tech and department gross profit; P&L; QuickBooks sync | Reporting, accounting sync |
 
-Also in the first release: **GPS trackers in every truck** (Bouncie, or Teltonika + Traccar as the runner-up) feeding the dispatch map and customer ETAs.
+Also in the first release: **live tech locations from the iPads' built-in GPS** (mounted on the dash with our app open; nothing to buy) feeding the dispatch map and customer ETAs. Plug-in trackers are the fallback if the pilot shows gaps.
 
-Deliberately **after the switch** (phase 2): AI phone receptionist, online booking on the website, an App Store wrapper that adds a Bluetooth card reader (Stripe M2) and locked-screen GPS, marketing campaigns, pricing insights. Tap to Pay is not possible on any iPad (Apple supports it on iPhone only).
+Deliberately **after the switch** (phase 2): AI phone receptionist, online booking on the website, an App Store wrapper that adds a Bluetooth card reader (Stripe M2) and GPS that keeps working with the screen locked, marketing campaigns, pricing insights. Tap to Pay is not possible on any iPad (Apple supports it on iPhone only).
 
 ## One job, start to finish
 
@@ -73,7 +73,7 @@ Techs keep their hourly pay. On top, they earn a percentage of the **gross profi
 
 ## Running cost
 
-About **$280–$565 a month** once everything is live: hosting, phones and texting, email, maps, AI, the calendar license and truck GPS trackers, against a $200–$600 budget. Card fees and GreenSky dealer fees are extra (paid today too). Until the switch, the ServiceTitan subscription continues on top. Breakdown in [03-tech-stack.md](03-tech-stack.md).
+About **$270–$440 a month** once everything is live: hosting, phones and texting, email, maps, AI and the calendar license, against a $200–$600 budget. GPS uses the iPads, so it adds nothing. Card fees and GreenSky dealer fees are extra (paid today too). Until the switch, the ServiceTitan subscription continues on top. Breakdown in [03-tech-stack.md](03-tech-stack.md).
 
 ## Timeline
 

@@ -31,7 +31,7 @@ TypeScript everywhere. React 19 + Vite PWA (`apps/web`), Hono API with WebSocket
 6. **Webhooks are verified and idempotent** (store provider event IDs in `webhook_events`).
 7. **Settings that affect pay have effective dates.** Changing a setting never rewrites history.
 8. **Every commission or spiff change ships with tests**, including all worked examples in `docs/02-commission-plan.md`.
-9. **The iPad app is a Safari home-screen web app** on iPad (A16) cellular. Test in Playwright WebKit at iPad size. Don't rely on background location or Bluetooth. Tap to Pay is impossible on any iPad. Truck locations come from GPS trackers.
+9. **The iPad app is a Safari home-screen web app** on iPad (A16) cellular. Test in Playwright WebKit at iPad size. Don't rely on background location or Bluetooth. Tap to Pay is impossible on any iPad. Tech locations come from the iPad's GPS only while our app is on screen; always handle the paused and stale states.
 10. **Keep the docs true.** If behavior changes, update the matching file in `docs/` in the same change.
 11. **ServiceTitan runs alongside us until the switch, with no API.** Its data arrives through uploaded report exports, imported idempotently on ServiceTitan IDs and kept read-only. Never write anything back to ServiceTitan.
 12. **Only the system that created an invoice posts it to QuickBooks.** Never post imported ServiceTitan invoices.

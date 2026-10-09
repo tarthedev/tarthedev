@@ -34,7 +34,7 @@ Commercial bookings add: which of the customer's locations, and the customer's P
 - Moving a customer who was already told a time needs the dispatcher's one-tap OK.
 - If the AI is unsure (low confidence), the job stays in Waiting and the dispatcher is pinged.
 - Alerts: tech running late (send customer a new ETA after one-tap OK), job over its estimated time, emergency booked (AI proposes who to pull), tech idle.
-- Truck locations come from **GPS trackers in every truck** (owner decision; Bouncie, or Teltonika + Traccar as the runner-up, see [03-tech-stack.md](03-tech-stack.md#truck-gps-trackers)). They also drive arrival detection and customer ETAs. The iPad's own location is a fallback while the app is open (web apps can't track with the screen locked).
+- Tech locations come from the **iPads' built-in GPS** while our app is on screen (recommended as the easiest option, nothing to buy; see [03-tech-stack.md](03-tech-stack.md#truck-gps)). Each truck has a dash mount and charger. When an iPad's screen locks or another app is in front, the board shows **"GPS paused since …"**; if pings stop with no notice, the tech shows as **stale**. Dispatch and ETAs fall back to job addresses and statuses, so nothing breaks.
 
 ### How the AI picks a tech
 

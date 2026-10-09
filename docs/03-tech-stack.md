@@ -44,15 +44,15 @@ Built by one developer with Claude Code, hosted on a VPS, running cost $200–$6
 | Backblaze B2 (or similar) | Nightly off-site copy of database dumps and files | |
 | Sentry + an uptime checker | Errors and outage alerts | Free tiers |
 | GitHub Actions | Tests and deploys | |
-| Truck GPS trackers: Bouncie (or Teltonika + self-hosted Traccar) | Live truck positions, trip start/end, job-site arrival geo-zones, ETAs | See [Truck GPS trackers](#truck-gps-trackers) |
+| Tech location: the iPads' built-in GPS | Dispatch map, arrival detection, customer ETAs | No extra hardware; see [Truck GPS](#truck-gps). Fallback if the pilot shows gaps: Spytec plug-in trackers |
 
 ## Architecture
 
 ```
- Office browser        Tech iPad (home-screen app)        Customer phone      Truck GPS trackers
- (board, phones)       (jobs, sales, scoreboard)          (texts, pay links)  (webhooks, or TCP to Traccar)
-        \                         |                               /                 |
-         \______________ HTTPS + WebSockets via Caddy ___________/__________________/
+ Office browser        Tech iPad (home-screen app)        Customer phone
+ (board, phones)       (jobs, sales, scoreboard, GPS)     (texts, pay links, portal)
+        \                         |                               /
+         \______________ HTTPS + WebSockets via Caddy ___________/
                                   |
         +------------------------ DigitalOcean droplet (Docker Compose) ---+
         |   api (Hono, WebSockets)    worker (pg-boss jobs)                |
@@ -61,12 +61,12 @@ Built by one developer with Claude Code, hosted on a VPS, running cost $200–$6
                Managed PostgreSQL         Spaces (photos, PDFs)
                          |
    Outbound API calls and inbound webhooks:
-   Stripe · Twilio · QuickBooks · Google Maps · Claude API · Postmark · Bouncie
+   Stripe · Twilio · QuickBooks · Google Maps · Claude API · Postmark
    ServiceTitan: no API; report exports uploaded on the office Import page
 ```
 
 - **api** handles requests, auth, and pushes live updates over WebSockets.
-- **worker** runs everything slow or scheduled: ServiceTitan report imports and import reports, texts and emails, QuickBooks sync, Stripe, Twilio and tracker webhook follow-ups, drive-time refresh, Sunday-night week lock, Monday payroll run, nightly restock lists.
+- **worker** runs everything slow or scheduled: ServiceTitan report imports and import reports, texts and emails, QuickBooks sync, Stripe and Twilio webhook follow-ups, drive-time refresh, Sunday-night week lock, Monday payroll run, nightly restock lists.
 - Postgres **LISTEN/NOTIFY** tells the api when the worker changed something.
 - **Staging** runs as a second Compose stack on the same droplet with its own database in the same managed cluster and its own subdomain.
 
@@ -103,7 +103,7 @@ The techs' devices are **iPad (A16) Wi-Fi + Cellular**: built-in GPS/GNSS (Wi-Fi
 
 | Works | Doesn't work in a web app |
 |---|---|
-| Home-screen icon, full screen | GPS while the screen is locked (iPadOS suspends the page); truck trackers cover this |
+| Home-screen icon, full screen | GPS while the screen is locked or another app is in front (WebKit stops location when the page isn't visible) |
 | Camera photos, signatures | Bluetooth card readers (need Stripe's native SDK; Safari has no Web Bluetooth) |
 | Location while the app is open | Card payments with no signal |
 | Web push once installed (iPadOS 16.4+) | |
@@ -115,22 +115,48 @@ The techs' devices are **iPad (A16) Wi-Fi + Cellular**: built-in GPS/GNSS (Wi-Fi
 - Web push can occasionally stop delivering on iOS, so emergency alerts also go out by text.
 - **Phase 2 escape hatch:** wrap the same web app in a thin Capacitor App Store app. That allows a **$59 Stripe Reader M2 per truck over Bluetooth** (chip and tap, 2.7% + 5¢, offline card collection) and locked-screen GPS, without a rewrite. The community Capacitor Stripe Terminal plugin pins Stripe's iOS SDK 5.x (critical fixes only since October 2026), so prototype first and plan for SDK 6.x.
 
-## Truck GPS trackers
+## Truck GPS
 
-Owner decision: new trackers in every truck. Two candidates; a two-week pilot of one of each decides.
+**Recommended, because the owner asked for the easiest option** (confirm). No trackers to buy: the techs' iPads (A16 Wi-Fi + Cellular, built-in GPS) report location while our app is on screen. Each truck gets a dash or vent mount out of direct sun and a USB-C car charger (20W or more).
 
-| | Bouncie (recommended) | Teltonika + Traccar (runner-up) |
-|---|---|---|
-| Hardware | ~$90 per truck, OBD-II plug-in, 4G LTE | ~$100 per truck (e.g., FMM00A/FMM80A LTE-M OBD, AT&T certified), or hardwired FMx130 |
-| Monthly | $8.35 per truck (3+ devices), no contract | IoT SIM ~$1–2 per truck + maybe $6–12/month more droplet for Traccar |
-| 6 / 15 trucks per month | ~$50 / ~$125 | ~$10–25 / ~$25–35 |
-| API | Self-serve OAuth API; live vehicle snapshot; trip webhooks streaming positions; geo-zones by API for job-site arrival | Open-source Traccar (Apache-2.0) on our server forwards every position to our API as JSON; WebSocket and REST |
-| Catch | Consumer terms forbid "commercial purposes" and cap use at 3,000 miles / 150 hours a month (idle counts); warranty excludes commercial use. **Get written OK from Bouncie first.** | We run it: configure devices, manage SIMs, expose TCP port 5027 outside Caddy, no support line |
+How it works:
 
-- Bouncie webhooks use a shared key (not a signature): check the header, and dedupe on device, transaction ID and timestamp in `webhook_events`. Geo-zones are per device, so arrival zones are per truck per job.
-- Teltonika: tune the Send Period (default 120 s) to about 10–15 s while moving; confirm AT&T LTE-M coverage and SIM attach around Elizabeth City before ordering.
-- Pilot exit test: webhook latency, gaps, and ETA accuracy against the iPad's own GPS; for Bouncie, written confirmation of commercial use.
-- Until the switch, ServiceTitan's board keeps using its own mobile-app GPS.
+- **Start day.** The tech taps *Start day* (or *On My Way*). That tap starts `watchPosition` with high accuracy and requests a Screen Wake Lock so the screen stays on (supported in Home Screen web apps since iPadOS 18.4). Auto-Lock is lengthened in Settings.
+- **Pings.** Uploads go every 10–15 seconds while moving into `gps_pings`, queued in IndexedDB when there's no signal. The watch restarts whenever the app becomes visible again.
+- **Paused, not silent.** When the page is hidden (screen locked, cover closed, another app in front), WebKit stops location at once. The app sends a "paused" beacon (`sendBeacon`) as it hides, and the board shows **"GPS paused since 10:42"**. A server heartbeat marks a tech **stale** if pings stop with no beacon (dead iPad, overheating, no signal).
+- **Dispatch doesn't depend on it.** AI drive times use job addresses, job statuses and the last known fix.
+- **ETAs.** *On My Way* computes the ETA from the current fix, or from the previous job's address if there's no fresh fix, and texts it. The live link shows the dot only when the last ping is under about 2 minutes old; otherwise it shows the ETA only.
+- **Arrival** is detected within a radius of the job address.
+- **Coverage report:** a daily GPS coverage percentage per tech for on-the-clock time.
+- **Pilot only at first.** Until the switch, only the pilot crew's iPads report; ServiceTitan's board keeps using its own mobile-app GPS.
+
+Settings per iPad:
+
+- Location Services on.
+- Safari Websites set to *While Using* with Precise Location on.
+- Settings › Apps › Safari › Location set to *Allow*. Test on a real iPad whether this stops repeat prompts in the Home Screen app; Apple doesn't document it.
+- Optionally push the app as a full-screen Web Clip from **Apple Business** (free, built-in MDM). This doesn't need erasing the iPads.
+- Don't use Guided Access or Single App Mode.
+
+Known limits and what to test in month 1 on one iPad:
+
+- Location-permission prompts across cold launches.
+- The wake lock after returning from the background (the first request needs a tap; show a big "Tap to resume GPS" banner).
+- Low Power Mode, which shortens Auto-Lock to 30 seconds. Keep the iPads charging.
+- Heat on the dash: Apple says charging can stop and the screen can dim when hot.
+- Navigation: opening Maps full screen pauses our GPS. Techs navigate on their phones, or tile Maps beside our app with Windowed Apps on iPadOS 26+ (test).
+
+**If the pilot shows poor coverage:**
+
+1. Easiest plug-in fallback: **Spytec GPS Pulse OBD**, business plan.
+   - $0 hardware, about 30-second OBD install.
+   - $14.95 per truck per month month-to-month, or $8.95 on annual prepay, with 5–10% off at 5+ devices.
+   - No contract, sold to service fleets.
+   - Its own app and map work on day one and include customer ETA texts.
+   - API access (Hapn) is issued on request and its price isn't published, so get it in writing first.
+   - Pilot on month-to-month: their annual plans are non-refundable.
+2. If Spytec won't provide an API: **OneStep GPS** at $13.95 per truck per month plus $20 activation, no contract, free open API and webhooks.
+3. Phase 2 alternative: the Capacitor App Store wrapper with background location, which keeps working with the screen locked. It needs an Apple Developer membership ($99/yr). The community plugin supports Capacitor up to 7, so prototype first.
 
 ## Security
 
@@ -154,10 +180,9 @@ Owner decision: new trackers in every truck. Two candidates; a two-week pilot of
 | Google Maps Platform | $0–$40 |
 | Claude API | $30–$80 |
 | FullCalendar Premium (about $480/yr) | ~$40 |
-| Truck GPS trackers, 6–15 trucks (Bouncie; Teltonika + Traccar is ~$10–35) | ~$50–$125 |
-| **Total** | **~$280–$565** |
+| **Total** | **~$270–$440** |
 
-One-time: trackers ~$90–$100 per truck. Optional: a Stripe S700 smart reader at $299 per truck.
+One-time: a dash mount and USB-C car charger per truck (GPS uses the iPads). Optional: a Stripe S700 smart reader at $299 per truck. Only if the pilot needs plug-in trackers: Spytec at about $9–$15 per truck per month.
 
 Not included:
 - Stripe fees: 2.9% + 30¢ for online and Payment Element cards (expected; 3.4% + 30¢ applies to cards keyed in Stripe's Dashboard or Terminal MOTO), 2.7% + 5¢ in person on a reader, ACH 0.8% capped at $5.

@@ -85,10 +85,12 @@ PostgreSQL via Drizzle. Conventions:
 
 Every core row created from an import keeps `st_id` (ServiceTitan customer ID, location ID, job number, invoice number). Nothing is ever written back to ServiceTitan.
 
-## Trucks and GPS
+## Tech location (iPad GPS)
 
 | Table | Key fields |
 |---|---|
-| `vehicles` | name, assigned_user_id, tracker_provider (bouncie / traccar), tracker_device_id, active |
-| `vehicle_positions` | vehicle_id, at, lat, lng, speed, heading, source — pruned after a retention period *(setting)* |
-| `geo_zones` | vehicle_id, appointment_id, provider_zone_id, radius_m — arrival detection per truck per job |
+| `gps_pings` | (see Work) user_id, at, lat, lng, accuracy, speed, heading; pruned after a retention period *(setting)* |
+| `location_status` | user_id, state (live / paused / stale / off), last_ping_at, paused_reason (hidden / denied / low-accuracy), updated_at |
+| `gps_coverage_daily` | user_id, day, on_clock_minutes, covered_minutes, coverage_pct |
+
+Arrival is detected against the job location's lat/lng and a radius *(setting)*. If plug-in trackers are added later, a `vehicles` table maps tracker device IDs to users.
