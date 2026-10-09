@@ -41,4 +41,16 @@ TypeScript everywhere. React 19 + Vite PWA (`apps/web`), Hono API with WebSocket
 
 ## Commands
 
-The monorepo isn't scaffolded yet (month 1 of `docs/04-build-plan.md`). Add install, dev, test, lint, typecheck and migrate commands here when it is.
+Node 22, pnpm 10, PostgreSQL 16+ (17 in production).
+
+- `pnpm install`: install everything
+- `pnpm dev:db`: start a local Postgres with `dwrg_dev` and `dwrg_test` (Docker, or a local PostgreSQL install)
+- `cp .env.example .env`: local settings (`DATABASE_URL`, `TEST_DATABASE_URL`, auth secret)
+- `pnpm db:generate`: create a migration after changing the Drizzle schema in `packages/db`
+- `pnpm db:migrate`: apply migrations (uses `DATABASE_URL`)
+- `pnpm db:seed`: load deterministic demo data (no real customer data yet; owner decision)
+- `pnpm lint`, `pnpm typecheck`, `pnpm test`: Biome, TypeScript and Vitest across all packages; `pnpm check` runs all three
+- `pnpm --filter @dwrg/api dev` and `pnpm --filter @dwrg/web dev`: run the API and the web app
+- `pnpm --filter @dwrg/web e2e`: Playwright tests at iPad size (WebKit in CI; Chromium locally if WebKit isn't installed)
+
+Database tests use `TEST_DATABASE_URL` and must leave it clean.

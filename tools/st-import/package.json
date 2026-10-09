@@ -1,0 +1,18 @@
+{
+  "name": "@dwrg/st-import",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@dwrg/core": "workspace:*",
+    "@dwrg/db": "workspace:*",
+    "csv-parse": "^7.0.3"
+  }
+}

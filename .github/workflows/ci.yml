@@ -1,0 +1,39 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: dwrg
+          POSTGRES_PASSWORD: dwrg
+          POSTGRES_DB: dwrg_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U dwrg" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://dwrg:dwrg@localhost:5432/dwrg_test
+      TEST_DATABASE_URL: postgres://dwrg:dwrg@localhost:5432/dwrg_test
+      BETTER_AUTH_SECRET: ci-only-secret-not-for-production-use-0123456789
+      BETTER_AUTH_URL: http://localhost:8787
+      TZ: America/New_York
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm db:migrate
+      - run: pnpm test
+      - name: iPad (WebKit) end-to-end tests
+        run: |
+          pnpm --filter @dwrg/web exec playwright install --with-deps webkit
+          pnpm --filter @dwrg/web e2e --project=ipad-webkit
