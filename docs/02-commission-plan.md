@@ -21,7 +21,7 @@ All dollar amounts and percentages are **starting values** stored in settings wi
 - **Finished:** the job's status becomes Done (tech taps Done). The office can correct the date with a logged reason.
 - **Sale:** invoice subtotal after all discounts (member pricing counts as a discount), **excluding sales tax**.
 - **Parts and equipment:** actual cost of everything used on the job: truck stock at stock cost, PO items at bill cost (pricebook cost until the bill arrives).
-- **Labor:** for every worker on the job (techs and installers), clocked time from **On My Way** to **Done** × that worker's **burdened hourly cost** (wage plus employer payroll taxes, workers' comp and benefits; set per worker by the office). Example used in the decks: $21 wage → $27/hr.
+- **Labor:** for every worker on the job (techs and installers), clocked time from **On My Way** to **Done** × that worker's **burdened hourly cost** = wage × **1.30** (30% for employer payroll taxes, workers' comp and benefits; owner decision, stored as a setting with an effective date and overridable per worker). Example used in the decks: $21 wage → $27.30/hr, shown rounded as $27.
 - **Other job costs:** permits, GreenSky dealer fees, card and ACH processing fees, subcontractor bills, equipment rental, disposal fees.
 - **Gross profit (GP):** Sale − Parts and equipment − Labor − Other job costs. Can be negative.
 - **Paid in full:** invoice balance is $0. For financed jobs, when GreenSky funds.
@@ -140,7 +140,7 @@ adjustment(W) = 0.5 × (commission + spiffs attributable to W) ÷ total hours wo
 
 ## 10. Worked examples (golden tests)
 
-Wage $21/hr, burdened cost $27/hr in all examples.
+Wage $21/hr. The examples pass a burdened cost of exactly **$27.00/hr** as the input, a round number for illustration (the live setting, wage × 1.30, gives $27.30).
 
 1. **One job.** Sale $850, parts $150, labor 2.0 h × $27 = $54, card fee $26 → GP **$620**. Tech is Silver that week → commission **$62.00**.
 2. **Example week.** Week score $5,100 → Silver (10%) → commission **$510.00**. Spiffs: 2 UV lights ($100) + 2 memberships ($80) + 1 surge protector ($20) + 1 Clean Air Combo bonus ($75) + 3 reviews ($60) = **$335.00**. Hourly 40 × $21 = **$840.00**. Week total **$1,685.00**.

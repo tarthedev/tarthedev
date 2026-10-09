@@ -88,7 +88,7 @@ Math first, AI for judgment. Scheduling has hard constraints, so a scoring engin
 
 1. **Read:** on booking, Claude turns the notes into structured data (structured outputs): job type, required skills, estimated minutes, urgency, replacement likelihood.
 2. **Filter (hard rules):** drop techs without the skill, outside their shift, or who can't make the window given drive time (Google route matrix, cached).
-3. **Score (weighted):** drive minutes; tech's GP and close rate on this job type over the last 90 days; fair share of high-value calls this week; customer's requested tech; workload balance.
+3. **Score (weighted):** drive minutes; tech's GP and close rate on this job type over the last 90 days; fair share of high-value calls this week; customer's requested tech; workload balance. **Replacement-likely calls skip fair share** and rank eligible techs by replacement close rate × average replacement GP over the last 180 days; the top-ranked tech who can make the window gets the call (owner decision, see [01-operations.md](01-operations.md#how-the-ai-picks-a-tech)).
 4. **Assign and explain:** top score gets the job; reasons are stored and shown. Low confidence → Waiting + ping the dispatcher.
 5. **Reshuffle:** when the day breaks (emergency, late tech), propose moves. Version 1 is greedy insertion in TypeScript; if time allows in month 5, add **VROOM** (open-source route optimizer, self-hosted in Docker) for whole-day optimization. Moving a confirmed customer always needs the dispatcher's OK.
 6. **Learn:** override reasons feed a weekly report; owners approve any change to the weights.

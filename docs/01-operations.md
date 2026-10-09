@@ -44,10 +44,12 @@ Hard rules first, then a weighted score. Details in [03-tech-stack.md](03-tech-s
 | Makes the window | Shift hours and real drive time fit the promised window |
 | Shortest drive | Drive minutes from the previous job |
 | Strong on this call | Tech's gross profit and close rate on this job type, last 90 days |
-| Fair share | Spreads high-value calls so every tech can climb the ladder |
+| Fair share | On ordinary calls, evens out high-value work so every tech can climb the ladder |
 | Customer's pick | A requested tech goes first |
 
-The owners see a weekly report of high-value calls per tech, because pay now depends on the calls each tech gets.
+**Replacement-likely calls go to the strongest closer (owner decision).** When the AI tags a call as a likely replacement (system over 15 years old *(setting)*, an estimate request, or notes that point to a failing system), it ranks the techs who can make the window by their replacement record over the last 180 days *(setting)*: replacement close rate × average replacement gross profit. The best-ranked tech gets the call; if they can't make the window, the next best does. Fair share does not apply to these calls. Every other call uses the normal score, where fair share applies.
+
+The owners see a weekly report of high-value calls per tech, because pay depends on the calls each tech gets. Top closers will earn more under this rule, which is intended.
 
 ## 4. Tech iPad app
 
