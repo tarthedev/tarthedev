@@ -4,6 +4,8 @@ This is the source of truth for pay. The commission engine (`packages/core`) imp
 
 All dollar amounts and percentages are **starting values** stored in settings with effective dates. Changing a setting never rewrites history. Before launch, the ladder steps are tuned by replaying 12 months of ServiceTitan history imported from report exports. The plan starts after the switch (section 9a).
 
+> **Open details:** a few rules here can be read two ways (combos sharing a membership, refund caps, review spiff timing, the callback window's end date, the cost-change threshold, negative rounding). They're listed as questions 16–22 in [07](07-open-questions.md#pay-plan-details-needed-before-the-pay-plan-rolls-out) with the reading the engine uses until the owners decide.
+>
 > **Before launch:** the owners' CPA reviews this plan (handled by the owners), and every employee signs the written plan, including the callback deduction authorization. This document is a design spec, not legal advice.
 
 ## 1. Who is on the plan

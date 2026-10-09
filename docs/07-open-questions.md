@@ -29,6 +29,18 @@ Each question says why it matters. Answered questions are kept at the bottom wit
 
 15. **What platform is the website on?** Matters for online booking and the portal link.
 
+## Pay plan details (needed before the pay plan rolls out)
+
+Building the engine turned up places where [02](02-commission-plan.md) can be read two ways. The engine uses the reading in *italics* for now, and its tests pin that reading, so changing it is a small, tested change. The owners (and the CPA where noted) should confirm each before rollout.
+
+16. **Can one membership complete both combos?** An invoice with a UV light, surge protector, leak shut-off valve, water filter and one membership: does it pay both combo bonuses? *Currently yes: both pay ($150 in combo bonuses).*
+17. **Can a refund deduction be bigger than the commission paid on the job?** *Currently no: it is capped at the commission still standing on the job.* Example 1 fully refunded deducts $62, not $85.
+18. **Does the review spiff wait until the job's invoice is paid in full?** Other spiffs do; a review isn't on an invoice. *Currently it pays once the office verifies the review.*
+19. **The 30-day callback window ends on which date: when the callback is booked, or when it's run?** *Currently the booking date, and day 30 counts.*
+20. **The $50 cost-change threshold: per change, or the total change since the commission was settled?** *Currently the total, so several small late bills add up.*
+21. **Rounding a negative half cent: away from zero (−$6.18) or in the employee's favor (−$6.17)?** It only matters for deduction lines that land on exactly half a cent. *Currently away from zero.*
+22. **For the CPA, with the overtime method in section 9:** callback and refund deductions don't lower the commission counted in that week's overtime adjustment, but negative cost adjustments do. *That's the current behavior.*
+
 ## Answered
 
 | Question | Decision |
