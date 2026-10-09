@@ -21,7 +21,7 @@ Five steps, about 60 seconds, with the script on screen:
 2. **What's wrong:** pick from a list (no heat, no cooling, leak, water heater, drain, tune-up, estimate, other). AI reads the notes and tags job type, skills needed, estimated minutes, urgency and replacement likelihood.
 3. **How urgent:** emergency, today, or scheduled. Members without heat or cooling go to the front.
 4. **Pick a time:** AI suggests the best open arrival windows; CSR confirms one with the customer.
-5. **Offer and confirm:** non-members are offered the membership; confirmation text goes out automatically, plus a reminder the day before.
+5. **Offer and confirm:** the CSR states the diagnostic fee, non-members are offered the membership, and a confirmation text goes out automatically, plus a reminder the day before.
 
 Commercial bookings add: which of the customer's locations, and the customer's PO number when that customer requires one.
 
@@ -90,6 +90,7 @@ Before the switch only the pilot crew uses this app; everyone else stays on Serv
 | GreenSky financing | Systems and big repairs | Dealer fee (varies by plan) |
 | Check or cash | Anyone who prefers it | None |
 
+- **Diagnostic fee on every visit** (owner decision): each time we go out, the invoice starts with the diagnostic fee from the pricebook. The only exception is a **callback** (a job linked to an earlier job as a callback), which carries no diagnostic fee. Removing the fee from any other visit needs a manager, with a logged reason.
 - Card fees and dealer fees are job costs, so they reduce gross profit.
 - Never key cards into the Stripe Dashboard app (3.4% + 30¢, and it would give techs access to payouts).
 - Tap to Pay is not possible on any iPad. Card-present options are the optional smart reader now, or a $59 Bluetooth reader once the App Store wrapper exists (phase 2).

@@ -29,14 +29,6 @@ Each question says why it matters. Answered questions are kept at the bottom wit
 
 15. **What platform is the website on?** Matters for online booking and the portal link.
 
-## Pay plan details (needed before the pay plan rolls out)
-
-Building the engine turned up places where [02](02-commission-plan.md) can be read two ways. The engine uses the reading in *italics* for now, and its tests pin that reading, so changing it is a small, tested change. The owners (and the CPA where noted) should confirm each before rollout.
-
-16. **The $50 cost-change threshold: per change, or the total change since the commission was settled?** *Currently the total, so several small late bills add up.*
-17. **Rounding a negative half cent: away from zero (−$6.18) or in the employee's favor (−$6.17)?** It only matters for deduction lines that land on exactly half a cent. *Currently away from zero.*
-18. **For the CPA, with the overtime method in section 9:** callback and refund deductions don't lower the commission counted in that week's overtime adjustment, but negative cost adjustments do. *That's the current behavior.*
-
 ## Answered
 
 | Question | Decision |
@@ -56,3 +48,5 @@ Building the engine turned up places where [02](02-commission-plan.md) can be re
 | Refund and chargeback clawbacks | Only take back commission: never more than the commission paid on that job ([02](02-commission-plan.md#5-when-commission-is-paid)). |
 | Review spiff timing | Paid like any other spiff, once the reviewed job's invoice is paid in full ([02](02-commission-plan.md#7-tech-spiffs)). |
 | What counts as a callback | A return visit for something the tech did wrong, booked within 30 days after the original job (day 30 counts) ([02](02-commission-plan.md#6-callbacks-the-30-day-oops-rule)). |
+| Rules that read two ways | Take the reading that favors the company, if lawful; the CPA confirms each before rollout. Cost changes: the $50 threshold applies to the total change since commission was settled. A deduction of exactly half a cent rounds away from zero. Callback and refund deductions should reduce the commission counted in that week's overtime adjustment; the engine waits for the CPA before changing this. |
+| Diagnostic fee | Charged on every visit except callbacks ([01](01-operations.md#6-invoices-and-payments)). |

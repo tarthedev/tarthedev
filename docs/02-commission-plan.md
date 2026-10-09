@@ -4,7 +4,7 @@ This is the source of truth for pay. The commission engine (`packages/core`) imp
 
 All dollar amounts and percentages are **starting values** stored in settings with effective dates. Changing a setting never rewrites history. Before launch, the ladder steps are tuned by replaying 12 months of ServiceTitan history imported from report exports. The plan starts after the switch (section 9a).
 
-> **Open details:** three rules here can still be read two ways (the cost-change threshold, rounding a negative half cent, and how deductions interact with the overtime adjustment). They're questions 16–18 in [07](07-open-questions.md#pay-plan-details-needed-before-the-pay-plan-rolls-out), with the reading the engine uses until the owners decide.
+> **Company-favorable readings (owner decision):** where a rule can be read two ways, the plan takes the reading that favors the company, as long as it is lawful. The CPA confirms each one before rollout; see the Answered table in [07](07-open-questions.md#answered).
 >
 > **Before launch:** the owners' CPA reviews this plan (handled by the owners), and every employee signs the written plan, including the callback deduction authorization. This document is a design spec, not legal advice.
 
@@ -21,7 +21,7 @@ All dollar amounts and percentages are **starting values** stored in settings wi
 
 - **Pay week:** Monday 00:00 through Sunday 23:59, America/New_York.
 - **Finished:** the job's status becomes Done (tech taps Done). The office can correct the date with a logged reason.
-- **Sale:** invoice subtotal after all discounts (member pricing counts as a discount), **excluding sales tax**.
+- **Sale:** invoice subtotal after all discounts (member pricing counts as a discount), **excluding sales tax**. It includes the diagnostic fee, which every visit carries except callbacks ([01](01-operations.md#6-invoices-and-payments)).
 - **Parts and equipment:** actual cost of everything used on the job: truck stock at stock cost, PO items at bill cost (pricebook cost until the bill arrives).
 - **Labor:** for every worker on the job (techs and installers), clocked time from **On My Way** to **Done** × that worker's **burdened hourly cost** = wage × **1.30** (30% for employer payroll taxes, workers' comp and benefits; owner decision, stored as a setting with an effective date and overridable per worker). Example used in the decks: $21 wage → $27.30/hr, shown rounded as $27.
 - **Other job costs:** permits, GreenSky dealer fees, card and ACH processing fees, subcontractor bills, equipment rental, disposal fees.
