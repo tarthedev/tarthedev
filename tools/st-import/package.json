@@ -4,15 +4,18 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./demo": "./src/demo/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run",
+    "demo-csvs": "tsx src/demo/cli.ts"
   },
   "dependencies": {
     "@dwrg/core": "workspace:*",
     "@dwrg/db": "workspace:*",
-    "csv-parse": "^7.0.3"
+    "csv-parse": "^7.0.3",
+    "drizzle-orm": "^0.45.4"
   }
 }

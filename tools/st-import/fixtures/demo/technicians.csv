@@ -1,0 +1,14 @@
+Technician ID,Name,Email,Mobile Phone,Role,Business Units,Skills,Hire Date,Active
+DEMO-E-00001,Jeffrey Roberts,jeffrey.roberts@demo.dwrg.example,(540) 555-0166,Owner,"HVAC Service, HVAC Replacement, Plumbing, Commercial & Refrigeration, New Construction",HVAC,8/11/2016,Yes
+DEMO-E-00002,Tracey Cremin,tracey.cremin@demo.dwrg.example,(910) 555-0153,Manager,"HVAC Service, HVAC Replacement",HVAC,9/3/2024,Yes
+DEMO-E-00003,Hollie Will,hollie.will@demo.dwrg.example,(704) 555-0113,CSR,"HVAC Service, HVAC Replacement, Plumbing, Commercial & Refrigeration, New Construction",,8/14/2014,Yes
+DEMO-E-00004,Alize Murazik,alize.murazik@demo.dwrg.example,(703) 555-0184,Technician,"HVAC Service, HVAC Replacement",HVAC,3/3/2014,Yes
+DEMO-E-00005,Henri Schuster,henri.schuster@demo.dwrg.example,(571) 555-0114,Technician,"HVAC Service, Commercial & Refrigeration","HVAC, Commercial, Refrigeration",8/2/2014,Yes
+DEMO-E-00006,Shemar West,shemar.west@demo.dwrg.example,(804) 555-0112,Technician,"HVAC Service, HVAC Replacement",HVAC,3/26/2021,Yes
+DEMO-E-00007,Clint Zieme,clint.zieme@demo.dwrg.example,(540) 555-0100,Technician,"HVAC Service, Commercial & Refrigeration","HVAC, Commercial",7/14/2017,Yes
+DEMO-E-00008,Mckenzie Howell,mckenzie.howell@demo.dwrg.example,(980) 555-0144,Technician,HVAC Service,HVAC,5/24/2021,Yes
+DEMO-E-00009,Lenore Keebler,lenore.keebler@demo.dwrg.example,(434) 555-0133,Technician,Plumbing,Plumbing,7/9/2014,Yes
+DEMO-E-00010,Jillian Pouros,jillian.pouros@demo.dwrg.example,(828) 555-0117,Technician,Plumbing,Plumbing,3/13/2023,Yes
+DEMO-E-00011,Alexane Walker,alexane.walker@demo.dwrg.example,(910) 555-0111,Technician,"Plumbing, HVAC Service","Plumbing, HVAC",4/2/2016,Yes
+DEMO-E-00012,Marietta Rath,marietta.rath@demo.dwrg.example,(704) 555-0101,Installer,"HVAC Replacement, New Construction",HVAC,4/22/2018,Yes
+DEMO-E-00013,Denis Jenkins,denis.jenkins@demo.dwrg.example,(984) 555-0114,Installer,"HVAC Replacement, New Construction",HVAC,7/16/2015,Yes

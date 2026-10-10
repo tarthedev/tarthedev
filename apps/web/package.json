@@ -19,6 +19,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@dwrg/db": "workspace:*",
     "@playwright/test": "^1.64.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/router-plugin": "^1.168.42",

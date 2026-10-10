@@ -1,0 +1,67 @@
+Item ID,Code,Name,Type,Category,Description,Price,Member Price,Cost,Hours,Taxable,Active
+DEMO-PB-00001,HVAC-DIAG,HVAC diagnostic / service call,Service,HVAC Diagnostics,,$95.00,$0.00,$0.00,0.5,No,Yes
+DEMO-PB-00002,HVAC-TUNE-AC,AC tune-up (spring cooling),Service,HVAC Maintenance,,$129.00,$0.00,$8.00,1,No,Yes
+DEMO-PB-00003,HVAC-TUNE-HT,Heating tune-up (fall heating),Service,HVAC Maintenance,,$129.00,$0.00,$8.00,1,No,Yes
+DEMO-PB-00004,HVAC-FILTER,Media filter replacement,Material,HVAC Maintenance,,$95.00,$81.00,$28.00,0.25,Yes,Yes
+DEMO-PB-00005,HVAC-DRAIN,Clear condensate drain line,Service,HVAC Maintenance,,$189.00,$161.00,$6.00,0.5,No,Yes
+DEMO-PB-00006,HVAC-COIL-CLEAN,Evaporator coil cleaning,Service,HVAC Maintenance,,$349.00,$297.00,$18.00,1.5,No,Yes
+DEMO-PB-00007,HVAC-CAP,Replace run capacitor,Service,HVAC Repair,,$289.00,$246.00,$28.00,0.5,No,Yes
+DEMO-PB-00008,HVAC-CONT,Replace contactor,Service,HVAC Repair,,$325.00,$276.00,$32.00,0.6667,No,Yes
+DEMO-PB-00009,HVAC-HARDSTART,Install hard start kit,Service,HVAC Repair,,$295.00,$251.00,$35.00,0.5,No,Yes
+DEMO-PB-00010,HVAC-FANMTR,Replace condenser fan motor,Service,HVAC Repair,,$795.00,$676.00,$185.00,1.5,No,Yes
+DEMO-PB-00011,HVAC-BLWMTR,Replace blower motor (PSC),Service,HVAC Repair,,"$1,150.00",$978.00,$260.00,2,No,Yes
+DEMO-PB-00012,HVAC-ECM,Replace ECM blower motor,Service,HVAC Repair,,"$1,895.00","$1,611.00",$620.00,2.5,No,Yes
+DEMO-PB-00013,HVAC-IGN,Replace hot surface ignitor,Service,HVAC Repair,,$345.00,$293.00,$38.00,0.75,No,Yes
+DEMO-PB-00014,HVAC-FLAME,Clean or replace flame sensor,Service,HVAC Repair,,$189.00,$161.00,$15.00,0.5,No,Yes
+DEMO-PB-00015,HVAC-INDUCER,Replace inducer motor,Service,HVAC Repair,,"$1,250.00","$1,063.00",$340.00,2,No,Yes
+DEMO-PB-00016,HVAC-BOARD,Replace control board,Service,HVAC Repair,,"$1,450.00","$1,233.00",$310.00,1.5,No,Yes
+DEMO-PB-00017,HVAC-TXV,Replace TXV,Service,HVAC Repair,,"$1,850.00","$1,573.00",$210.00,3,No,Yes
+DEMO-PB-00018,HVAC-LEAK,Refrigerant leak search,Service,HVAC Repair,,$395.00,$336.00,$10.00,1.5,No,Yes
+DEMO-PB-00019,HVAC-R410A,Refrigerant R-410A (per lb),Material,HVAC Repair,,$125.00,$106.00,$22.00,0.0833,Yes,Yes
+DEMO-PB-00020,HVAC-CPUMP,Replace condensate pump,Service,HVAC Repair,,$425.00,$361.00,$75.00,1,No,Yes
+DEMO-PB-00021,HVAC-COMP,Replace compressor,Service,HVAC Repair,,"$3,450.00","$2,933.00","$1,150.00",6,No,Yes
+DEMO-PB-00022,HVAC-EVAPCOIL,Replace evaporator coil,Service,HVAC Repair,,"$2,750.00","$2,338.00",$850.00,5,No,Yes
+DEMO-PB-00023,HVAC-DEFROST,Replace heat pump defrost board,Service,HVAC Repair,,$695.00,$591.00,$140.00,1,No,Yes
+DEMO-PB-00024,HVAC-THERM,Install programmable thermostat,Service,HVAC Repair,,$395.00,$336.00,$85.00,0.75,No,Yes
+DEMO-PB-00025,HVAC-SMART,Install smart thermostat,Service,HVAC Repair,,$595.00,$506.00,$165.00,1,No,Yes
+DEMO-PB-00026,IAQ-UV,UV light (coil and air),Equipment,Indoor Air Quality,,$695.00,$591.00,$165.00,0.75,Yes,Yes
+DEMO-PB-00027,IAQ-SCRUB,Air scrubber,Equipment,Indoor Air Quality,,"$1,295.00","$1,101.00",$420.00,1,Yes,Yes
+DEMO-PB-00028,IAQ-PURIFIER,Whole-home air purifier,Equipment,Indoor Air Quality,,"$1,195.00","$1,016.00",$360.00,1,Yes,Yes
+DEMO-PB-00029,IAQ-DEHUM,Whole-home dehumidifier,Equipment,Indoor Air Quality,,"$2,895.00","$2,461.00","$1,050.00",3,Yes,Yes
+DEMO-PB-00030,ELEC-SURGE,HVAC surge protector,Equipment,Indoor Air Quality,,$295.00,$251.00,$45.00,0.5,Yes,Yes
+DEMO-PB-00031,EQ-AC-3T,"14.3 SEER2 AC and coil, 3 ton (installed)",Equipment,HVAC Equipment,,"$7,950.00","$7,553.00","$3,300.00",8,No,Yes
+DEMO-PB-00032,EQ-HP-3T,"15.2 SEER2 heat pump system, 3 ton (installed)",Equipment,HVAC Equipment,,"$10,950.00","$10,403.00","$4,600.00",10,No,Yes
+DEMO-PB-00033,EQ-HP-VS,Variable-speed heat pump system (installed),Equipment,HVAC Equipment,,"$15,950.00","$15,153.00","$6,900.00",12,No,Yes
+DEMO-PB-00034,EQ-FURN-80,80% gas furnace (installed),Equipment,HVAC Equipment,,"$4,950.00","$4,703.00","$1,500.00",6,No,Yes
+DEMO-PB-00035,EQ-FURN-96,96% gas furnace (installed),Equipment,HVAC Equipment,,"$6,450.00","$6,128.00","$2,200.00",7,No,Yes
+DEMO-PB-00036,EQ-AH,Air handler (installed),Equipment,HVAC Equipment,,"$3,950.00","$3,753.00","$1,450.00",5,No,Yes
+DEMO-PB-00037,EQ-MINI,"Ductless mini-split, single zone (installed)",Equipment,HVAC Equipment,,"$5,450.00","$5,178.00","$2,100.00",7,No,Yes
+DEMO-PB-00038,COM-DIAG,Commercial service call,Service,Commercial HVAC,,$165.00,$140.00,$0.00,0.75,No,Yes
+DEMO-PB-00039,COM-PM,Commercial preventive maintenance (per unit),Service,Commercial HVAC,,$225.00,$191.00,$25.00,1,No,Yes
+DEMO-PB-00040,COM-BELT,Replace RTU belt,Service,Commercial HVAC,,$189.00,$161.00,$22.00,0.5,No,Yes
+DEMO-PB-00041,COM-ECON,Replace economizer actuator,Service,Commercial HVAC,,"$1,150.00",$978.00,$320.00,2,No,Yes
+DEMO-PB-00042,COM-RTU-MTR,Replace RTU condenser fan motor,Service,Commercial HVAC,,"$1,095.00",$931.00,$290.00,2,No,Yes
+DEMO-PB-00043,REF-ICE,Ice machine clean and sanitize,Service,Refrigeration,,$295.00,$251.00,$35.00,1.5,No,Yes
+DEMO-PB-00044,REF-EVAPFAN,Replace walk-in evaporator fan motor,Service,Refrigeration,,$685.00,$582.00,$140.00,1.5,No,Yes
+DEMO-PB-00045,REF-DEFROST,Replace defrost timer,Service,Refrigeration,,$545.00,$463.00,$95.00,1,No,Yes
+DEMO-PB-00046,REF-GASKET,Replace door gasket,Service,Refrigeration,,$325.00,$276.00,$85.00,0.75,No,Yes
+DEMO-PB-00047,REF-R404A,Refrigerant R-404A (per lb),Material,Refrigeration,,$145.00,$123.00,$35.00,0.0833,Yes,Yes
+DEMO-PB-00048,PL-DIAG,Plumbing diagnostic / service call,Service,Plumbing Repair,,$95.00,$0.00,$0.00,0.5,No,Yes
+DEMO-PB-00049,PL-DRAIN-MAIN,Clear main drain line,Service,Drains,,$395.00,$336.00,$10.00,1.5,No,Yes
+DEMO-PB-00050,PL-DRAIN-SM,Clear sink or tub drain,Service,Drains,,$225.00,$191.00,$5.00,1,No,Yes
+DEMO-PB-00051,PL-CAMERA,Sewer camera inspection,Service,Drains,,$295.00,$251.00,$0.00,0.75,No,Yes
+DEMO-PB-00052,PL-LEAK,Repair pipe leak,Service,Plumbing Repair,,$425.00,$361.00,$35.00,1.25,No,Yes
+DEMO-PB-00053,PL-PRV,Replace pressure reducing valve,Service,Plumbing Repair,,$585.00,$497.00,$95.00,1.5,No,Yes
+DEMO-PB-00054,PL-FAUCET,Replace faucet,Service,Plumbing Repair,,$345.00,$293.00,$95.00,1,No,Yes
+DEMO-PB-00055,PL-TOILET,Rebuild toilet,Service,Plumbing Repair,,$245.00,$208.00,$35.00,0.75,No,Yes
+DEMO-PB-00056,PL-TOILET-NEW,Replace toilet,Service,Plumbing Repair,,$695.00,$591.00,$210.00,1.5,No,Yes
+DEMO-PB-00057,PL-DISPOSAL,Replace garbage disposal,Service,Plumbing Repair,,$495.00,$421.00,$140.00,1,No,Yes
+DEMO-PB-00058,PL-SUMP,Replace sump pump,Service,Plumbing Repair,,$895.00,$761.00,$240.00,2,No,Yes
+DEMO-PB-00059,PL-WH40,40-gallon water heater (installed),Equipment,Water Heaters,,"$2,195.00","$1,866.00",$780.00,3,Yes,Yes
+DEMO-PB-00060,PL-WH50,50-gallon water heater (installed),Equipment,Water Heaters,,"$2,495.00","$2,121.00",$890.00,3.5,Yes,Yes
+DEMO-PB-00061,PL-TANKLESS,Tankless water heater (installed),Equipment,Water Heaters,,"$4,850.00","$4,123.00","$1,800.00",5,Yes,Yes
+DEMO-PB-00062,WTR-FILTER,Whole-home water filter,Equipment,Water Quality,,"$1,895.00","$1,611.00",$620.00,2.5,Yes,Yes
+DEMO-PB-00063,WTR-SOFT,Water softener,Equipment,Water Quality,,"$2,795.00","$2,376.00",$980.00,3,Yes,Yes
+DEMO-PB-00064,WTR-LEAKVALVE,Leak-detection shut-off valve,Equipment,Water Quality,,$895.00,$761.00,$290.00,1.5,Yes,Yes
+DEMO-PB-00065,NC-HVAC-HOME,"New construction HVAC, per home",Service,New Construction,,"$11,500.00",,$0.00,16,No,Yes
+DEMO-PB-00066,MEMB-YR,Comfort Club yearly membership,Service,Memberships,,$199.00,,$0.00,0,No,Yes
