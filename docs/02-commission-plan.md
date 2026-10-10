@@ -22,7 +22,7 @@ All dollar amounts and percentages are **starting values** stored in settings wi
 - **Pay week:** Monday 00:00 through Sunday 23:59, America/New_York.
 - **Finished:** the job's status becomes Done (tech taps Done). The office can correct the date with a logged reason.
 - **Sale:** invoice subtotal after all discounts (member pricing counts as a discount), **excluding sales tax**. It includes the diagnostic fee, which every visit carries except callbacks ([01](01-operations.md#6-invoices-and-payments)).
-- **Parts and equipment:** actual cost of everything used on the job: truck stock at stock cost, PO items at bill cost (pricebook cost until the bill arrives).
+- **Parts and equipment:** actual cost of everything used on the job: truck stock at stock cost, PO items at bill cost (pricebook cost until the bill arrives). On system replacements and new construction (capital improvements, no sales tax to the customer), the sales or use tax DWRG pays on the materials is part of their cost.
 - **Labor:** for every worker on the job (techs and installers), clocked time from **On My Way** to **Done** × that worker's **burdened hourly cost** = wage × **1.30** (30% for employer payroll taxes, workers' comp and benefits; owner decision, stored as a setting with an effective date and overridable per worker). Example used in the decks: $21 wage → $27.30/hr, shown rounded as $27.
 - **Other job costs:** permits, GreenSky dealer fees, card and ACH processing fees, subcontractor bills, equipment rental, disposal fees.
 - **Gross profit (GP):** Sale − Parts and equipment − Labor − Other job costs. Can be negative.
@@ -65,7 +65,12 @@ All dollar amounts and percentages are **starting values** stored in settings wi
 - **Tech-caused:** a deduction line equal to the commission on the original job (or the original tech's share of it). If that commission wasn't paid yet, it is cancelled instead.
 - Spiffs on the original job stay, unless the item itself was refunded or removed.
 - The callback visit itself is excluded from week scores; the tech who runs it is paid hourly.
-- Deductions follow NC G.S. 95-25.8: signed written authorization (in the plan every tech signs), the amount shown on the pay sheet **before** payday, and never reducing pay below minimum wage or touching overtime wages. Any amount that can't be taken carries forward to the next run.
+- Deductions follow NC G.S. 95-25.8 and 29 CFR 531.37:
+    - A signed written authorization stating the reason, in the plan every tech signs.
+    - For each deduction, **written notice of the actual amount and of the right to withdraw the authorization, at least 3 calendar days before the payday** it comes from (95-25.8(a)(3); 13 NCAC 12 .0305(c)). The CPA may approve a different structure instead (a per-job known-amount authorization, or commission not earned until the 30-day window passes); until then this is the rule.
+    - Never below minimum wage × non-overtime hours. In an overtime week, deductions come only from pay for the non-overtime hours (hourly pay plus that share of commission and spiffs), and never from any pay for overtime hours.
+    - Any amount that can't be taken carries forward to the next run, and each deduction is itemized on the pay sheet with its job and reason (95-25.13(4)).
+- **Leaving the company (waiting on the CPA):** the company would prefer that commission and spiffs on invoices not paid in full by the last day worked are forfeited, and that a carried-forward balance can come out of the final check. Neither applies until the CPA confirms it and it is written into the signed plan (95-25.7, 95-25.13).
 
 ## 7. Tech spiffs
 
@@ -124,7 +129,7 @@ Per employee:
 - Regular hours and overtime hours (over 40 in the pay week).
 - Commission lines payable this run (each linked to its job).
 - Spiffs and bonuses payable this run.
-- Deductions (callbacks, refunds), shown before payday.
+- Deductions (callbacks, refunds), with the written notice sent at least 3 calendar days before payday.
 - **Overtime regular-rate adjustment** (below).
 - A plain-English pay sheet the employee can open on their iPad.
 

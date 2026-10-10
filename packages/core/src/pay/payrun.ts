@@ -8,7 +8,7 @@
  * explanation, and a sheet's total is exactly the sum of its lines.
  */
 
-import { assertNonNegativeInt, assertText } from "../internal/int";
+import { assertNonNegativeInt, assertText, toSafeNumber } from "../internal/int";
 import {
   assertCents,
   type Cents,
@@ -403,11 +403,23 @@ function buildSheet(args: {
   const negatives = [...lines, ...sheetLines.filter((line) => line.group === "overtime_adjustment")]
     .filter((line) => line.amountCents < 0)
     .map((line) => -line.amountCents);
-  const positives = lines.filter((line) => line.amountCents > 0).map((line) => line.amountCents);
+  const positives = sumCents(
+    lines.filter((line) => line.amountCents > 0).map((line) => line.amountCents),
+  );
+  // In an overtime week, deductions may only come out of pay for the non-overtime hours
+  // (29 CFR 531.37, FOH 32j08; N.C.G.S. 95-25.8(b)). Commission and spiffs are pay for every
+  // hour worked, so only the non-overtime hours' share of them is reachable, rounded down.
+  const deductiblePositives =
+    otMinutes > 0
+      ? toSafeNumber(
+          (BigInt(positives) * BigInt(regularMinutes)) / BigInt(employee.totalMinutes),
+          "deductible commission and spiffs",
+        )
+      : positives;
   const owed = sumCents([args.carriedInCents, ...negatives]);
   const cap = capDeduction({
     owedCents: owed,
-    nonOvertimePayCents: sumCents([regularPay, ...positives]),
+    nonOvertimePayCents: sumCents([regularPay, deductiblePositives]),
     nonOvertimeMinutes: regularMinutes,
     minimumWageCentsPerHour: args.minimumWage,
   });

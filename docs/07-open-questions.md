@@ -20,14 +20,18 @@ Each question says why it matters. Answered questions are kept at the bottom wit
 11. **Are the two combos the right bundles?** They are Clean Air (UV + surge + membership) and Water Guard (leak shut-off + filter or softener + membership). Any other add-ons to push, such as smart thermostats or water heater flushes?
 12. **Do you want card-present payments before the App Store version exists?** If yes: a Stripe S700 smart reader ($299 per truck, no monthly fee) on each iPad's Personal Hotspot. Check that the carrier plans include hotspot.
 
+## Needed before the pay plan rolls out
+
+13. **The CPA's answers to the CPA review packet** (sent separately): the deduction structure, the separation clause, whether deductions can reduce the overtime adjustment, the labor burden, sales tax on trip charges, and payroll and record-keeping details. Until then the engine follows the most conservative lawful reading.
+
 ## Needed by the switch
 
-13. **All at once, or one business unit at a time?**
-14. **How many phone numbers are on Phones Pro, including any call-tracking numbers used for advertising?** All of them have to be ported.
+14. **All at once, or one business unit at a time?**
+15. **How many phone numbers are on Phones Pro, including any call-tracking numbers used for advertising?** All of them have to be ported.
 
 ## Later (phase 2)
 
-15. **What platform is the website on?** Matters for online booking and the portal link.
+16. **What platform is the website on?** Matters for online booking and the portal link.
 
 ## Answered
 

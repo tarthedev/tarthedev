@@ -204,6 +204,30 @@ describe("assemblePayRun", () => {
     expect(sheet?.totalCents).toBe(sheet?.hourlyCents);
   });
 
+  it("in an overtime week, deducts only from the non-overtime hours' share of pay (29 CFR 531.37)", () => {
+    // $25/hr, 50 hours, $500 commission this week. Regular rate = ($1,250 + $500) / 50 = $35.
+    // Federal maximum deduction = ($35 - $7.25) x 40 = $1,110.00, not ($1,000 + $500) - $290.
+    const run = assemblePayRun({
+      ...base,
+      employees: [{ userId: "tech-a", wageCentsPerHour: 2_500, totalMinutes: 3_000 }],
+      lines: [
+        {
+          userId: "tech-a",
+          kind: "commission",
+          amountCents: 50_000,
+          attributableWeekStart: week,
+          explanation: "Commission",
+        },
+        { userId: "tech-a", kind: "callback_deduction", amountCents: -200_000, explanation: "x" },
+      ],
+    });
+    const sheet = run.sheets[0];
+    expect(sheet?.carryForwardCents).toBe(89_000);
+    expect(sheet?.lines.find((l) => l.kind === "ot_adjustment")?.amountCents).toBe(5_000);
+    // Hourly $1,375 + commission $500 + OT adjustment $50 - $1,110 taken = $815.
+    expect(sheet?.totalCents).toBe(81_500);
+  });
+
   it("true-ups a late line against an earlier overtime week (Example 8 shape)", () => {
     const run = assemblePayRun({
       ...base,
