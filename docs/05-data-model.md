@@ -46,7 +46,7 @@ PostgreSQL via Drizzle. Conventions:
 | `invoices` | origin, number, job_id, customer_id, location_id, business_unit_id, status (draft, open, paid, void), invoice_date, due_date, subtotal_cents, discount_cents, tax_cents, total_cents, balance_cents, po_number, billing_stage (deposit, rough_in, trim_out, final), paid_in_full_at, qbo_invoice_id |
 | `invoice_lines` | invoice_id, pricebook_item_id, sort_order, description, quantity, unit_price_cents, discount_cents, amount_cents, taxable, tax_cents, cost_cents |
 | `payments` | origin, invoice_id, kind (payment, refund, chargeback), method (card_link, card_keyed, card_reader, ach, greensky, check, cash), amount_cents (always positive; `kind` gives the direction), fee_cents, stripe_payment_intent_id, check_number, reference, received_at, recorded_by_user_id, qbo_payment_id |
-| `job_costs` | job_id, kind (parts, equipment, labor, permit, finance_fee, card_fee, subcontractor, rental, disposal), amount_cents, source (time_entry / po_line / stock_move / invoice_line / payment / manual / import), source_id, incurred_at. This is the job's complete cost ledger: labor from time entries at wage × burden, parts and equipment from invoice lines, card and financing fees from payments, plus permits, disposal and rentals |
+| `job_costs` | job_id, kind (parts, equipment, labor, permit, finance_fee, card_fee, subcontractor, rental, disposal), amount_cents, source (time_entry / po_line / stock_move / invoice_line / payment / manual / import), source_id, incurred_at. This is the job's complete cost ledger: labor from time entries at wage × burden, parts and equipment from invoice lines, card and financing fees from payments, plus permits, disposal and rentals. Imported costs get derived `st_id`s: `<invoice line st_id>/cost` and `<payment st_id>/fee` |
 | `purchase_orders` / `po_lines` | vendor, job_id (optional), stock_location_id (optional), status, lines, bill_cents, qbo_bill_id |
 | `stock_locations` | kind (warehouse, truck), user_id (truck owner) |
 | `stock_levels` / `stock_moves` | item_id, location_id, qty; moves record use on jobs, transfers, receipts, counts |
@@ -79,7 +79,7 @@ Invoice math, enforced by a CHECK: `subtotal` is the sum of line amounts before 
 | `user` (Better Auth) | id, name, email, email_verified, role (owner, manager, dispatcher_csr, tech, installer), active. Logins live in `account`, `session` and `verification`. Only owners and managers create logins; there is no public sign-up |
 | `business_units` | code (hvac_service, hvac_replacement, plumbing, commercial, new_construction), name, qbo_class, active |
 | `audit_log` | table_name, row_id, action (insert, update, delete, soft_delete, restore, import, bulk_load), before (json), after (json), user_id, at, reason. Append-only |
-| `settings` | key, value (json), effective_from, effective_to, reason |
+| `settings` | key, value (json), effective_from, effective_to, reason. Examples: `replacement_flag_age_years` (equipment older than this many years is flagged for replacement; default 15) |
 | `sync_map` | system (qbo, stripe, twilio, servicetitan), local_id, remote_id, last_synced_at |
 | `webhook_events` | provider (stripe, twilio, qbo, postmark), event_id (unique per provider), type, payload, received_at, processed_at, attempts, error — for exactly-once processing |
 

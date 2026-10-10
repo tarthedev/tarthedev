@@ -8,8 +8,9 @@
     "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests",
-    "e2e": "playwright test"
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "icons": "node --import tsx scripts/make-icons.ts"
   },
   "dependencies": {
     "@dwrg/shared": "workspace:*",

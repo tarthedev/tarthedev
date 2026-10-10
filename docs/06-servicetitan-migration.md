@@ -12,7 +12,7 @@ ServiceTitan keeps doing everything while we build. We load ServiceTitan's data 
 
 ## Getting the data in: report exports
 
-ServiceTitan reports export to CSV or Excel. `tools/st-import` reads them through an **Import** page in the office app:
+ServiceTitan reports export to CSV or Excel. `tools/st-import` reads **CSV only** (an Excel file is refused with a request to export it as CSV), through an **Import** page in the office app. Owners, managers and dispatcher/CSRs can import:
 
 - Upload the file.
 - Pick the report type (or let it be detected from the columns).
@@ -34,12 +34,16 @@ ServiceTitan reports export to CSV or Excel. `tools/st-import` reads them throug
 Import rules:
 
 - **Idempotent.** Every row keeps its ServiceTitan ID (customer ID, location ID, job number, invoice number), so re-importing updates rows instead of duplicating them.
-- **Raw files kept.** Each upload is stored unchanged, with who uploaded it and when.
+- **Raw rows kept.** Every row of each upload is stored unchanged, with who uploaded it and when. The file itself is also kept once file storage (Spaces) arrives in month 4.
+- **Import order:** technicians, pricebook, customers, equipment, memberships, invoices, payments, timesheets, so each file can link to rows already loaded.
+- **Never touches our own rows.** An import only creates or updates ServiceTitan-origin rows; rows created in the new system (`origin = new`) are never changed by an import.
 - **Money parsed straight to integer cents** (CLAUDE.md rule 1).
 - **Prove it.** After each import, an import report shows counts and dollar totals per business unit and year next to the totals from ServiceTitan's own summary reports. Differences are explained or fixed.
 - **Read-only.** ServiceTitan data is never written back. ServiceTitan only receives what people type into it.
 
-**Demo data first (owner decision):** development and testing use realistic demo data and demo CSV files shaped like ServiceTitan reports. The column mappings are config, and they're matched to DWRG's real exports (one of each report) before the pilot.
+**Demo data first (owner decision):** development and testing use realistic demo data and demo CSV files shaped like ServiceTitan reports. The column mappings are config (`tools/st-import/src/mappings`), and they're matched to DWRG's real exports (one of each report) before the pilot. Real pricebook categories are mapped to the pay engine's spiff category keys at the same time, so spiffs and combos pay in the history replay.
+
+**Known gaps before the pilot:** imports don't yet check `system_of_record`, so a pilot-crew job also typed into ServiceTitan would import as a second job; and customers created here and later added in ServiceTitan would import as duplicates until matching is built.
 
 ## Stages
 

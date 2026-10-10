@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/*
+ * The deck's colors. Orange is for fills (bars, badges with dark text), never
+ * for text: it doesn't have the contrast on paper.
+ */
+@theme {
+  --color-navy: #14213d;
+  --color-navy-soft: #2a3a5e;
+  --color-paper: #f7f5f0;
+  --color-blue: #1f5fc7;
+  --color-blue-dark: #174a9c;
+  --color-orange: #e8742a;
+  --color-line: #d9d4c7;
+  --color-ink: #1d1d1b;
+  --color-muted: #5b5a55;
+  --color-ok: #1e6b3a;
+  --color-ok-soft: #e3f1e7;
+  --color-bad: #a3271f;
+  --color-bad-soft: #fbe6e3;
+  --color-warn-soft: #fdebd9;
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+}
+
+@layer base {
+  /* Large type for the iPad: 18px base, so every rem-sized target grows with it. */
+  html {
+    font-size: 112.5%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-paper text-ink antialiased;
+    min-height: 100dvh;
+    /* No double-tap zoom delay on taps. */
+    touch-action: manipulation;
+  }
+
+  /* Visible keyboard focus everywhere. */
+  :focus-visible {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+}
+
+@utility safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility safe-x {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}

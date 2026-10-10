@@ -6,7 +6,7 @@ import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
-import { type Auth, withoutSessionTokens } from "./auth";
+import { AUTH_BASE_PATH, type Auth, isPublicAuthPath, withoutSessionTokens } from "./auth";
 import type { AppEnv, AuthedEnv, AuthedVariables } from "./context";
 import type { ApiEnv } from "./env";
 import { ApiError, handleError, handleNotFound } from "./errors";
@@ -120,9 +120,11 @@ export function createApp({ db, auth, env, logger, now, importFileStore }: Creat
   // 4. Routes. No login: /health and Better Auth's own endpoints.
   app.route("/", healthRoutes({ db, env }));
   // Sign-up is turned off in Better Auth; logins are created through POST /api/employees.
-  app.on(["GET", "POST"], "/api/auth/*", async (c) =>
-    withoutSessionTokens(await auth.handler(c.req.raw)),
-  );
+  // Only the allow-listed endpoints reach Better Auth (see AUTH_PUBLIC_PATHS); the rest are 404.
+  app.on(["GET", "POST"], `${AUTH_BASE_PATH}/*`, async (c) => {
+    if (!isPublicAuthPath(c.req.path)) return handleNotFound(c);
+    return withoutSessionTokens(await auth.handler(c.req.raw));
+  });
 
   // Everything else under /api needs a session; each route states its roles.
   const api = new Hono<AuthedEnv>();

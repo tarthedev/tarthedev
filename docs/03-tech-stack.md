@@ -161,7 +161,9 @@ Known limits and what to test in month 1 on one iPad:
 ## Security
 
 - Roles: owner, manager, dispatcher/CSR, tech, installer, customer. Techs see only their jobs and pay; CSRs can't see payroll.
-- Two-factor for office logins; iPads use a device passcode plus a short PIN.
+- No public sign-up: owners and managers create logins, and managers can't create owner logins.
+- Only the login endpoints the app needs are served (sign in, sign out, session); every other built-in auth endpoint returns 404, so nothing changes a user or password without an audit row. Self-service password change and reset come later as audited endpoints.
+- Two-factor for office logins; iPads use a device passcode plus a short PIN (not built yet).
 - Audit log for every money change: who, when, before and after.
 - Webhooks verified by signature and processed idempotently.
 - Backups: managed point-in-time restore + nightly off-site copy + a monthly restore drill.

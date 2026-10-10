@@ -64,8 +64,12 @@ ARG APP_VERSION=dev
 ENV VITE_APP_VERSION=${APP_VERSION}
 
 # The package's own build script: typecheck, then `vite build` into apps/web/dist.
+# Vite writes "hidden" source maps (not linked from the files) for error reports.
+# Caddy would serve anything in dist, so the maps are removed from what ships;
+# when Sentry is wired in, upload them from this stage before removing them.
 RUN pnpm --filter @dwrg/web build \
- && test -f apps/web/dist/index.html
+ && test -f apps/web/dist/index.html \
+ && find apps/web/dist -name '*.map' -type f -delete
 
 # ---------------------------------------------------------------------------
 # 5. Only the static files. Used with --output type=local,dest=<folder>.

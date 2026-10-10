@@ -14,6 +14,8 @@ import type { Logger } from "./logger";
  *
  * - Email and password only. No public sign-up: owners and managers create
  *   logins through POST /api/employees.
+ * - Only the endpoints in AUTH_PUBLIC_PATHS are served over HTTP (app.ts),
+ *   so nothing changes a login without an audit_log row.
  * - `role` and `active` are our columns on `user`. Neither can be set through
  *   Better Auth's endpoints (`input: false`).
  * - A turned-off login (`active = false`) can't start a session, and
@@ -23,6 +25,37 @@ import type { Logger } from "./logger";
 
 /** Better Auth's account provider id for email-and-password logins. */
 export const CREDENTIAL_PROVIDER_ID = "credential";
+
+/** Where Better Auth is mounted (app.ts and infra/Caddyfile agree on it). */
+export const AUTH_BASE_PATH = "/api/auth";
+
+/**
+ * The only Better Auth endpoints reachable over HTTP (below AUTH_BASE_PATH):
+ * signing in and out, and reading or ending your own sessions. Everything
+ * else Better Auth offers answers 404. Its self-service endpoints
+ * (update-user, change-password, change-email, delete-user, password reset,
+ * ...) write `user` and `account` rows without an audit_log entry
+ * (CLAUDE.md rule 4), so login changes go through our own audited endpoints
+ * (POST /api/employees today). An allow-list keeps endpoints that future
+ * Better Auth versions add closed until we choose to open them.
+ */
+export const AUTH_PUBLIC_PATHS: ReadonlySet<string> = new Set([
+  "/sign-in/email",
+  "/sign-out",
+  "/get-session",
+  "/list-sessions",
+  "/revoke-session",
+  "/revoke-sessions",
+  "/revoke-other-sessions",
+]);
+
+/** Whether an HTTP request to `path` (the full path, e.g. /api/auth/sign-in/email) may reach Better Auth. */
+export function isPublicAuthPath(path: string): boolean {
+  return (
+    path.startsWith(`${AUTH_BASE_PATH}/`) &&
+    AUTH_PUBLIC_PATHS.has(path.slice(AUTH_BASE_PATH.length))
+  );
+}
 
 export const SESSION_EXPIRES_IN_SECONDS = 60 * 60 * 24 * 7;
 
@@ -40,7 +73,7 @@ export function createAuth({ db, env, logger }: CreateAuthOptions) {
   return betterAuth({
     appName: "DWRG",
     baseURL: env.BETTER_AUTH_URL,
-    basePath: "/api/auth",
+    basePath: AUTH_BASE_PATH,
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: [...new Set([env.WEB_ORIGIN, env.BETTER_AUTH_URL])],
     database: drizzleAdapter(db, {

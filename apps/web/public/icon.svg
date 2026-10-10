@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t">
+<title id="t">DWRG</title>
+<rect width="512" height="512" rx="96" fill="#14213d"/>
+<path fill="#f7f5f0" fill-rule="evenodd" d="M153.6 112.64H240.64A122.88 122.88 0 0 1 240.64 358.4H153.6ZM199.68 158.72H240.64A76.8 76.8 0 0 1 240.64 312.32H199.68Z"/>
+<rect x="153.6" y="389.12" width="209.92" height="30.72" fill="#e8742a"/>
+</svg>

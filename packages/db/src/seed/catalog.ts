@@ -1,8 +1,12 @@
+import { SPIFF_CATEGORY } from "@dwrg/core";
 import type { EquipmentKind, PricebookKind } from "../schema";
 
 /**
  * Static demo catalog: pricebook, towns and word lists. Prices are realistic
  * flat-rate prices for the area but made up; nothing here is real DWRG data.
+ *
+ * Spiff items carry @dwrg/core's SPIFF_CATEGORY keys as combo tags, the keys
+ * the pay engine's combo rules match on (docs/02 section 7).
  */
 
 export interface CatalogItem {
@@ -89,23 +93,23 @@ export const PRICEBOOK: readonly CatalogItem[] = [
   // Add-ons with spiffs (docs/02 section 7)
   eqp("IAQ-UV", "UV light (coil and air)", "Indoor Air Quality", 695, 591, 165, 45, {
     spiffCents: 5000,
-    comboTags: ["uv_light"],
+    comboTags: [SPIFF_CATEGORY.uvLight],
   }),
   eqp("IAQ-SCRUB", "Air scrubber", "Indoor Air Quality", 1295, 1101, 420, 60, {
     spiffCents: 5000,
-    comboTags: ["air_purifier"],
+    comboTags: [SPIFF_CATEGORY.airScrubber],
   }),
   eqp("IAQ-PURIFIER", "Whole-home air purifier", "Indoor Air Quality", 1195, 1016, 360, 60, {
     spiffCents: 5000,
-    comboTags: ["air_purifier"],
+    comboTags: [SPIFF_CATEGORY.airPurifier],
   }),
   eqp("IAQ-DEHUM", "Whole-home dehumidifier", "Indoor Air Quality", 2895, 2461, 1050, 180, {
     spiffCents: 7500,
-    comboTags: ["dehumidifier"],
+    comboTags: [SPIFF_CATEGORY.dehumidifier],
   }),
   eqp("ELEC-SURGE", "HVAC surge protector", "Indoor Air Quality", 295, 251, 45, 30, {
     spiffCents: 2000,
-    comboTags: ["surge_protector"],
+    comboTags: [SPIFF_CATEGORY.surgeProtector],
   }),
   // HVAC replacement equipment (installed price)
   eqp(
@@ -207,21 +211,21 @@ export const PRICEBOOK: readonly CatalogItem[] = [
   }),
   eqp("WTR-FILTER", "Whole-home water filter", "Water Quality", 1895, 1611, 620, 150, {
     spiffCents: 7500,
-    comboTags: ["water_filter_or_softener"],
+    comboTags: [SPIFF_CATEGORY.waterFilter],
   }),
   eqp("WTR-SOFT", "Water softener", "Water Quality", 2795, 2376, 980, 180, {
     spiffCents: 7500,
-    comboTags: ["water_filter_or_softener"],
+    comboTags: [SPIFF_CATEGORY.waterSoftener],
   }),
   eqp("WTR-LEAKVALVE", "Leak-detection shut-off valve", "Water Quality", 895, 761, 290, 90, {
     spiffCents: 4000,
-    comboTags: ["leak_shutoff"],
+    comboTags: [SPIFF_CATEGORY.leakShutoffValve],
   }),
   // New construction (progress-billed per home)
   svc("NC-HVAC-HOME", "New construction HVAC, per home", "New Construction", 11500, null, 0, 960),
   // Membership (its spiff is a membership spiff rule, not an item spiff)
   svc(MEMBERSHIP_ITEM_CODE, "Comfort Club yearly membership", "Memberships", 199, null, 0, 0, {
-    comboTags: ["membership"],
+    comboTags: [SPIFF_CATEGORY.membership],
   }),
 ];
 

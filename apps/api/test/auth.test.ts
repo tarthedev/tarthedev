@@ -155,15 +155,46 @@ describe("no public sign-up", () => {
     expect(rows).toEqual([]);
   });
 
-  it("ignores attempts to set role or active through Better Auth", async () => {
-    const { cookie, id } = await loginAs(t, { role: "tech" });
-    await t.app.request(`${API_ORIGIN}/api/auth/update-user`, {
+  it("closes Better Auth's self-service endpoints, which would skip the audit log", async () => {
+    const login = await createLogin(t, { role: "tech", name: "Tess Tech" });
+    const cookie = await signIn(t, login.email, login.password);
+    const [before] = await t.db.select().from(user).where(eq(user.id, login.id));
+    const attempts: [string, Record<string, unknown>][] = [
+      ["update-user", { role: "owner", active: true, name: "Renamed Myself" }],
+      ["change-password", { currentPassword: login.password, newPassword: "a-new-password-1" }],
+      ["change-email", { newEmail: "elsewhere@test.dwrg.example" }],
+      ["delete-user", { password: login.password }],
+      ["set-password", { newPassword: "a-new-password-1" }],
+      ["request-password-reset", { email: login.email }],
+      ["reset-password", { newPassword: "a-new-password-1", token: "guess" }],
+      ["send-verification-email", { email: login.email }],
+      ["sign-in/social", { provider: "google" }],
+      ["unlink-account", { providerId: "credential" }],
+    ];
+    for (const [path, body] of attempts) {
+      const res = await t.app.request(`${API_ORIGIN}/api/auth/${path}`, {
+        method: "POST",
+        headers: { Cookie: cookie, Origin: WEB_ORIGIN, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      expect(res.status, path).toBe(404);
+      expect((await errorOf(res)).code, path).toBe("not_found");
+    }
+    const [after] = await t.db.select().from(user).where(eq(user.id, login.id));
+    expect(after).toEqual(before);
+    // The old password still works: change-password never ran.
+    expect(await signIn(t, login.email, login.password)).toMatch(/session_token=/);
+  });
+
+  it("keeps the session endpoints the web app needs", async () => {
+    const { cookie } = await loginAs(t, { role: "dispatcher_csr" });
+    const other = await call(t, "/api/auth/revoke-other-sessions", {
       method: "POST",
-      headers: { Cookie: cookie, Origin: WEB_ORIGIN, "Content-Type": "application/json" },
-      body: JSON.stringify({ role: "owner", name: "Still A Tech" }),
+      cookie,
+      json: {},
     });
-    const [row] = await t.db.select({ role: user.role }).from(user).where(eq(user.id, id));
-    expect(row?.role).toBe("tech");
+    expect(other.status).toBe(200);
+    expect((await call(t, "/api/me", { cookie })).status).toBe(200);
   });
 });
 

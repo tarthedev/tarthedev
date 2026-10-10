@@ -2,7 +2,7 @@
 
 A ServiceTitan-style field-service system for **DWRG Heating & Cooling** (Elizabeth City, NC), built around gross profit: phones, booking, AI-assisted dispatch, a Safari home-screen iPad app for techs, Good/Better/Best sales, invoicing and payments, memberships, inventory, a gross-profit commission plan with a live tech scoreboard, reports, and QuickBooks Online sync.
 
-**Status:** planning. Nothing is built yet. The build starts October 2026. ServiceTitan keeps running while we build; a pilot crew proves the new system, then everyone switches. There is no hard cutover date and no ServiceTitan API (data comes over through report exports).
+**Status:** building (month 1, foundation and import, October 2026): logins with roles, the database with deterministic demo data, the ServiceTitan report importer and office Import page, customer search and files, the pay engine with every worked example as a test (practice only), the iPad GPS test page, and production hosting with backups. ServiceTitan keeps running while we build; a pilot crew proves the new system, then everyone switches. There is no hard cutover date and no ServiceTitan API (data comes over through report exports).
 
 ## The plan
 
@@ -16,6 +16,7 @@ A ServiceTitan-style field-service system for **DWRG Heating & Cooling** (Elizab
 | [docs/05-data-model.md](docs/05-data-model.md) | Tables and conventions |
 | [docs/06-servicetitan-migration.md](docs/06-servicetitan-migration.md) | Running side by side with ServiceTitan: report-export imports, pilot crew, the switch |
 | [docs/07-open-questions.md](docs/07-open-questions.md) | What we still need to decide |
+| [docs/runbooks/](docs/runbooks/) | Deploying, backups and restores, monitoring |
 
 ## Presentations
 
@@ -28,4 +29,15 @@ Slide decks for each audience (private on claude.ai until shared):
 
 ## Building it
 
-Built with Claude Code. Start with [CLAUDE.md](CLAUDE.md) for the house rules.
+Built with Claude Code. Start with [CLAUDE.md](CLAUDE.md) for the house rules and every command. To run it locally (Node 22, pnpm 10, PostgreSQL 16+):
+
+```sh
+pnpm install
+pnpm dev:db                          # local Postgres with dwrg_dev and dwrg_test
+cp .env.example .env
+pnpm db:migrate && pnpm db:seed      # schema and demo data (made up, never real customers)
+pnpm --filter @dwrg/api seed-auth    # demo logins, password demo-password-123
+pnpm --filter @dwrg/api dev          # API on http://localhost:8787
+pnpm --filter @dwrg/web dev          # web app on http://localhost:5173
+pnpm check                           # lint, typecheck and tests
+```

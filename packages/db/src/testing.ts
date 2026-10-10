@@ -104,10 +104,26 @@ async function dropDatabase(adminUrl: string, name: string): Promise<void> {
   if (!name.startsWith(TEST_DATABASE_PREFIX)) {
     throw new Error(`Refusing to drop ${name}: not a test database`);
   }
-  await withAdmin(adminUrl, (admin) =>
-    admin.unsafe(`drop database if exists "${name}" with (force)`),
-  );
+  // A new database soon gets an autovacuum worker (it analyzes the catalogs the
+  // migrations filled). The worker runs as the bootstrap superuser, which a
+  // non-superuser's DROP ... WITH (FORCE) may not terminate: "permission denied
+  // to terminate process" (42501). It finishes within moments, so try again.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await withAdmin(adminUrl, (admin) =>
+        admin.unsafe(`drop database if exists "${name}" with (force)`),
+      );
+      return;
+    } catch (error) {
+      const code = (error as { code?: unknown } | null)?.code;
+      if (code !== "42501" || attempt >= DROP_ATTEMPTS) throw error;
+      await new Promise((resolve) => setTimeout(resolve, DROP_RETRY_MS * attempt));
+    }
+  }
 }
+
+const DROP_ATTEMPTS = 8;
+const DROP_RETRY_MS = 250;
 
 async function withAdmin<T>(adminUrl: string, fn: (admin: postgres.Sql) => Promise<T>): Promise<T> {
   const admin = postgres(adminUrl, { max: 1, onnotice: () => {} });

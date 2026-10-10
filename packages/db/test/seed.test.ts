@@ -1,3 +1,4 @@
+import { DEFAULT_COMBO_RULES, evaluateInvoiceSpiffs, SPIFF_CATEGORY } from "@dwrg/core";
 import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { customers } from "../src/schema";
@@ -101,18 +102,9 @@ describe("demo data generator", () => {
 
     expect(data.pricebookItems.length).toBeGreaterThanOrEqual(55);
     expect(data.pricebookItems.length).toBeLessThanOrEqual(70);
+    // Every spiff key the pay engine knows is on a demo item (docs/02 section 7).
     const tags = new Set(data.pricebookItems.flatMap((p) => p.comboTags ?? []));
-    for (const tag of [
-      "uv_light",
-      "air_purifier",
-      "dehumidifier",
-      "surge_protector",
-      "water_filter_or_softener",
-      "leak_shutoff",
-      "membership",
-    ]) {
-      expect(tags).toContain(tag);
-    }
+    for (const tag of Object.values(SPIFF_CATEGORY)) expect(tags).toContain(tag);
     const membership = data.pricebookItems.find((p) => p.comboTags?.includes("membership"));
     expect(membership?.priceCents).toBe(19_900);
     expect(data.membershipPlans[0]?.priceCents).toBe(19_900);
@@ -131,6 +123,28 @@ describe("demo data generator", () => {
     expect(data.equipment.every((e) => e.installYear && e.installYear <= 2026)).toBe(true);
     expect(summary.membershipShareBps).toBeGreaterThanOrEqual(2500);
     expect(summary.membershipShareBps).toBeLessThanOrEqual(3500);
+  });
+
+  it("tags pricebook items so the pay engine's combo rules match them", () => {
+    // docs/02 section 7: UV light, surge protector, leak valve, water filter and
+    // one membership on one invoice pay both combo bonuses.
+    const codes = ["IAQ-UV", "ELEC-SURGE", "WTR-LEAKVALVE", "WTR-FILTER", "MEMB-YR"];
+    const lines = codes.map((code) => {
+      const item = data.pricebookItems.find((p) => p.code === code);
+      if (!item) throw new Error(`demo pricebook has no ${code}`);
+      return { itemId: item.id, tags: item.comboTags ?? [], qty: 1 };
+    });
+    const result = evaluateInvoiceSpiffs(
+      { invoiceId: "demo", lines, shares: [{ userId: "tech", shareBps: 10_000 }] },
+      { items: [], combos: DEFAULT_COMBO_RULES },
+    );
+    expect(result.awards.map((a) => a.label).sort()).toEqual([
+      "Clean Air Combo",
+      "Water Guard Combo",
+    ]);
+    // The softener completes Water Guard too.
+    const softener = data.pricebookItems.find((p) => p.code === "WTR-SOFT");
+    expect(softener?.comboTags).toEqual([SPIFF_CATEGORY.waterSoftener]);
   });
 
   it("gives every row a unique DEMO- st_id", () => {

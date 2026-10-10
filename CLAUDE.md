@@ -43,14 +43,28 @@ TypeScript everywhere. React 19 + Vite PWA (`apps/web`), Hono API with WebSocket
 
 Node 22, pnpm 10, PostgreSQL 16+ (17 in production).
 
+Setup and data:
+
 - `pnpm install`: install everything
 - `pnpm dev:db`: start a local Postgres with `dwrg_dev` and `dwrg_test` (Docker, or a local PostgreSQL install)
 - `cp .env.example .env`: local settings (`DATABASE_URL`, `TEST_DATABASE_URL`, auth secret)
 - `pnpm db:generate`: create a migration after changing the Drizzle schema in `packages/db`
 - `pnpm db:migrate`: apply migrations (uses `DATABASE_URL`)
-- `pnpm db:seed`: load deterministic demo data (no real customer data yet; owner decision)
-- `pnpm lint`, `pnpm typecheck`, `pnpm test`: Biome, TypeScript and Vitest across all packages; `pnpm check` runs all three
-- `pnpm --filter @dwrg/api dev` and `pnpm --filter @dwrg/web dev`: run the API and the web app
-- `pnpm --filter @dwrg/web e2e`: Playwright tests at iPad size (WebKit in CI; Chromium locally if WebKit isn't installed)
+- `pnpm db:seed`: load deterministic demo data (no real customer data yet; owner decision). Reseeding replaces the demo rows; it refuses when non-demo data exists or `NODE_ENV=production`
+- `pnpm --filter @dwrg/api seed-auth`: give the seeded demo staff logins, all with password `demo-password-123` (emails `firstname.lastname@demo.dwrg.example`; the owner is `jeffrey.roberts@demo.dwrg.example`). Run after `db:seed`; refuses in production
 
-Database tests use `TEST_DATABASE_URL` and must leave it clean.
+Run and check:
+
+- `pnpm --filter @dwrg/api dev` and `pnpm --filter @dwrg/web dev`: run the API (http://localhost:8787, `/health`) and the web app (http://localhost:5173)
+- `pnpm lint`, `pnpm typecheck`, `pnpm test`: Biome, TypeScript and Vitest across all packages; `pnpm check` runs all three
+- `pnpm --filter @dwrg/web build`: production PWA build (typecheck, then Vite)
+- `pnpm --filter @dwrg/web e2e`: Playwright tests at iPad size (WebKit in CI; Chromium locally if WebKit isn't installed). Locally: `pnpm --filter @dwrg/web e2e --project=ipad-chromium` (Chromium from `CHROMIUM_PATH` or `/opt/pw-browsers/chromium`). It starts its own API and web server on ports 18787 and 15173 against a throwaway database loaded with the demo data, and drops it afterwards; `E2E_REUSE=1` reuses servers already running
+- `pnpm --filter @dwrg/st-import demo-csvs [--out=<dir>]`: regenerate the demo ServiceTitan exports and `summary.json` in `tools/st-import/fixtures/demo` (deterministic); commit them whenever the demo data changes
+- `pnpm --filter @dwrg/web icons`: redraw the PWA icons in `apps/web/public`
+
+Deploy and operate (DigitalOcean droplet; see `docs/runbooks/`):
+
+- `infra/scripts/deploy.sh staging <commit>`, then `infra/scripts/deploy.sh production <commit>` (a commit staging ran); `--rollback` goes back one deploy ([deploy.md](docs/runbooks/deploy.md))
+- `infra/scripts/backup-db.sh` and `infra/scripts/restore-db.sh` ([backup-restore.md](docs/runbooks/backup-restore.md)); health and alerts in [monitoring.md](docs/runbooks/monitoring.md)
+
+Database tests use `TEST_DATABASE_URL` and must leave it clean: create databases with `createTestDatabase()` from `@dwrg/db/testing` (throwaway `dwrg_tmp_*` databases, dropped on `close()`).

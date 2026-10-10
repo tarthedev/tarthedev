@@ -5,8 +5,8 @@ import { PRICEBOOK_KINDS } from "./enums";
 
 /**
  * Flat-rate pricebook. `spiff_cents` is the item spiff (docs/02 section 7);
- * `combo_tags` are what combo rules match on (e.g. uv_light, surge_protector,
- * membership, leak_shutoff, water_filter_or_softener).
+ * `combo_tags` are what combo rules match on: @dwrg/core's SPIFF_CATEGORY keys
+ * (uv_light, surge_protector, membership, leak_shutoff_valve, water_filter, ...).
  * `member_price_cents` null means no separate member price.
  */
 export const pricebookItems = pgTable(

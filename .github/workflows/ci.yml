@@ -31,9 +31,23 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      - name: Shell scripts (infra)
+        run: shellcheck -x infra/scripts/*.sh
       - run: pnpm db:migrate
       - run: pnpm test
+      - name: Web production build (PWA)
+        run: pnpm --filter @dwrg/web build
       - name: iPad (WebKit) end-to-end tests
         run: |
           pnpm --filter @dwrg/web exec playwright install --with-deps webkit
           pnpm --filter @dwrg/web e2e --project=ipad-webkit
+      - name: Keep the Playwright report when the iPad tests fail
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          if-no-files-found: ignore
+          retention-days: 14
