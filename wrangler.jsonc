@@ -15,8 +15,9 @@
   },
   "routes": [{ "pattern": "rollinsonnetwork.com", "custom_domain": true }],
   "vars": {
-    // Stripe Tax needs a head office address in Dashboard > Settings > Tax before this can be "true".
-    "AUTOMATIC_TAX": "false",
+    // Stripe Tax is active (head office: Elizabeth City, NC). It only charges tax where you add a
+    // registration in Dashboard > Tax > Registrations; until then it tracks thresholds and charges $0.
+    "AUTOMATIC_TAX": "true",
     // Days between paying $756 and the first $127 care-plan charge.
     "CARE_PLAN_DELAY_DAYS": "30",
     "ALERT_EMAIL": "aaron@rollinsonnetwork.com",

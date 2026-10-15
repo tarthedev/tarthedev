@@ -56,8 +56,8 @@ dashboard: **Workers & Pages > rnet > Settings > Build**.
    subdomain and don't touch your Zoho mail. Then create an API key for `RESEND_API_KEY`.
    Alerts go to `ALERT_EMAIL` in `wrangler.jsonc`.
 5. **Stripe Dashboard settings** (no code):
-   - **Settings > Tax:** add your head office address. Once you're registered where needed, set
-     `AUTOMATIC_TAX` to `"true"` in `wrangler.jsonc`.
+   - **Tax > Registrations:** automatic tax is on. It charges $0 until you add a registration
+     (for example, North Carolina once you're registered there), then it adds the right tax at checkout.
    - **Settings > Branding:** add your logo and color (shown on Checkout, receipts, invoices).
    - **Settings > Billing > Customer portal:** turn on the login link so clients can cancel the
      care plan or update their card themselves.
