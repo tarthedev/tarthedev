@@ -15,7 +15,7 @@ const NTFY_PRIORITY = { urgent: 5, high: 4, default: 3 } as const;
 export async function sendAlert(env: Env, alert: Alert): Promise<number> {
   const jobs: Promise<void>[] = [];
   if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID) jobs.push(sendTelegram(env, alert));
-  if (env.NTFY_TOPIC) jobs.push(sendPush(env, alert));
+  if (env.NTFY_TOPIC && env.NTFY_SERVER) jobs.push(sendPush(env, alert));
   if (env.RESEND_API_KEY && env.ALERT_EMAIL) jobs.push(sendEmail(env, alert));
   if (!jobs.length) {
     console.warn('no alert channels configured', alert);
@@ -47,7 +47,7 @@ async function sendTelegram(env: Env, alert: Alert) {
 // ntfy.sh doesn't accept connections from Cloudflare Workers (times out with a 522), so this only
 // works with a self-hosted ntfy server set in NTFY_SERVER.
 async function sendPush(env: Env, alert: Alert) {
-  const res = await fetch(env.NTFY_SERVER || 'https://ntfy.sh', {
+  const res = await fetch(env.NTFY_SERVER!, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     signal: AbortSignal.timeout(5000),
