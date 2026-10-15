@@ -1,0 +1,19 @@
+{
+  "name": "rollinson-stripe-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "setup:stripe": "node --env-file=.dev.vars scripts/setup-stripe.mjs"
+  },
+  "dependencies": {
+    "stripe": "^23.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261006.1",
+    "typescript": "^5.9.0",
+    "wrangler": "^4.151.0"
+  }
+}
