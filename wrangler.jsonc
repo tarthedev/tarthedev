@@ -1,15 +1,27 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "rollinson-stripe",
+  // Same name as the Worker serving rollinsonnetwork.com today, so a deploy replaces it in place.
+  "name": "rnet",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/admin/*", "/webhook"]
+  },
+  "routes": [{ "pattern": "rollinsonnetwork.com", "custom_domain": true }],
   "vars": {
     // Stripe Tax needs a head office address in Dashboard > Settings > Tax before this can be "true".
     "AUTOMATIC_TAX": "false",
-    // Days after the build invoice is paid before the first $129 care-plan charge.
-    "CARE_PLAN_DELAY_DAYS": "30"
+    // Days between paying $756 and the first $127 care-plan charge.
+    "CARE_PLAN_DELAY_DAYS": "30",
+    "ALERT_EMAIL": "aaron@rollinsonnetwork.com",
+    "ALERT_FROM": "Rollinson Network Leads <leads@rollinsonnetwork.com>"
   }
-  // Secrets (set with `wrangler secret put`): STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ADMIN_TOKEN
+  // Secrets (set with `npx wrangler secret put NAME`):
+  //   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ADMIN_TOKEN, NTFY_TOPIC, RESEND_API_KEY
 }

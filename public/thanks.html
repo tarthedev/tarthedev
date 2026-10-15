@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thank you — Rollinson Network</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="mark"><a href="/" style="color:inherit;text-decoration:none">Rollinson Network</a> <span>— websites for local business</span></div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="lede">
+    <h1 id="title">Thank you.</h1>
+    <p id="body">I've got it, and I'll be in touch shortly from (252) 250-3044.</p>
+  </div>
+  <div class="cta">
+    <p>Questions in the meantime? Call or text me.</p>
+    <a class="btn" href="tel:+12522503044">Call (252) 250-3044</a>
+    <a class="btn alt" href="sms:+12522503044">Text me</a>
+  </div>
+  <footer>
+    Rollinson Network · Elizabeth City, North Carolina<br>
+    <a href="mailto:aaron@rollinsonnetwork.com">aaron@rollinsonnetwork.com</a>
+  </footer>
+</div>
+<script>
+  // /thanks?paid=1 after Stripe Checkout; /thanks?lead=1 after the no-JavaScript form post.
+  const q = new URLSearchParams(location.search);
+  if (q.has('paid')) {
+    document.getElementById('title').textContent = 'Payment received — thank you.';
+    document.getElementById('body').textContent =
+      "Your receipt is on its way to your email. I'll call you within a day to get your site live.";
+  }
+</script>
+</body>
+</html>

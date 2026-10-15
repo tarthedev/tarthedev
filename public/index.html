@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rollinson Network — Websites for Elizabeth City businesses</title>
+<meta name="description" content="Aaron Rollinson builds websites for trades and local businesses in Elizabeth City and the Albemarle. $756, live in a week. Free preview before you pay.">
+<link rel="canonical" href="https://rollinsonnetwork.com/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="mark">Rollinson Network <span>— websites for local business</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="lede">
+    <h1>Somebody in Elizabeth City is looking for what you do. Right now.</h1>
+    <p>If nothing comes up when they search, they call the next name on the list. That's the whole problem, and it's a cheap one to fix.</p>
+    <a class="btn lede-btn" href="#start">See if it's a fit — takes a minute</a>
+  </div>
+
+  <div class="quote">
+    <div class="price">
+      <span class="now">$756</span>
+    </div>
+    <div class="price-note">A five-page website, live in a week.</div>
+    <div class="price-sub">$127/month after that if you want me to keep it running &mdash; no contract, cancel whenever.</div>
+  </div>
+
+  <section>
+    <h2>What's in it</h2>
+    <ul class="items">
+      <li>Built for a phone first <span>most of your traffic</span></li>
+      <li>Tap-to-call on every screen <span>no forms to fill out</span></li>
+      <li>Your services, hours, and area <span>written in plain English</span></li>
+      <li>Google Maps and your reviews <span>pulled in and linked</span></li>
+      <li>Your Google Business Profile cleaned up <span>included, not extra</span></li>
+      <li>Hosting and the domain <span>I handle it</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>How it goes</h2>
+    <ol class="steps">
+      <li><b>I build it first.</b> Before you spend a dollar, I put together a real page with your name, your number, and your reviews on it. You look at it on your phone.</li>
+      <li><b>You tell me what's wrong with it.</b> Wrong services listed, wrong hours, hate the color. I fix it.</li>
+      <li><b>It goes live.</b> You pay when you're happy with it, not before. Usually about a week start to finish.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Work I've done</h2>
+
+    <!-- To add another: copy this whole <a class="work"> block and swap the name, description, and link. -->
+    <a class="work" href="https://dwrgheatingandcooling.net" target="_blank" rel="noopener">
+      <div class="chrome">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="addr">dwrgheatingandcooling.net</span>
+      </div>
+      <div class="meta">
+        <div class="cname">DWRG Heating &amp; Cooling</div>
+        <div class="ctype">Rick Gilbert Refrigeration · Elizabeth City, NC</div>
+        <p class="cdesc">HVAC, plumbing and refrigeration, in business here since 1974. Services, service area, licensing, and a phone number you can tap from any screen.</p>
+        <span class="curl">dwrgheatingandcooling.net</span>
+      </div>
+    </a>
+  </section>
+
+  <section>
+    <h2>Who you'd be dealing with</h2>
+    <div class="me">
+      <p>I'm Aaron Rollinson. I live here, I sell phones and plans for a living, and I spend most of my day explaining technology to people who'd rather not think about it.</p>
+      <p>That's the same job as this one. You shouldn't have to learn what hosting is or what a domain costs. You should get a website that makes your phone ring.</p>
+      <p>I'm building my client list right now, which is why the price is what it is and why I'll build you a preview for free. That won't be true forever.</p>
+    </div>
+  </section>
+
+  <!-- Lead qualifier. Works without JavaScript (all questions show at once); app.js turns it into one question per screen. -->
+  <section class="cta" id="start">
+    <h2>Want to see yours before you decide?</h2>
+    <p>Answer a few quick questions. I'll call you, then build a free preview and text you the link. No charge, no pitch until you've seen it.</p>
+
+    <form class="quiz" id="quiz" method="post" action="/api/lead" novalidate>
+      <div class="progress" aria-hidden="true"><i></i></div>
+
+      <fieldset data-step>
+        <legend>What kind of business do you run?</legend>
+        <label class="opt"><input type="radio" name="trade" value="HVAC, plumbing or electrical" required> HVAC, plumbing or electrical</label>
+        <label class="opt"><input type="radio" name="trade" value="Roofing, construction or remodeling"> Roofing, construction or remodeling</label>
+        <label class="opt"><input type="radio" name="trade" value="Lawn, landscaping or cleaning"> Lawn, landscaping or cleaning</label>
+        <label class="opt"><input type="radio" name="trade" value="Auto repair or detailing"> Auto repair or detailing</label>
+        <label class="opt"><input type="radio" name="trade" value="Salon, barber or beauty"> Salon, barber or beauty</label>
+        <label class="opt"><input type="radio" name="trade" value="Restaurant or food"> Restaurant or food</label>
+        <label class="opt"><input type="radio" name="trade" value="Something else"> Something else</label>
+      </fieldset>
+
+      <fieldset data-step>
+        <legend>Do you have a website right now?</legend>
+        <label class="opt"><input type="radio" name="has_site" value="none" required> No, nothing</label>
+        <label class="opt"><input type="radio" name="has_site" value="facebook"> Just a Facebook page</label>
+        <label class="opt"><input type="radio" name="has_site" value="outdated"> Yes, but it's old or doesn't bring calls</label>
+        <label class="opt"><input type="radio" name="has_site" value="fine"> Yes, and it works fine</label>
+      </fieldset>
+
+      <fieldset data-step>
+        <legend>Where are most of your customers?</legend>
+        <label class="opt"><input type="radio" name="area" value="Pasquotank" required> Pasquotank / Elizabeth City</label>
+        <label class="opt"><input type="radio" name="area" value="Camden"> Camden</label>
+        <label class="opt"><input type="radio" name="area" value="Currituck"> Currituck</label>
+        <label class="opt"><input type="radio" name="area" value="Perquimans"> Perquimans</label>
+        <label class="opt"><input type="radio" name="area" value="Elsewhere"> Somewhere else</label>
+      </fieldset>
+
+      <fieldset data-step>
+        <legend>When would you want it live?</legend>
+        <label class="opt"><input type="radio" name="timeline" value="asap" required> As soon as possible</label>
+        <label class="opt"><input type="radio" name="timeline" value="month"> In the next month or so</label>
+        <label class="opt"><input type="radio" name="timeline" value="later"> Just looking for now</label>
+      </fieldset>
+
+      <fieldset data-step>
+        <legend>$756 to build it, then $127/month if I keep it running. Does that work?</legend>
+        <label class="opt"><input type="radio" name="budget" value="yes" required> Yes, that works</label>
+        <label class="opt"><input type="radio" name="budget" value="talk"> Maybe — I'd want to talk first</label>
+        <label class="opt"><input type="radio" name="budget" value="no"> That's more than I can spend right now</label>
+      </fieldset>
+
+      <fieldset data-step>
+        <legend>Last thing — where do I reach you?</legend>
+        <label class="field">Your name <input type="text" name="name" autocomplete="name" required maxlength="80"></label>
+        <label class="field">Business name <input type="text" name="business" autocomplete="organization" required maxlength="120"></label>
+        <label class="field">Cell number <input type="tel" name="phone" autocomplete="tel" inputmode="tel" required placeholder="(252) 555-0123"></label>
+        <label class="field">Email <small>(optional)</small> <input type="email" name="email" autocomplete="email" maxlength="120"></label>
+        <label class="field">Best time to call
+          <select name="best_time">
+            <option>Anytime</option>
+            <option>Morning</option>
+            <option>Afternoon</option>
+            <option>Evening</option>
+          </select>
+        </label>
+        <!-- Spam trap: hidden from people, bots fill it in. -->
+        <label class="trap" aria-hidden="true">Leave this empty <input type="text" name="company_site" tabindex="-1" autocomplete="off"></label>
+        <input type="hidden" name="started_at" value="">
+        <button class="btn" type="submit">Send — I'll call you</button>
+      </fieldset>
+
+      <div class="quiz-nav">
+        <button type="button" class="back" hidden>&larr; Back</button>
+        <p class="error" role="alert" hidden></p>
+      </div>
+    </form>
+
+    <div class="done" id="done" hidden tabindex="-1">
+      <h3>Got it — thanks.</h3>
+      <p>I'll call you soon from (252) 250-3044. If you'd rather not wait, call or text me now.</p>
+    </div>
+
+    <a class="btn alt" href="sms:+12522503044">Rather text? Send me your business name</a>
+    <a class="btn alt" href="tel:+12522503044">Or call (252) 250-3044</a>
+  </section>
+
+  <section class="pay" id="pay">
+    <h2>Seen your preview and ready to go?</h2>
+    <p>Pay in full here. Checkout is handled securely by Stripe — cards, Apple Pay and Google Pay all work.</p>
+
+    <form method="post" action="/api/checkout" class="plan">
+      <input type="hidden" name="plan" value="care">
+      <div class="plan-head"><b>Website + care plan</b><span class="tag">most pick this</span></div>
+      <p><b>$756 today</b>, then $127/month starting in 30 days. Hosting, domain, updates and fixes handled. Cancel anytime.</p>
+      <button class="btn" type="submit">Pay $756 &amp; start care plan</button>
+    </form>
+
+    <form method="post" action="/api/checkout" class="plan">
+      <input type="hidden" name="plan" value="site">
+      <div class="plan-head"><b>Website only</b></div>
+      <p><b>$756 one time.</b> You take it from there.</p>
+      <button class="btn alt" type="submit">Pay $756</button>
+    </form>
+  </section>
+
+  <footer>
+    Rollinson Network · Elizabeth City, North Carolina<br>
+    Serving Pasquotank, Camden, Currituck, and Perquimans counties.<br>
+    <a href="mailto:aaron@rollinsonnetwork.com">aaron@rollinsonnetwork.com</a>
+  </footer>
+
+</div>
+
+<script src="/app.js" defer></script>
+</body>
+</html>
