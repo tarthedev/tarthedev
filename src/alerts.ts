@@ -14,6 +14,7 @@ const NTFY_PRIORITY = { urgent: 5, high: 4, default: 3 } as const;
 // or -1 when none are configured (so local dev without secrets still works).
 export async function sendAlert(env: Env, alert: Alert): Promise<number> {
   const jobs: Promise<void>[] = [];
+  if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID) jobs.push(sendTelegram(env, alert));
   if (env.NTFY_TOPIC) jobs.push(sendPush(env, alert));
   if (env.RESEND_API_KEY && env.ALERT_EMAIL) jobs.push(sendEmail(env, alert));
   if (!jobs.length) {
@@ -25,10 +26,31 @@ export async function sendAlert(env: Env, alert: Alert): Promise<number> {
   return results.filter((r) => r.status === 'fulfilled').length;
 }
 
+// Telegram turns the phone number into a tap-to-call link on its own.
+async function sendTelegram(env: Env, alert: Alert) {
+  const icon = alert.priority === 'urgent' ? '🔥' : alert.priority === 'high' ? '📞' : '📝';
+  const text = `${icon} <b>${escape(alert.title)}</b>\n\n${alert.lines.map(escape).join('\n')}`;
+  const res = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    signal: AbortSignal.timeout(5000),
+    body: JSON.stringify({
+      chat_id: env.TELEGRAM_CHAT_ID,
+      text,
+      parse_mode: 'HTML',
+      disable_notification: alert.priority === 'default',
+    }),
+  });
+  if (!res.ok) throw new Error(`telegram ${res.status}: ${await res.text()}`);
+}
+
+// ntfy.sh doesn't accept connections from Cloudflare Workers (times out with a 522), so this only
+// works with a self-hosted ntfy server set in NTFY_SERVER.
 async function sendPush(env: Env, alert: Alert) {
   const res = await fetch(env.NTFY_SERVER || 'https://ntfy.sh', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
+    signal: AbortSignal.timeout(5000),
     body: JSON.stringify({
       topic: env.NTFY_TOPIC,
       title: alert.title,
@@ -54,6 +76,7 @@ async function sendEmail(env: Env, alert: Alert) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
+    signal: AbortSignal.timeout(5000),
     body: JSON.stringify({
       from: env.ALERT_FROM || 'Rollinson Network <leads@rollinsonnetwork.com>',
       to: [env.ALERT_EMAIL],

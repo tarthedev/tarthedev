@@ -1,15 +1,18 @@
 import Stripe from 'stripe';
-import { handleLead } from './leads';
+import { handleLead, listLeads } from './leads';
 import { createBuildInvoice, createCheckout, handleWebhook, stripeClient } from './billing';
 
 export interface Env {
   ASSETS: Fetcher;
+  LEADS: KVNamespace;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
   ADMIN_TOKEN: string;
   AUTOMATIC_TAX: string;
   CARE_PLAN_DELAY_DAYS: string;
   // Lead alerts — any channel left unset is skipped.
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_CHAT_ID?: string;
   NTFY_TOPIC?: string;
   NTFY_SERVER?: string;
   RESEND_API_KEY?: string;
@@ -32,6 +35,10 @@ export default {
           return await createBuildInvoice(request, env, stripeClient(env));
         }
       }
+      if (request.method === 'GET' && pathname === '/admin/leads') {
+        if (!isAdmin(request, env)) return new Response('Not authorized', { status: 401 });
+        return await listLeads(env);
+      }
       if (pathname.startsWith('/api/') || pathname.startsWith('/admin/') || pathname === '/webhook') {
         return Response.json({ error: 'not found' }, { status: 404 });
       }
@@ -44,8 +51,10 @@ export default {
   },
 } satisfies ExportedHandler<Env>;
 
+// Accepts "Authorization: Bearer <token>" or, for bookmarking in a browser, "?key=<token>".
 function isAdmin(request: Request, env: Env): boolean {
-  const header = request.headers.get('authorization') ?? '';
+  const key = new URL(request.url).searchParams.get('key');
+  const header = key ? `Bearer ${key}` : (request.headers.get('authorization') ?? '');
   const expected = `Bearer ${env.ADMIN_TOKEN}`;
   if (!env.ADMIN_TOKEN || header.length !== expected.length) return false;
   const enc = new TextEncoder();

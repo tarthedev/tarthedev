@@ -13,7 +13,12 @@
     "not_found_handling": "404-page",
     "run_worker_first": ["/api/*", "/admin/*", "/webhook"]
   },
-  "routes": [{ "pattern": "rollinsonnetwork.com", "custom_domain": true }],
+  // Every lead is saved here before alerts go out, so none are lost if an alert fails.
+  "kv_namespaces": [{ "binding": "LEADS", "id": "1345ac2cda9e4003bc61948dfaf92256" }],
+  "routes": [
+    { "pattern": "rollinsonnetwork.com", "custom_domain": true },
+    { "pattern": "www.rollinsonnetwork.com", "custom_domain": true }
+  ],
   "vars": {
     // Stripe Tax is active (head office: Elizabeth City, NC). It only charges tax where you add a
     // registration in Dashboard > Tax > Registrations; until then it tracks thresholds and charges $0.

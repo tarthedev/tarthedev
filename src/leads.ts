@@ -54,7 +54,16 @@ export async function handleLead(request: Request, env: Env): Promise<Response> 
     `Budget: ${BUDGET_LABEL[f.budget] ?? '—'}`,
     `Score: ${score} (${grade})`,
   ];
-  console.log('lead', JSON.stringify({ grade, score, ...f, phone }));
+  const record = { at: new Date().toISOString(), grade, score, ...f, phone };
+  delete (record as Record<string, unknown>).company_site;
+  delete (record as Record<string, unknown>).started_at;
+  console.log('lead', JSON.stringify(record));
+  // Keys sort newest-first so /admin/leads can list without loading everything.
+  const key = `lead:${String(9e15 - Date.now()).padStart(16, '0')}:${crypto.randomUUID().slice(0, 8)}`;
+  const saved = await env.LEADS.put(key, JSON.stringify(record)).then(
+    () => true,
+    (err) => (console.error('lead save failed:', err), false),
+  );
 
   const delivered = await sendAlert(env, {
     title: `${grade} lead: ${f.business} — ${formatPhone(phone)}`,
@@ -63,7 +72,33 @@ export async function handleLead(request: Request, env: Env): Promise<Response> 
     replyTo: f.email || undefined,
     priority: grade === 'HOT' ? 'urgent' : grade === 'WARM' ? 'high' : 'default',
   });
-  // Every configured channel failed: tell the visitor so they call instead of waiting.
-  if (delivered === 0) return reply(false, 502, 'could not deliver');
+  // Only tell the visitor to call instead if the lead was neither saved nor alerted.
+  if (!saved && delivered <= 0) return reply(false, 502, 'could not deliver');
   return reply(true);
+}
+
+// Private list of saved leads: https://rollinsonnetwork.com/admin/leads?key=ADMIN_TOKEN
+export async function listLeads(env: Env): Promise<Response> {
+  const { keys } = await env.LEADS.list({ prefix: 'lead:', limit: 200 });
+  const leads = (await Promise.all(keys.map((k) => env.LEADS.get(k.name, 'json')))) as Record<string, string>[];
+  const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  const rows = leads
+    .filter(Boolean)
+    .map(
+      (l) => `<tr class="${esc(l.grade).toLowerCase()}">
+        <td>${esc(new Date(l.at).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'short', timeStyle: 'short' }))}</td>
+        <td><b>${esc(l.grade)}</b> ${esc(l.score)}</td>
+        <td>${esc(l.name)}<br><small>${esc(l.business)}</small></td>
+        <td><a href="tel:${esc(l.phone)}">${esc(formatPhone(l.phone))}</a><br><small>${esc(l.best_time)}</small></td>
+        <td><small>${esc(l.trade)} · ${esc(SITE_LABEL[l.has_site] ?? '')} · ${esc(l.area)} · ${esc(TIMELINE_LABEL[l.timeline] ?? '')} · ${esc(BUDGET_LABEL[l.budget] ?? '')}${l.email ? ` · ${esc(l.email)}` : ''}</small></td>
+      </tr>`,
+    )
+    .join('');
+  const html = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Leads — Rollinson Network</title>
+<style>body{font:15px system-ui,sans-serif;margin:16px;color:#241E1A}table{border-collapse:collapse;width:100%}
+td{padding:9px 8px;border-bottom:1px solid #DDD9D2;vertical-align:top}small{color:#6B635C}a{color:#14684B;font-weight:600}
+tr.hot td:first-child{border-left:4px solid #B9444A}tr.warm td:first-child{border-left:4px solid #C99A2E}tr.cold td:first-child{border-left:4px solid #DDD9D2}</style>
+<h1 style="font-size:20px">Leads (${leads.length})</h1><table>${rows || '<tr><td>No leads yet.</td></tr>'}</table>`;
+  return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
 }

@@ -4,7 +4,8 @@ The whole site runs as one Cloudflare Worker (`rnet`):
 
 - **Website** (`public/`): the home page, a lead qualifier form, and a pay section.
 - **Lead alerts** (`POST /api/lead`): six quick questions, scored HOT / WARM / COLD. You get a
-  phone push (ntfy) and an email (Resend) with their answers and a tap-to-call number.
+  Telegram message and an email (Resend) with their answers and a tap-to-call number. Every lead
+  is also saved, and you can see them all at `/admin/leads?key=ADMIN_TOKEN`.
 - **Payments** (`POST /api/checkout`): Stripe Checkout for the $756 website, with or without
   the $127/month care plan. The care plan's first charge is 30 days after the $756 payment.
   You get a "PAID" alert for every payment.
@@ -25,7 +26,8 @@ npx wrangler login
 npx wrangler secret put STRIPE_SECRET_KEY      # sk_live_... (sk_test_... to try it first)
 npx wrangler secret put STRIPE_WEBHOOK_SECRET  # whsec_... from step 2 below
 npx wrangler secret put ADMIN_TOKEN            # any long random string; only you use it
-npx wrangler secret put NTFY_TOPIC             # your private push topic
+npx wrangler secret put TELEGRAM_BOT_TOKEN     # from @BotFather (step 3 below)
+npx wrangler secret put TELEGRAM_CHAT_ID       # your chat ID (step 3 below)
 npx wrangler secret put RESEND_API_KEY         # re_... from step 4 below
 
 npm run deploy
@@ -48,9 +50,11 @@ dashboard: **Workers & Pages > rnet > Settings > Build**.
    `https://rollinsonnetwork.com/webhook` with these events: `checkout.session.completed`,
    `checkout.session.async_payment_succeeded`, `invoice.paid`, `invoice.payment_failed`,
    `customer.subscription.deleted`. Copy its signing secret into `STRIPE_WEBHOOK_SECRET`.
-3. **Phone alerts (ntfy).** Install the free **ntfy** app (iPhone or Android), tap **+**, and
-   subscribe to your `NTFY_TOPIC`. Anyone who knows the topic name can read it, so keep it
-   private. HOT leads and payments arrive as urgent alerts with Call and Text buttons.
+3. **Phone alerts (Telegram).** In Telegram, message **@BotFather**, send `/newbot`, and follow
+   the prompts. It gives you a bot token for `TELEGRAM_BOT_TOKEN`. Send your new bot any message,
+   then open `https://api.telegram.org/bot<TOKEN>/getUpdates`; the `chat.id` number there is your
+   `TELEGRAM_CHAT_ID`. HOT leads and payments arrive with sound; COLD leads arrive silently.
+   (ntfy.sh doesn't accept connections from Cloudflare Workers, so it isn't used.)
 4. **Email alerts (Resend).** Create a free account at resend.com and add the domain
    `rollinsonnetwork.com`. Add the DNS records it shows in Cloudflare DNS. They sit on a `send.`
    subdomain and don't touch your Zoho mail. Then create an API key for `RESEND_API_KEY`.
@@ -64,8 +68,8 @@ dashboard: **Workers & Pages > rnet > Settings > Build**.
    - **Settings > Billing > Revenue recovery:** turn on Smart Retries and failed-payment emails.
    - **In person:** use Tap to Pay in the Stripe Dashboard app on your phone.
 
-If no alert channel is configured, leads are still written to the Worker logs
-(**Workers & Pages > rnet > Logs**).
+Leads are saved before any alert is sent, so you never lose one even if an alert fails. Bookmark
+`https://rollinsonnetwork.com/admin/leads?key=<ADMIN_TOKEN>` on your phone to see them all.
 
 ## Local development
 
