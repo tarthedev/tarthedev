@@ -4,3 +4,5 @@ node_modules/
 .env
 *.zip
 *.xlsx
+# Prospect demo sites: client photos and details stay out of the public repo
+public/demo/
