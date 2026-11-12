@@ -74,6 +74,18 @@ const CARD = {
   .btn.primary { background: var(--accent); color: var(--accent-text); border-color: transparent; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .row .btn span { margin-right: 0; }
+  .qrbtn {
+    margin-top: 20px; background: none; border: 0; color: var(--muted);
+    font: inherit; font-size: 15px; text-decoration: underline; cursor: pointer; padding: 10px;
+  }
+  .qr {
+    position: fixed; inset: 0; background: #ffffff; color: #0f172a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; padding: 24px; cursor: pointer;
+  }
+  .qr svg { width: min(80vw, 60vh, 340px); height: auto; }
+  .qr p { margin: 0; font-weight: 600; }
+  .qr small { color: #64748b; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -89,7 +101,15 @@ const CARD = {
     <div class="row" id="callrow"></div>
     <div class="stack" id="links" style="margin-top:0"></div>
   </div>
+  <button class="qrbtn" id="qrbtn" type="button">Show QR code</button>
 </main>
+
+<div class="qr" id="qr" hidden>
+  <div id="qrimg"></div>
+  <p>Scan with your camera to open this card</p>
+  <small>Tap anywhere to close</small>
+</div>
+<script src="qrcode.js"></script>
 
 <script>
 const ICONS = {
@@ -170,6 +190,16 @@ async function saveContact(c) {
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
+
+/* QR backup for phones with NFC switched off: encodes this page's own address. */
+$("qrbtn").onclick = () => {
+  const q = qrcode(0, "M");
+  q.addData(location.origin + location.pathname);
+  q.make();
+  $("qrimg").innerHTML = q.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
+  $("qr").hidden = false;
+};
+$("qr").onclick = () => { $("qr").hidden = true; };
 
 render(CARD);
 </script>
