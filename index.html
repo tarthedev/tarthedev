@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Contact Card</title>
+<script>
+/* ============================================================
+   EDIT YOUR DETAILS HERE — nothing else needs to change.
+   Any field left as "" is simply hidden on the card.
+   ============================================================ */
+const CARD = {
+  name:     "",              // e.g. "Jane Smith"
+  tagline:  "",              // e.g. "Founder, ClearGuard"
+  phone:    "",              // e.g. "+1 555 123 4567"
+  photo:    "",              // e.g. "photo.jpg" (file placed next to this page)
+  links: [
+    { label: "Buy Me a Coffee",    icon: "coffee",  url: "" },
+    { label: "Leave a Review",     icon: "star",    url: "" },
+    { label: "ClearGuard Support", icon: "support", url: "" },
+  ],
+};
+</script>
+<style>
+  :root {
+    --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --muted: #64748b;
+    --line: #e2e8f0; --accent: #2563eb; --accent-text: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b1220; --card: #131c2e; --text: #f1f5f9; --muted: #94a3b8;
+      --line: #25324a; --accent: #3b82f6; --accent-text: #ffffff;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100dvh; background: var(--bg); color: var(--text);
+    font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex; justify-content: center;
+    padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    -webkit-tap-highlight-color: transparent;
+  }
+  main { width: 100%; max-width: 420px; text-align: center; }
+  .avatar {
+    width: 128px; height: 128px; border-radius: 50%; object-fit: cover;
+    margin: 16px auto 16px; display: block;
+    border: 4px solid var(--card); box-shadow: 0 6px 24px rgba(0,0,0,.18);
+    background: var(--line);
+  }
+  .initials {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; font-weight: 700; color: var(--muted);
+  }
+  h1 { margin: 0; font-size: 26px; letter-spacing: -.01em; }
+  .tagline { margin: 4px 0 0; color: var(--muted); }
+  .phone {
+    display: inline-block; margin-top: 10px; color: var(--accent);
+    font-size: 18px; font-weight: 600; text-decoration: none;
+  }
+  .stack { display: grid; gap: 12px; margin-top: 24px; }
+  .btn {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    min-height: 58px; padding: 0 18px; border-radius: 16px;
+    background: var(--card); color: var(--text); border: 1px solid var(--line);
+    font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    transition: transform .08s ease;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn span { flex: 1; text-align: center; margin-right: 24px; }
+  .btn svg { width: 24px; height: 24px; flex: none; }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: transparent; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row .btn span { margin-right: 0; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <div id="avatar"></div>
+  <h1 id="name"></h1>
+  <p class="tagline" id="tagline"></p>
+  <a class="phone" id="phone"></a>
+
+  <div class="stack">
+    <button class="btn primary" id="save" type="button"></button>
+    <div class="row" id="callrow"></div>
+    <div class="stack" id="links" style="margin-top:0"></div>
+  </div>
+</main>
+
+<script>
+const ICONS = {
+  coffee:  '<path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 2v3M12 2v3"/>',
+  star:    '<path d="m12 3 2.7 5.6 6.1.8-4.5 4.3 1.1 6.1L12 16.9l-5.4 2.9 1.1-6.1L3.2 9.4l6.1-.8L12 3Z"/>',
+  support: '<path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="2.5" y="13" width="4" height="6" rx="1.5"/><rect x="17.5" y="13" width="4" height="6" rx="1.5"/><path d="M19.5 19c0 1.7-2 2.5-5 2.5"/>',
+  contact: '<circle cx="10" cy="8" r="4"/><path d="M2.5 20a7.5 7.5 0 0 1 15 0"/><path d="M19 8v6M16 11h6"/>',
+  call:    '<path d="M5 3h3.5l1.5 5-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 5 1.5V19a2 2 0 0 1-2 2C10.5 21 3 13.5 3 5a2 2 0 0 1 2-2Z"/>',
+  text:    '<path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-8l-5 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>',
+  link:    '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/>',
+};
+const icon = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ICONS.link}</svg>`;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const tel = p => p.replace(/[^\d+]/g, "");
+
+function render(c) {
+  document.title = c.name || "Contact Card";
+
+  const initials = (c.name || "").split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
+  $("avatar").innerHTML = c.photo
+    ? `<img class="avatar" src="${esc(c.photo)}" alt="${esc(c.name)}">`
+    : initials ? `<div class="avatar initials">${esc(initials)}</div>` : "";
+
+  $("name").textContent = c.name || "";
+  $("tagline").textContent = c.tagline || "";
+  $("tagline").hidden = !c.tagline;
+
+  const hasPhone = !!c.phone;
+  $("phone").textContent = c.phone || "";
+  $("phone").href = hasPhone ? "tel:" + tel(c.phone) : "#";
+  $("phone").hidden = !hasPhone;
+
+  $("save").innerHTML = icon("contact") + "<span>Save Contact</span>";
+  $("save").hidden = !(c.name || hasPhone);
+  $("save").onclick = () => saveContact(c);
+
+  $("callrow").hidden = !hasPhone;
+  $("callrow").innerHTML = hasPhone
+    ? `<a class="btn" href="tel:${tel(c.phone)}">${icon("call")}<span>Call</span></a>
+       <a class="btn" href="sms:${tel(c.phone)}">${icon("text")}<span>Text</span></a>`
+    : "";
+
+  $("links").innerHTML = (c.links || []).filter(l => l.url).map(l =>
+    `<a class="btn" href="${esc(l.url)}" target="_blank" rel="noopener">${icon(l.icon)}<span>${esc(l.label)}</span></a>`
+  ).join("");
+}
+
+/* Builds a .vcf on the fly so the visitor can add you to their contacts
+   (photo included when it can be read). */
+async function saveContact(c) {
+  const v = s => String(s).replace(/([\\,;])/g, "\\$1");
+  const parts = (c.name || "").trim().split(/\s+/);
+  const last = parts.length > 1 ? parts.pop() : "";
+  const lines = ["BEGIN:VCARD", "VERSION:3.0",
+    `N:${v(last)};${v(parts.join(" "))};;;`, `FN:${v(c.name || "")}`];
+  if (c.tagline) lines.push(`TITLE:${v(c.tagline)}`);
+  if (c.phone) lines.push(`TEL;TYPE=CELL:${tel(c.phone)}`);
+  lines.push(`URL:${location.origin + location.pathname}`);
+  if (c.photo) {
+    try {
+      const blob = await (await fetch(c.photo)).blob();
+      const b64 = await new Promise((ok, no) => {
+        const r = new FileReader();
+        r.onload = () => ok(r.result.split(",")[1]); r.onerror = no;
+        r.readAsDataURL(blob);
+      });
+      const type = /png/i.test(blob.type) ? "PNG" : "JPEG";
+      lines.push(`PHOTO;ENCODING=b;TYPE=${type}:${b64}`);
+    } catch (e) { /* contact still saves without the photo */ }
+  }
+  lines.push("END:VCARD");
+
+  const url = URL.createObjectURL(new Blob([lines.join("\r\n")], { type: "text/vcard" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (c.name || "contact").replace(/\s+/g, "-") + ".vcf";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+render(CARD);
+</script>
+</body>
+</html>
