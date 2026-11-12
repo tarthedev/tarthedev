@@ -11,14 +11,15 @@
    Any field left as "" is simply hidden on the card.
    ============================================================ */
 const CARD = {
-  name:     "",              // e.g. "Jane Smith"
-  tagline:  "",              // e.g. "Founder, ClearGuard"
-  phone:    "",              // e.g. "+1 555 123 4567"
-  photo:    "",              // e.g. "photo.jpg" (file placed next to this page)
+  name:     "Aaron Rollinson",
+  tagline:  "Verizon Sales Consultant",
+  phone:    "(252) 722-6761",
+  email:    "aaron@rollinsonnetwork.com",
+  photo:    "photo.jpg",
   links: [
-    { label: "Buy Me a Coffee",    icon: "coffee",  url: "" },
-    { label: "Leave a Review",     icon: "star",    url: "" },
-    { label: "ClearGuard Support", icon: "support", url: "" },
+    { label: "Buy Me a Coffee",    icon: "coffee",  url: "https://buy.stripe.com/28E9AUg8f8MP00201mc7u02" },
+    { label: "Leave a Review",     icon: "star",    url: "https://search.google.com/local/writereview?placeid=ChIJbcyc_Q5FpYkR96aUGn5BR8M" },
+    { label: "ClearGuard Support", icon: "support", url: "mailto:aaron@rollinsonnetwork.com?subject=ClearGuard%20Support" },
   ],
 };
 </script>
@@ -73,7 +74,8 @@ const CARD = {
   .btn svg { width: 24px; height: 24px; flex: none; }
   .btn.primary { background: var(--accent); color: var(--accent-text); border-color: transparent; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .row .btn span { margin-right: 0; }
+  .row .btn { flex-direction: column; justify-content: center; gap: 4px; padding: 10px 6px; font-size: 14px; }
+  .row .btn span { margin-right: 0; flex: none; }
   .qrbtn {
     margin-top: 20px; background: none; border: 0; color: var(--muted);
     font: inherit; font-size: 15px; text-decoration: underline; cursor: pointer; padding: 10px;
@@ -119,6 +121,7 @@ const ICONS = {
   contact: '<circle cx="10" cy="8" r="4"/><path d="M2.5 20a7.5 7.5 0 0 1 15 0"/><path d="M19 8v6M16 11h6"/>',
   call:    '<path d="M5 3h3.5l1.5 5-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 5 1.5V19a2 2 0 0 1-2 2C10.5 21 3 13.5 3 5a2 2 0 0 1 2-2Z"/>',
   text:    '<path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-8l-5 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>',
+  mail:    '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/>',
   link:    '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/>',
 };
 const icon = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ICONS.link}</svg>`;
@@ -147,14 +150,16 @@ function render(c) {
   $("save").hidden = !(c.name || hasPhone);
   $("save").onclick = () => saveContact(c);
 
-  $("callrow").hidden = !hasPhone;
-  $("callrow").innerHTML = hasPhone
-    ? `<a class="btn" href="tel:${tel(c.phone)}">${icon("call")}<span>Call</span></a>
-       <a class="btn" href="sms:${tel(c.phone)}">${icon("text")}<span>Text</span></a>`
-    : "";
+  const quick = [];
+  if (hasPhone) quick.push(`<a class="btn" href="tel:${tel(c.phone)}">${icon("call")}<span>Call</span></a>`,
+                           `<a class="btn" href="sms:${tel(c.phone)}">${icon("text")}<span>Text</span></a>`);
+  if (c.email) quick.push(`<a class="btn" href="mailto:${esc(c.email)}">${icon("mail")}<span>Email</span></a>`);
+  $("callrow").hidden = !quick.length;
+  $("callrow").style.gridTemplateColumns = `repeat(${quick.length || 1}, 1fr)`;
+  $("callrow").innerHTML = quick.join("");
 
   $("links").innerHTML = (c.links || []).filter(l => l.url).map(l =>
-    `<a class="btn" href="${esc(l.url)}" target="_blank" rel="noopener">${icon(l.icon)}<span>${esc(l.label)}</span></a>`
+    `<a class="btn" href="${esc(l.url)}"${/^https?:/.test(l.url) ? ' target="_blank" rel="noopener"' : ""}>${icon(l.icon)}<span>${esc(l.label)}</span></a>`
   ).join("");
 }
 
@@ -168,6 +173,7 @@ async function saveContact(c) {
     `N:${v(last)};${v(parts.join(" "))};;;`, `FN:${v(c.name || "")}`];
   if (c.tagline) lines.push(`TITLE:${v(c.tagline)}`);
   if (c.phone) lines.push(`TEL;TYPE=CELL:${tel(c.phone)}`);
+  if (c.email) lines.push(`EMAIL;TYPE=WORK:${c.email}`);
   lines.push(`URL:${location.origin + location.pathname}`);
   if (c.photo) {
     try {
