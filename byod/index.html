@@ -34,6 +34,7 @@ main{max-width:760px;margin:0 auto;padding:8px max(5vw,16px) 120px}
 h2{font:700 clamp(28px,6vw,40px)/1.05 "Inter Tight",sans-serif;margin:0 0 18px;text-wrap:balance}
 .say{border-left:4px solid var(--rose);padding:4px 0 4px 16px;margin:0 0 20px;font:400 clamp(21px,4.6vw,26px)/1.35 "Inter Tight",sans-serif;color:var(--ink)}
 .say b{color:var(--rose);font-weight:700;white-space:nowrap}
+.say b.w{white-space:normal}
 .lbl{font:600 13px Inter;color:var(--dusk);margin:20px 0 8px}
 ul.notes{margin:0;padding-left:20px;color:var(--soft)}
 ul.notes li{margin:4px 0}
@@ -48,24 +49,27 @@ input[type=number]{width:100%;background:none;border:0;color:var(--ink);font:500
 .addph{margin-top:10px;background:none;border:1px dashed var(--dusk);color:var(--soft);border-radius:12px;min-height:48px;width:100%;font:500 15px Inter;cursor:pointer}
 .items{display:grid;gap:8px;margin-top:8px}
 .item{display:flex;align-items:center;gap:12px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-height:52px;cursor:pointer;color:var(--ink);font:500 16px Inter;text-align:left;width:100%}
-.item .p{margin-left:auto;color:var(--soft);white-space:nowrap}
+.item .p{margin-left:auto;color:var(--soft);white-space:nowrap;flex:none}
 .item .box{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--dusk);display:grid;place-items:center;font-size:14px;color:#fff}
 .item.on{border-color:var(--rose)}
 .item.on .box{background:var(--rose);border-color:var(--rose)}
 .item.on .box::after{content:"✓"}
 .total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
-.total strong{font:700 clamp(28px,7vw,36px) "Inter Tight";color:var(--rose);white-space:nowrap}
+.total strong{font:700 clamp(28px,7vw,36px) "Inter Tight",sans-serif;color:var(--rose);white-space:nowrap;flex:none}
 .total.first{margin-top:0;padding-top:0;border-top:0}
 .rep{background:var(--card2);border:1px dashed var(--dusk);border-radius:14px;padding:12px 14px;color:var(--soft);margin-top:16px}
 .rep b{color:var(--rose)}
 .brk div{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
-.brk div span:last-child{white-space:nowrap;color:var(--ink)}
+.brk div span:last-child{white-space:nowrap;color:var(--ink);flex:none}
 .sum{display:grid;gap:2px}
 .sum div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .sum div span:last-child{color:var(--rose);font-weight:600;text-align:right}
 .miss{display:flex;flex-wrap:wrap;gap:8px}
 .miss button{background:var(--card2);border:1px solid var(--rose);color:var(--rose);border-radius:999px;padding:8px 14px;min-height:40px;font:500 14px Inter;cursor:pointer}
 .ok{color:var(--soft);margin:0}
+.p s{color:var(--dusk);font-weight:400;margin-right:6px}
+.say.sub{margin-top:24px}
+.rep.warn{border:2px solid var(--rose);color:var(--rose);font-weight:600}
 nav.go{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:24px max(5vw,16px) calc(16px + env(safe-area-inset-bottom))}
 nav.go div{max-width:760px;margin:0 auto;display:flex;gap:10px}
 nav.go button{flex:1;min-height:54px;border-radius:16px;border:0;font:600 17px Inter;cursor:pointer}
@@ -91,8 +95,11 @@ const ACC=[{k:"sp",n:"Screen protector",p:70},{k:"lp",n:"Lens protectors",p:40},
 const ADD=[{k:"cb",n:"Charging block",p:40},{k:"cl",n:"Cable",p:40}];
 const PERKS=["Disney+","Hulu","ESPN+","Netflix","HBO Max"];
 const PK={pkN:{n:"Netflix + HBO Max",p:13,has:["Netflix","HBO Max"]},pkD:{n:"Disney+ + Hulu + ESPN+",p:12,has:["Disney+","Hulu","ESPN+"]}};
+const CABLE_OFF=.5, JL_OFF=.25;
+const JL={"42":{n:"JLab · $42 option",p:42},"61":{n:"JLab · $61 option",p:61}};
+const OFFERS=[{k:"tv",n:"Samsung 43\" 4K TV + soundbar"},{k:"gc",n:"$200 Target gift card"}];
 const KEY="salesflow3";
-const fresh=()=>({step:0,credit:"",phones:[""],watchR:"",tabR:"",saved:"",acc:{sp:1,lp:1,cs:1},add:{},perks:{},vmp:1,watch:0,tab:0,pkN:0,pkD:0,vhiQ:0,vhi:0});
+const fresh=()=>({step:0,credit:"",phones:[""],watchR:"",tabR:"",saved:"",acc:{sp:1,lp:1,cs:1},add:{},jl:"",perks:{},vmp:1,watch:0,tab:0,pkN:0,pkD:0,vhiQ:0,vhi:0,vhiT:"",vhiO:""});
 let S;
 try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){S=fresh()}
 if(!Array.isArray(S.phones)||!S.phones.length)S.phones=[""];
@@ -104,10 +111,15 @@ const list=a=>a.length<2?(a[0]||""):a.slice(0,-1).join(", ")+" and "+a[a.length-
 const money=(id,lab,val)=>`<label class="f">${lab}<div class="money"><span>$</span><input type="number" inputmode="decimal" id="${id}" value="${esc(val)}" placeholder="0"></div></label>`;
 const box=(attr,on,name,price)=>`<button class="item ${on?"on":""}" ${attr} aria-pressed="${on?"true":"false"}"><span class="box"></span>${name}${price?`<span class="p">${price}</span>`:""}</button>`;
 const tog=(key,name,price)=>box(`data-t="${key}"`,S[key],name,price);
+const pick=(key,val,name,price)=>box(`data-set="${key}" data-val="${val}"`,S[key]===val,name,price);
+const px=n=>Number.isInteger(n)?"$"+n:f2(n);
+const was=(full,now)=>now<full?`<s>$${full}</s>${px(now)}`:"$"+full;
 
 // ---- Out the door ----
-const itemCount=(add=S.add)=>ACC.filter(a=>S.acc[a.k]).length+ADD.filter(a=>add[a.k]).length;
-const bundleOff=(add=S.add)=>TIERS[itemCount(add)]||0;
+const addP=(a,add=S.add)=>a.k==="cl"&&add.cb?a.p*(1-CABLE_OFF):a.p;
+const jlP=()=>S.jl?JL[S.jl].p*(1-JL_OFF):0;
+const itemCount=(add=S.add)=>ACC.filter(a=>S.acc[a.k]).length+ADD.filter(a=>add[a.k]).length+(S.jl?1:0);
+const bundleOff=(add=S.add)=>TIERS[Math.min(itemCount(add),5)]||0;
 function calc(add=S.add){
   const devs=S.phones.map(r=>+r||0);
   if(S.watch)devs.push(+S.watchR||0);
@@ -117,7 +129,7 @@ function calc(add=S.add){
   const devTax=retail*TAX;
   const setup=SETUP*lines;
   const off=bundleOff(add);
-  const gear=ACC.reduce((t,a)=>t+(S.acc[a.k]?a.p:0),0)+ADD.reduce((t,a)=>t+(add[a.k]?a.p:0),0)-off;
+  const gear=ACC.reduce((t,a)=>t+(S.acc[a.k]?a.p:0),0)+ADD.reduce((t,a)=>t+(add[a.k]?addP(a,add):0),0)+jlP()-off;
   const otherTax=(setup+gear)*TAX;
   return {lines,retail,devTax,setup,gear,off,otherTax,otd:devTax+setup+gear+otherTax};
 }
@@ -131,7 +143,9 @@ const tierNote=()=>{
   const miss=ADD.filter(a=>!S.add[a.k]);
   const delta=calc({cb:1,cl:1}).otd-calc().otd;
   return `<div class="lbl" style="margin-top:0">Rep note · not for customer</div><div class="brk">
-  <div><span>3 items</span><span>saves $15</span></div><div><span>4 items</span><span>saves $25</span></div><div><span>5 items</span><span>saves $55</span></div>
+  <div><span>3 items</span><span>saves $15</span></div><div><span>4 items</span><span>saves $25</span></div><div><span>5+ items</span><span>saves $55</span></div>
+  <div><span>Cable with block</span><span>50% off</span></div>
+  <div><span>JLab · counts as an item</span><span>25% off</span></div>
   <div><span><b>${itemCount()} selected</b></span><span><b>−$${bundleOff()}</b></span></div>
   ${miss.length?`<div><span><b>Adding ${miss.length===2?"both":"the "+miss[0].n.toLowerCase()}</b></span><span><b>+${f2(delta)} out the door</b></span></div>`:""}</div>`};
 
@@ -165,10 +179,19 @@ const OPEN=[
   [()=>!S.vmp,"VMP",1],
   ...ACC.map(a=>[()=>!S.acc[a.k],a.n,4]),
   ...ADD.map(a=>[()=>!S.add[a.k],a.n,5]),
-  [()=>!S.watch,"Watch",3],[()=>!S.tab,"Tablet",3],
+  [()=>!S.jl,"JLab headphones",5],
+  [()=>!S.watch,"Watch · free AirPods",3],[()=>!S.tab,"Tablet",3],
   [()=>!S.pkN,"Netflix + HBO Max",6],[()=>!S.pkD,"Disney+ + Hulu + ESPN+",6],
-  [()=>!S.vhi,()=>S.vhiQ?"Home internet":"Home internet · check address",7]
+  [()=>!S.vhi,()=>S.vhiQ?"Home internet":"Home internet · check address",7],
+  [()=>S.vhi&&!S.vhiT,"Pick 5G Home or Fios",7],
+  [()=>needOffer(),"Pick 5G Home choice offer",7]
 ];
+const needOffer=()=>S.vhi&&S.vhiT==="5g"&&!S.vhiO;
+const vhiTxt=()=>{
+  if(!S.vhiQ)return "Not checked / doesn’t qualify";
+  const t={"5g":"5G Home",fios:"Fios"}[S.vhiT]||"", o=(OFFERS.find(x=>x.k===S.vhiO)||{}).n||"";
+  return S.vhi?["Signed up",t,S.vhiT==="5g"?(o||"offer not picked"):""].filter(Boolean).join(" · "):"Qualifies · not sold"+(t?" · "+t:"");
+};
 
 const STEPS=[
 {t:"Upgrade",h:"Position BYOD",body:()=>`
@@ -186,8 +209,8 @@ const STEPS=[
   <ul class="notes"><li>Find savings in the safe 5 minutes</li><li>Use the savings to add perks, hotspot, etc.</li></ul>
   <div class="row" style="margin-top:16px">${money("saved","Monthly savings found",S.saved)}</div>`},
 {t:"Watch + tablet",h:"Bring out watch and tablet",body:()=>`
-  <p class="say">“Both of these are <b>free</b> — you just pay the line of service and taxes: <b>$7.50/mo</b> for the watch, <b>$11/mo</b> for the tablet.”</p>
-  <div class="items">${tog("watch","Watch added","+$7.50/mo")}${tog("tab","Tablet added","+$11/mo")}</div>
+  <p class="say">“Both of these are <b>free</b> — you just pay the line of service and taxes: <b>$7.50/mo</b> for the watch, <b>$11/mo</b> for the tablet. And with the watch, you get <b>free AirPods</b>.”</p>
+  <div class="items">${tog("watch","Watch added · free AirPods","+$7.50/mo")}${tog("tab","Tablet added","+$11/mo")}</div>
   ${S.watch||S.tab?`<div class="lbl">Retail price (for tax)</div><div class="row">${S.watch?money("watchR","Watch",S.watchR):""}${S.tab?money("tabR","Tablet",S.tabR):""}</div>`:""}
   <div class="total"><span>Total monthly increase</span><strong>${totMo()}</strong></div>`},
 {t:"Accessories",h:"Quote 3 accessories",body:()=>{
@@ -203,9 +226,11 @@ const STEPS=[
   <div class="items">${ACC.map(a=>box(`data-acc="${a.k}"`,S.acc[a.k],a.n,"$"+a.p)).join("")}</div>
   <div class="rep" data-v="brk">${brk()}</div>
   ${otdRow()}`}},
-{t:"Add-ons",h:"Charging block + cable",body:()=>`
-  <p class="say">“Want the charging block and cable too? Doing both makes the 5th one free.”</p>
-  <div class="items">${ADD.map(a=>box(`data-add="${a.k}"`,S.add[a.k],a.n,"$"+a.p)).join("")}</div>
+{t:"Add-ons",h:"Block, cable + JLab",body:()=>`
+  <p class="say">“Want the charging block and cable too? Get the block and the cable is <b>50% off</b> — and doing both makes the 5th one free.”</p>
+  <div class="items">${ADD.map(a=>box(`data-add="${a.k}"`,S.add[a.k],a.n,was(a.p,addP(a)))).join("")}</div>
+  <p class="say sub">“JLab headphones are <b>25% off</b> too — <b>$31.50</b> or <b>$45.75</b>.”</p>
+  <div class="items">${Object.keys(JL).map(k=>pick("jl",k,JL[k].n,was(JL[k].p,JL[k].p*(1-JL_OFF)))).join("")}</div>
   <div class="rep">${tierNote()}</div>
   ${otdRow()}`},
 {t:"Setup",h:"Find existing perks",body:()=>`
@@ -219,14 +244,20 @@ const STEPS=[
 {t:"Home internet",h:"Pitch VHI",body:()=>`
   <p class="say">“Last thing — let me check if your address qualifies for Verizon Home Internet.”</p>
   <ul class="notes"><li>Only pitch if the address qualifies</li></ul>
-  <div class="items" style="margin-top:14px">${tog("vhiQ","Address qualifies")}${S.vhiQ?tog("vhi","Customer signed up"):""}</div>`},
+  <div class="items" style="margin-top:14px">${tog("vhiQ","Address qualifies")}</div>
+  ${S.vhiQ?`<div class="lbl">Service</div><div class="items">${pick("vhiT","5g","5G Home")}${pick("vhiT","fios","Fios")}</div>`:""}
+  ${S.vhiQ&&S.vhiT==="5g"?`<p class="say sub">“With 5G Home you also get to pick: a <b class="w">Samsung 43" 4K TV with a soundbar</b>, or a <b class="w">$200 Target gift card</b>.”</p>
+  <div class="lbl">Choice offer · pick one</div><div class="items">${OFFERS.map(o=>pick("vhiO",o.k,o.n)).join("")}</div>`:""}
+  ${S.vhiQ?`<div class="lbl">Result</div><div class="items">${tog("vhi","Customer signed up")}</div>`:""}
+  ${S.vhi&&!S.vhiT?`<div class="rep warn">Pick 5G Home or Fios.</div>`:""}
+  ${needOffer()?`<div class="rep warn">Pick a choice offer — every 5G Home sale gets one.</div>`:""}`},
 {t:"Recap",h:"Deal recap",body:()=>{
   const c=calc(), sv=+S.saved||0;
   const open=OPEN.filter(o=>o[0]());
   const acc=ACC.filter(a=>S.acc[a.k]).map(a=>a.n).join(", ")||"None";
-  const add=ADD.filter(a=>S.add[a.k]).map(a=>a.n).join(", ")||"None";
+  const add=[...ADD.filter(a=>S.add[a.k]).map(a=>a.n+(addP(a)<a.p?" (50% off)":"")),S.jl&&JL[S.jl].n+" (25% off)"].filter(Boolean).join(", ")||"None";
   const pk=PERKS.filter(p=>S.perks[p]).join(", ")||"None";
-  const rows=[["Promo amount",m(S.credit)],["Phone + BYOD",fmtMo(phone().n)],["VMP",S.vmp?"Yes · $19/mo":"No"],["Watch / tablet",[S.watch&&"Watch",S.tab&&"Tablet"].filter(Boolean).join(" + ")||"None"],["Perks added",perkName()],["Bill savings found",sv>0?f2(sv)+"/mo":"None"],["Lines",String(c.lines)],["Device retail",f2(c.retail)],["Accessories",acc],["Add-ons",add],["Already has",pk],["VHI",S.vhi?"Signed up":S.vhiQ?"Qualifies · not sold":"Not checked / doesn’t qualify"]];
+  const rows=[["Promo amount",m(S.credit)],["Phone + BYOD",fmtMo(phone().n)],["VMP",S.vmp?"Yes · $19/mo":"No"],["Watch / tablet",[S.watch&&"Watch (free AirPods)",S.tab&&"Tablet"].filter(Boolean).join(" + ")||"None"],["Perks added",perkName()],["Bill savings found",sv>0?f2(sv)+"/mo":"None"],["Lines",String(c.lines)],["Device retail",f2(c.retail)],["Accessories",acc],["Add-ons",add],["Already has",pk],["VHI",vhiTxt()]];
   return `<div class="total first"><span>Out the door</span><strong>${f2(c.otd)}</strong></div>
   <div class="total"><span>Total monthly increase</span><strong>${totMo()}</strong></div>
   ${sv>0&&!noPhone()?`<div class="total"><span>Net after savings</span><strong>${(totV()-sv<0?"−":"")+f2(Math.abs(totV()-sv))}/mo</strong></div>`:""}
@@ -271,7 +302,8 @@ main.addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b)return;
   const d=b.dataset;
   if(d.go!=null){go(+d.go);return}
-  if(d.t){S[d.t]=S[d.t]?0:1;if(d.t==="vhi"&&S.vhi)S.vhiQ=1;if(d.t==="vhiQ"&&!S.vhiQ)S.vhi=0}
+  if(d.t){S[d.t]=S[d.t]?0:1;if(d.t==="vhi"&&S.vhi)S.vhiQ=1;if(d.t==="vhiQ"&&!S.vhiQ){S.vhi=0;S.vhiT="";S.vhiO=""}}
+  else if(d.set){S[d.set]=S[d.set]===d.val?"":d.val;if(d.set==="vhiT"&&S.vhiT!=="5g")S.vhiO=""}
   else if(d.acc)S.acc[d.acc]=S.acc[d.acc]?0:1;
   else if(d.add)S.add[d.add]=S.add[d.add]?0:1;
   else if(d.perk)S.perks[d.perk]=S.perks[d.perk]?0:1;
