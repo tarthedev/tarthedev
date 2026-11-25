@@ -2,90 +2,215 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sales Flow">
 <title>Upgrade Sales Flow</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* VOICE: a coach in your pocket on the sales floor — fast, glanceable, confident.
-   IDEA: a cue card deck; one card per beat of the sale, tap through like cooking mode.
-   PICTURE: the current card itself, with the line to say set large.
-   COLOUR and TYPE: white ground, black ink, one bold red for the line to say and totals; Inter Tight + Inter.
-   LAYOUT: progress chips on top, one card, sticky Back / Next at the thumb. */
-:root{color-scheme:light;--bg:#fff;--card:#f6f6f6;--card2:#fff;--ink:#000;--soft:#333;--rose:#ee0000;--dusk:#6f7171;--line:#d8dada}
-:root[data-theme=light],:root[data-theme=dark]{color-scheme:light}
-*{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip;min-height:100vh}
-header{padding:18px max(5vw,16px) 8px;max-width:760px;margin:0 auto}
-.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
-h1{font:700 20px/1.1 "Inter Tight",sans-serif;margin:0;color:var(--ink)}
-.reset{background:none;border:1px solid var(--line);color:var(--soft);border-radius:999px;padding:8px 14px;font:500 14px Inter;min-height:40px;cursor:pointer}
-.chips{position:relative;display:flex;gap:6px;overflow-x:auto;padding:14px 0 6px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;border:1px solid var(--line);border-radius:999px;padding:8px 12px;font:500 13px Inter;background:var(--card);color:var(--soft);cursor:pointer;min-height:36px}
-.chip.done{background:var(--card);color:var(--dusk)}
-.chip.on{background:#000;color:#fff}
-main{max-width:760px;margin:0 auto;padding:8px max(5vw,16px) 120px}
-.card{background:var(--card);border-top:4px solid var(--rose);border-radius:22px;padding:clamp(20px,4vw,32px)}
-.card.anim{animation:in .25s ease}
-@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.card.anim{animation:none}}
-.num{color:var(--dusk);font:500 14px Inter;margin:0 0 6px}
-h2{font:700 clamp(28px,6vw,40px)/1.05 "Inter Tight",sans-serif;margin:0 0 18px;text-wrap:balance}
-.say{border-left:4px solid var(--rose);padding:4px 0 4px 16px;margin:0 0 20px;font:400 clamp(21px,4.6vw,26px)/1.35 "Inter Tight",sans-serif;color:var(--ink)}
-.say b{color:var(--rose);font-weight:700;white-space:nowrap}
-.say b.w{white-space:normal}
-.lbl{font:600 13px Inter;color:var(--dusk);margin:20px 0 8px}
-ul.notes{margin:0;padding-left:20px;color:var(--soft)}
-ul.notes li{margin:4px 0}
-.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:8px}
-label.f{display:block;font:500 14px Inter;color:var(--soft)}
-.money{display:flex;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:12px;margin-top:6px;padding-left:12px}
-.money span{color:var(--dusk)}
-input[type=number]{width:100%;background:none;border:0;color:var(--ink);font:500 18px Inter;padding:12px 12px 12px 4px;min-height:48px;outline:none}
-.money:focus-within{border-color:var(--rose)}
-.dev{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin-top:10px}
-.x{background:var(--card2);border:1px solid var(--line);color:var(--soft);border-radius:12px;min-width:48px;min-height:50px;font:500 20px Inter;cursor:pointer}
-.addph{margin-top:10px;background:none;border:1px dashed var(--dusk);color:var(--soft);border-radius:12px;min-height:48px;width:100%;font:500 15px Inter;cursor:pointer}
-.items{display:grid;gap:8px;margin-top:8px}
-.item{display:flex;align-items:center;gap:12px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-height:52px;cursor:pointer;color:var(--ink);font:500 16px Inter;text-align:left;width:100%}
-.item .p{margin-left:auto;color:var(--soft);white-space:nowrap;flex:none}
-.item .box{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--dusk);display:grid;place-items:center;font-size:14px;color:#fff}
-.item.on{border-color:var(--rose)}
-.item.on .box{background:var(--rose);border-color:var(--rose)}
-.item.on .box::after{content:"✓"}
-.total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
-.total strong{font:700 clamp(28px,7vw,36px) "Inter Tight",sans-serif;color:var(--rose);white-space:nowrap;flex:none}
-.total.first{margin-top:0;padding-top:0;border-top:0}
-.rep{background:var(--card2);border:1px dashed var(--dusk);border-radius:14px;padding:12px 14px;color:var(--soft);margin-top:16px}
-.rep b{color:var(--rose)}
-.brk div{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
-.brk div span:last-child{white-space:nowrap;color:var(--ink);flex:none}
-.sum{display:grid;gap:2px}
-.sum div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
-.sum div span:last-child{color:var(--rose);font-weight:600;text-align:right}
+/* Upgrade sales flow — design system
+   Mood: a premium internal sales tool. Dark neutral surfaces, one accent, nothing decorative.
+   Surfaces: page (--bg) → card (--card) → raised controls (--raised: inputs, options, tabs)
+             and recessed readouts (--well: calculation panels and results).
+   Accent: Verizon red only for progress, selection, numbers that matter and the primary action.
+   Type: system sans, tabular figures for every number, small uppercase labels for structure. */
+
+/* ---------- Tokens ---------- */
+:root{
+  color-scheme:dark;
+  --bg:#0a0a0a; --card:#141414; --well:#0e0e0e; --raised:#1b1b1b; --raised-hi:#222;
+  --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.11); --line-3:rgba(255,255,255,.2);
+  --text:#f5f5f7; --text-2:#a7a7ad; --text-3:#8a8a90; --text-4:#56565c;
+  --red:#ee0000; --red-hi:#ff1a1a; --red-lo:#c80000; --red-ink:#ff3b3b;
+  --red-wash:rgba(238,0,0,.075); --red-edge:rgba(238,0,0,.5);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-d:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter Display","Inter","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --r-card:16px; --r:12px;
+  --g:16px; --cp:18px; --maxw:640px;
+  --gl:max(var(--g),env(safe-area-inset-left)); --gr:max(var(--g),env(safe-area-inset-right));
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+@media(min-width:600px){:root{--g:24px;--cp:28px}}
+
+/* ---------- Base ---------- */
+*,*::before,*::after{box-sizing:border-box}
+*{min-width:0}
+html{background:var(--bg);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--text);font:400 15px/1.5 var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:clip}
+button,input{font:inherit;color:inherit;margin:0}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button:disabled{opacity:.3;cursor:default}
+:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+
+/* ---------- Layout ---------- */
+header,main{max-width:var(--maxw);margin:0 auto;padding-left:var(--gl);padding-right:var(--gr)}
+header{padding-top:calc(6px + env(safe-area-inset-top))}
+main{padding-top:2px;padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+
+/* ---------- Top bar ---------- */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px}
+h1{display:flex;align-items:center;gap:10px;margin:0;font:600 17px/1.2 var(--font-d);letter-spacing:-.015em}
+h1::before{content:"";flex:none;width:3px;height:15px;border-radius:2px;background:var(--red)}
+.reset{flex:none;height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--raised);font:600 13px/1 var(--font);transition:background-color .15s,border-color .15s}
+
+/* ---------- Flow tabs ---------- */
+.tabs{position:relative;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:2px calc(-1*var(--g)) 0;padding:6px var(--g) 14px;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 var(--g),#000 calc(100% - var(--g)),transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 var(--g),#000 calc(100% - var(--g)),transparent)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px 0 11px;border-radius:999px;border:1px solid var(--line);background:var(--raised);color:var(--text-3);font:500 13px/1 var(--font);white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s}
+.tab i{font-style:normal;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;opacity:.65}
+.tab.done{color:var(--text-2)}
+.tab.on{background:#000;border-color:var(--line-3);color:#fff}
+.tab.on i{color:var(--red-ink);opacity:1}
+
+/* ---------- Step card ---------- */
+.card{position:relative;overflow:hidden;padding:calc(var(--cp) + 2px) var(--cp) var(--cp);background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 24px 48px -32px #000}
+.card::before,.card::after{content:"";position:absolute;top:0;left:0;height:2px}
+.card::before{right:0;background:rgba(255,255,255,.05)}
+.card::after{width:calc(var(--p,0)*100%);background:var(--red)}
+.card.anim{animation:in .2s var(--ease)}
+@keyframes in{from{opacity:0;transform:translateY(4px)}}
+.eyebrow{margin:0 0 8px;font:600 11px/1.3 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-variant-numeric:tabular-nums}
+.eyebrow b{font-weight:600;color:var(--text)}
+h2{margin:0 0 18px;font:700 24px/1.15 var(--font-d);letter-spacing:-.022em;text-wrap:balance}
+.lbl{margin:22px 0 10px;font:600 11px/1.3 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+
+/* ---------- Talk track ---------- */
+.say{position:relative;margin:0 0 22px;padding-left:22px;font:500 18px/1.45 var(--font);letter-spacing:-.011em;color:var(--text)}
+.say::before{content:"\201C";position:absolute;left:-1px;top:-2px;font:700 30px/1 var(--font-d);color:var(--text-4)}
+.say>span{display:block;text-wrap:pretty}
+.say>span+span{margin-top:8px}
+.say b{font-weight:600;color:var(--red-ink);white-space:nowrap}
+.say b.w{white-space:normal;color:var(--text)}
+.say.sub{margin-top:26px}
+
+/* ---------- Inputs ---------- */
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.row.sp,.items.sp{margin-top:22px}
+label.f{display:block;font:500 13px/1.2 var(--font);color:var(--text-2)}
+.money{display:flex;align-items:center;gap:4px;height:52px;margin-top:8px;padding:0 14px;background:var(--raised);border:1px solid var(--line-2);border-radius:var(--r);transition:border-color .15s,box-shadow .15s,background-color .15s}
+.money>span{flex:none;font:500 17px/1 var(--font);color:var(--text-3)}
+.money>.suf{font-size:14px}
+.money input{flex:1;width:100%;height:100%;padding:0;border:0;outline:0;background:none;font:600 19px/1 var(--font);letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:var(--text);-moz-appearance:textfield;appearance:textfield}
+.money input::placeholder{color:var(--text-4);opacity:1}
+.money input::-webkit-outer-spin-button,.money input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.money input:focus-visible{outline:0}
+.money:focus-within{border-color:var(--red);background:var(--raised-hi);box-shadow:0 0 0 3px rgba(238,0,0,.18)}
+.dev{display:flex;align-items:flex-end;gap:8px}
+.dev>label{flex:1}
+.dev>span:empty{display:none}
+.dev+.dev{margin-top:12px}
+.x{width:52px;height:52px;border-radius:var(--r);border:1px solid var(--line-2);background:var(--raised);color:var(--text-2);font:400 22px/1 var(--font);transition:background-color .15s,border-color .15s}
+.addph{display:block;width:100%;height:46px;margin-top:12px;border-radius:var(--r);border:1px dashed var(--line-3);background:none;color:var(--text-2);font:500 14px/1 var(--font);transition:color .15s,border-color .15s}
+
+/* ---------- Options (checkbox / radio rows, tag pills) ---------- */
+.items{display:grid;gap:8px}
+.items.two{grid-template-columns:1fr 1fr}
+.item{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:12px 14px;border-radius:var(--r);border:1px solid var(--line);background:var(--raised);color:var(--text);font:500 15px/1.3 var(--font);text-align:left;transition:background-color .15s,border-color .15s,transform .1s}
+.item .nm{flex:1}
+.item .box{flex:none;display:grid;place-items:center;width:20px;height:20px;border-radius:6px;border:1.5px solid rgba(255,255,255,.28);transition:background-color .15s,border-color .15s}
+.item[data-set] .box{border-radius:50%}
+.item .p{flex:none;padding-left:8px;font:500 14px/1 var(--font);font-variant-numeric:tabular-nums;color:var(--text-2);white-space:nowrap}
+.item .p s{margin-right:6px;font-weight:400;color:var(--text-4)}
+.item.on{border-color:var(--red-edge);background:var(--red-wash)}
+.item.on .box{background:var(--red);border-color:var(--red)}
+.item.on .box::after{content:"";width:9px;height:5px;margin-top:-2px;border:solid #fff;border-width:0 0 2px 2px;transform:rotate(-45deg)}
+.item[data-set].on .box::after{width:8px;height:8px;margin:0;border:0;border-radius:50%;background:#fff;transform:none}
+.item.on .p{color:var(--text)}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--raised);color:var(--text-2);font:500 14px/1 var(--font);transition:background-color .15s,border-color .15s,color .15s,transform .1s}
+.tag.on{border-color:var(--red-edge);background:var(--red-wash);color:var(--text)}
+.tag.on::before{content:"";width:8px;height:4px;margin-top:-3px;border:solid var(--red-ink);border-width:0 0 2px 2px;transform:rotate(-45deg)}
+
+/* ---------- Calculation panels + results ---------- */
+.panel{margin-top:22px;padding:0 14px;background:var(--well);border:1px solid var(--line);border-radius:var(--r)}
+.panel+.panel{margin-top:12px}
+.panel>.ln:last-child{padding-bottom:14px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 0 11px;font:600 11px/1.2 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+.ph em{flex:none;padding:3px 7px;border-radius:6px;border:1px solid var(--line-2);font-style:normal;font-size:10px;letter-spacing:.08em}
+.ln{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"k v" "d v";align-items:baseline;column-gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.ln .k{grid-area:k;font:500 14px/1.35 var(--font);color:var(--text)}
+.ln .d{grid-area:d;margin-top:1px;font:400 12.5px/1.35 var(--font);font-variant-numeric:tabular-nums;color:var(--text-3)}
+.ln .d:empty{display:none}
+.ln .v{grid-area:v;min-width:max-content;text-align:right;white-space:nowrap;font:600 14px/1.35 var(--font);font-variant-numeric:tabular-nums;color:var(--text)}
+.ln.dim .k,.ln.dim .v{font-weight:500;color:var(--text-3)}
+.ln.on .k::before{content:"";display:inline-block;width:6px;height:6px;margin:0 8px 1px 0;border-radius:50%;background:var(--red)}
+.ln.em .k,.ln.em .v{color:var(--red-ink)}
+.ln.t{display:block}
+.ln.t .k{font-weight:400;color:var(--text-2)}
+.ln.t b{font-weight:600;color:var(--text)}
+.result{padding:14px 0 16px;border-top:1px solid var(--line-2)}
+.panel>.result:first-child{border-top:0}
+.rl{display:flex;justify-content:space-between;gap:10px;font:600 11px/1.3 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--text-2)}
+.rl span{color:var(--text-3)}
+.result strong{display:block;margin-top:8px;font:700 34px/1 var(--font-d);letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--red-ink);white-space:nowrap}
+.result small{margin-left:3px;font:600 15px/1 var(--font);letter-spacing:0;color:var(--text-2)}
+.result .nil{color:var(--text-4)}
+.result.s strong{font-size:24px}
+
+/* ---------- Notes ---------- */
+ul.notes{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+ul.notes li{position:relative;padding-left:16px;font:400 14px/1.45 var(--font);color:var(--text-2)}
+ul.notes li::before{content:"";position:absolute;left:3px;top:.62em;width:4px;height:4px;border-radius:50%;background:var(--text-3)}
+.note{margin-top:12px;padding:12px 14px;border-radius:var(--r);border:1px solid var(--line);background:var(--well);font:400 14px/1.45 var(--font);color:var(--text-2)}
+.note.warn{display:flex;align-items:flex-start;gap:10px;border-color:var(--red-edge);background:var(--red-wash);font-weight:500;color:#ffd0d0}
+.note.warn::before{content:"!";flex:none;display:grid;place-items:center;width:18px;height:18px;margin-top:1px;border-radius:50%;background:var(--red);font:700 12px/1 var(--font);color:#fff}
+
+/* ---------- Recap ---------- */
 .miss{display:flex;flex-wrap:wrap;gap:8px}
-.miss button{background:var(--card2);border:1px solid var(--rose);color:var(--rose);border-radius:999px;padding:8px 14px;min-height:40px;font:500 14px Inter;cursor:pointer}
-.ok{color:var(--soft);margin:0}
-.p s{color:var(--dusk);font-weight:400;margin-right:6px}
-.say.sub{margin-top:24px}
-.rep.warn{border:2px solid var(--rose);color:var(--rose);font-weight:600}
-nav.go{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:24px max(5vw,16px) calc(16px + env(safe-area-inset-bottom))}
-nav.go div{max-width:760px;margin:0 auto;display:flex;gap:10px}
-nav.go button{flex:1;min-height:54px;border-radius:16px;border:0;font:600 17px Inter;cursor:pointer}
-#back{background:var(--card2);color:var(--ink);border:2px solid #000 !important;flex:0 0 34%}
-#next{background:var(--rose);color:#fff}
-button:focus-visible,.item:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
-button:disabled{opacity:.35}
+.miss button{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px 0 14px;border-radius:999px;border:1px solid var(--red-edge);background:var(--red-wash);color:#ffc4c4;font:500 13px/1 var(--font);transition:background-color .15s,border-color .15s,transform .1s}
+.miss button::after{content:"";width:6px;height:6px;margin-left:-2px;border:solid currentColor;border-width:1.5px 1.5px 0 0;transform:rotate(45deg);opacity:.8}
+.ok{margin:0;font-size:14px;color:var(--text-2)}
+.sum{border-top:1px solid var(--line)}
+.sum div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.4}
+.sum div span:first-child{flex:none;color:var(--text-3)}
+.sum div span:last-child{text-align:right;font-weight:500;font-variant-numeric:tabular-nums;color:var(--text)}
+
+/* ---------- Bottom actions ---------- */
+nav.go{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:12px var(--gr) calc(12px + env(safe-area-inset-bottom)) var(--gl);background:rgba(10,10,10,.86);-webkit-backdrop-filter:saturate(150%) blur(18px);backdrop-filter:saturate(150%) blur(18px);border-top:1px solid var(--line)}
+nav.go>div{display:flex;gap:10px;max-width:calc(var(--maxw) - 2*var(--g));margin:0 auto}
+nav.go button{height:52px;border-radius:var(--r);font:600 16px/1 var(--font);letter-spacing:-.01em;transition:background-color .15s,border-color .15s,transform .1s}
+#back{flex:0 0 32%;border:1px solid var(--line-3);background:transparent;color:var(--text)}
+#next{flex:1;display:flex;align-items:center;justify-content:center;padding:0 16px;border:1px solid var(--red);background:var(--red);color:#fff;white-space:nowrap;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 10px 24px -14px rgba(238,0,0,.7)}
+#next .to{overflow:hidden;text-overflow:ellipsis;font-weight:500;color:rgba(255,255,255,.72)}
+#next .to::before{content:"·";margin:0 7px}
+
+/* ---------- States ---------- */
+@media(hover:hover){
+  .reset:hover,.x:hover{background:var(--raised-hi);border-color:var(--line-3)}
+  .tab:hover{color:var(--text);border-color:var(--line-2)}
+  .tab.on:hover{border-color:var(--line-3)}
+  .item:hover,.tag:hover{background:var(--raised-hi);border-color:var(--line-3)}
+  .item.on:hover,.tag.on:hover{background:rgba(238,0,0,.13);border-color:var(--red)}
+  .money:hover:not(:focus-within){border-color:var(--line-3)}
+  .addph:hover{color:var(--text);border-color:rgba(255,255,255,.35)}
+  .miss button:hover{background:rgba(238,0,0,.15);border-color:var(--red)}
+  #back:hover:not(:disabled){background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.3)}
+  #next:hover{background:var(--red-hi);border-color:var(--red-hi)}
+}
+.item:active,.tag:active,.tab:active,.x:active,.addph:active,.miss button:active,nav.go button:active:not(:disabled){transform:scale(.985)}
+#next:active{background:var(--red-lo);border-color:var(--red-lo)}
+
+/* ---------- Larger screens ---------- */
+@media(min-width:600px){
+  h2{font-size:28px}
+  .say{font-size:20px}
+  .result strong{font-size:40px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <header>
-  <div class="top"><h1>Upgrade sales flow</h1><button class="reset" id="reset">New customer</button></div>
-  <div class="chips" id="chips"></div>
+  <div class="bar"><h1>Upgrade sales flow</h1><button class="reset" id="reset" type="button">New customer</button></div>
+  <nav class="tabs" id="chips" aria-label="Sales flow steps"></nav>
 </header>
 <main id="main"></main>
-<nav class="go"><div><button id="back">Back</button><button id="next">Next</button></div></nav>
+<nav class="go" aria-label="Step navigation"><div><button id="back" type="button">Back</button><button id="next" type="button">Next</button></div></nav>
 
 <script>
 {
@@ -108,10 +233,18 @@ const m=v=>v===""||v==null?"$__":"$"+Number(v).toLocaleString();
 const f2=n=>"$"+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const list=a=>a.length<2?(a[0]||""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
-const money=(id,lab,val)=>`<label class="f">${lab}<div class="money"><span>$</span><input type="number" inputmode="decimal" id="${id}" value="${esc(val)}" placeholder="0"></div></label>`;
-const box=(attr,on,name,price)=>`<button class="item ${on?"on":""}" ${attr} aria-pressed="${on?"true":"false"}"><span class="box"></span>${name}${price?`<span class="p">${price}</span>`:""}</button>`;
+
+// ---- UI building blocks (presentation only) ----
+const say=(lines,c="")=>`<p class="say${c}">${lines.map(l=>`<span>${l}</span>`).join("")}</p>`;
+const money=(id,lab,val,suf="")=>`<label class="f">${lab}<div class="money"><span>$</span><input type="number" inputmode="decimal" enterkeyhint="done" id="${id}" value="${esc(val)}" placeholder="0.00">${suf?`<span class="suf">${suf}</span>`:""}</div></label>`;
+const box=(attr,on,name,price)=>`<button type="button" class="item${on?" on":""}" ${attr} aria-pressed="${on?"true":"false"}"><span class="box"></span><span class="nm">${name}</span>${price?`<span class="p">${price}</span>`:""}</button>`;
 const tog=(key,name,price)=>box(`data-t="${key}"`,S[key],name,price);
 const pick=(key,val,name,price)=>box(`data-set="${key}" data-val="${val}"`,S[key]===val,name,price);
+const tag=(attr,on,name)=>`<button type="button" class="tag${on?" on":""}" ${attr} aria-pressed="${on?"true":"false"}">${name}</button>`;
+const ph=t=>`<div class="ph"><span>${t}</span><em>Rep only</em></div>`;
+const ln=(k,d,v,c)=>`<div class="ln${c?" "+c:""}"><span class="k">${k}</span><span class="d">${d||""}</span><span class="v">${v}</span></div>`;
+const res=(lab,val,attr="",c="")=>`<div class="result${c}"><div class="rl">${lab}</div><strong${attr}>${val}</strong></div>`;
+const moR=s=>s.includes("__")?`<span class="nil">${s}</span>`:"+"+s.replace("/mo","<small>/mo</small>");
 const px=n=>Number.isInteger(n)?"$"+n:f2(n);
 const was=(full,now)=>now<full?`<s>$${full}</s>${px(now)}`:"$"+full;
 
@@ -133,21 +266,21 @@ function calc(add=S.add){
   const otherTax=(setup+gear)*TAX;
   return {lines,retail,devTax,setup,gear,off,otherTax,otd:devTax+setup+gear+otherTax};
 }
-const brk=()=>{const c=calc();return `<div class="lbl" style="margin-top:0">Rep note · not for customer</div><div class="brk">
-  <div><span>Tax on ${c.lines} device${c.lines>1?"s":""} (${f2(c.retail)} retail)</span><span>${f2(c.devTax)}</span></div>
-  <div><span>Setup · ${c.lines} × $39.99</span><span>${f2(c.setup)}</span></div>
-  <div><span>Accessories + add-ons${c.off?` (−$${c.off} bundle)`:""}</span><span>${f2(c.gear)}</span></div>
-  <div><span>Tax on setup + accessories</span><span>${f2(c.otherTax)}</span></div></div>`};
-const otdRow=()=>`<div class="total"><span>Out the door</span><strong data-v="otd">${f2(calc().otd)}</strong></div>`;
+const brk=()=>{const c=calc();return ln("Device tax",`${c.lines} device${c.lines>1?"s":""} · ${f2(c.retail)} retail`,f2(c.devTax))
+  +ln("Setup",`${c.lines} × $39.99`,f2(c.setup))
+  +ln("Accessories + add-ons",c.off?`−$${c.off} bundle`:"",f2(c.gear))
+  +ln("Tax","on setup + accessories",f2(c.otherTax))};
 const tierNote=()=>{
   const miss=ADD.filter(a=>!S.add[a.k]);
-  const delta=calc({cb:1,cl:1}).otd-calc().otd;
-  return `<div class="lbl" style="margin-top:0">Rep note · not for customer</div><div class="brk">
-  <div><span>3 items</span><span>saves $15</span></div><div><span>4 items</span><span>saves $25</span></div><div><span>5+ items</span><span>saves $55</span></div>
-  <div><span>Cable with block</span><span>50% off</span></div>
-  <div><span>JLab · counts as an item</span><span>25% off</span></div>
-  <div><span><b>${itemCount()} selected</b></span><span><b>−$${bundleOff()}</b></span></div>
-  ${miss.length?`<div><span><b>Adding ${miss.length===2?"both":"the "+miss[0].n.toLowerCase()}</b></span><span><b>+${f2(delta)} out the door</b></span></div>`:""}</div>`};
+  const r2=v=>Math.round(v*100)/100, delta=r2(calc({cb:1,cl:1}).otd)-r2(calc().otd); // match the totals as displayed
+  const n=itemCount(), cur=Math.min(n,5);
+  const tier=(k,lab,s)=>ln(lab,"",`saves $${s}`,n<3?"":cur===k?"on":"dim");
+  return tier(3,"3 items",15)+tier(4,"4 items",25)+tier(5,"5+ items",55)
+    +ln("Cable","with charging block","50% off")
+    +ln("JLab","counts as an item","25% off")
+    +ln(`${n} selected`,"bundle savings",`−$${bundleOff()}`)
+    +(miss.length?ln(`Adding ${miss.length===2?"both":"the "+miss[0].n.toLowerCase()}`,delta<0?"lowers out the door":"adds to out the door",`${delta<0?"−":"+"}${f2(Math.abs(delta))}`,"em"):"");
+};
 
 // ---- Monthly ----
 const noPhone=()=>S.phones[0]==="";
@@ -160,18 +293,17 @@ const totV=()=>quoteV()+(S.watch?WATCH_MO:0)+(S.tab?TAB_MO:0)+perkMo();
 const quoteMo=()=>fmtMo(quoteV());
 const totMo=()=>fmtMo(totV());
 const perkName=()=>S.pkN&&S.pkD?"Fans package · $25/mo":S.pkN?"Netflix + HBO Max · $13/mo":S.pkD?"Disney+ + Hulu + ESPN+ · $12/mo":"None";
-const mob=()=>{const x=phone();return `<div class="lbl" style="margin-top:0">Rep note · 36 monthly payments</div><div class="brk">
-  <div><span>${f2(x.r)} retail ÷ 36</span><span>${f2(x.a)}/mo</span></div>
-  <div><span>${f2(x.p)} promo ÷ 36</span><span>−${f2(x.b)}/mo</span></div>
-  <div><span>BYOD</span><span>+$5.00/mo</span></div>
-  <div><span>${S.vmp?"VMP · quoted in":"VMP · declined"}</span><span>${S.vmp?"+$19.00/mo":"$0.00"}</span></div></div>`};
+const mob=()=>{const x=phone();return ln("Retail",`${f2(x.r)} ÷ 36`,`${f2(x.a)}/mo`)
+  +ln("Promo",`${f2(x.p)} ÷ 36`,`−${f2(x.b)}/mo`)
+  +ln("BYOD","","+$5.00/mo")
+  +ln("VMP",S.vmp?"quoted in":"declined",S.vmp?"+$19.00/mo":"$0.00",S.vmp?"":"dim")};
 const perkPitch=()=>{
   const t=[];
   for(const k of ["pkN","pkD"]){const hit=PK[k].has.filter(p=>S.perks[p]);if(!S[k]&&hit.length)t.push(`Pitch <b>${PK[k].n}</b> · they already pay for ${list(hit)}`)}
   const sv=+S.saved||0;
   if(sv>0)t.push(`Savings found · <b>${f2(sv)}/mo</b> to put toward perks`);
   if(S.pkN&&S.pkD)t.push(`<b>Fans package</b> · both for $25/mo`);
-  return t.length?`<div class="rep">${t.join("<br>")}</div>`:"";
+  return t.length?`<div class="panel">${ph("Pitch notes")}${t.map(x=>`<div class="ln t"><span class="k">${x}</span></div>`).join("")}</div>`:"";
 };
 
 // ---- Recap: what's still on the table ----
@@ -195,62 +327,60 @@ const vhiTxt=()=>{
 
 const STEPS=[
 {t:"Upgrade",h:"Position BYOD",body:()=>`
-  <p class="say">“Okay, you get <b data-v="credit">${m(S.credit)}</b> off the upgrade. Your total monthly goes up <b data-v="inc">${quoteMo()}</b>. No trade required — keep your old phone.”</p>
+  ${say([`Okay, you get <b data-v="credit">${m(S.credit)}</b> off the upgrade.`,`Your total monthly goes up <b data-v="inc">${quoteMo()}</b>.`,"No trade required — keep your old phone."])}
   <div class="row">${money("ph0","Phone retail price",S.phones[0])}${money("credit","Promo amount",S.credit)}</div>
-  <div class="rep" data-v="mob">${mob()}</div>
-  <div class="total"><span>Monthly increase${S.vmp?" · with VMP":""}</span><strong data-v="inc">${quoteMo()}</strong></div>`},
+  <div class="panel">${ph("36 monthly payments")}<div data-v="mob">${mob()}</div>
+  ${res(`Monthly increase${S.vmp?"<span>With VMP</span>":""}`,moR(quoteMo()),' data-v="incR"')}</div>`},
 {t:"Protection",h:"Quote with VMP",body:()=>`
-  <p class="say">“That’s with protection — an extra <b>$19/mo</b>. You can’t add it later, and if the device breaks you’d pay full retail, usually <b>$1,200+</b>. If after 90 days you find you don’t need it, come in and we’ll take it off.”</p>
+  ${say(["That’s with protection — an extra <b>$19/mo</b>.","You can’t add it later, and if the device breaks you’d pay full retail, usually <b>$1,200+</b>.","If after 90 days you find you don’t need it, come in and we’ll take it off."])}
   <div class="items">${tog("vmp","Customer kept VMP","+$19/mo")}</div>
-  <div class="total"><span>Monthly increase</span><strong>${quoteMo()}</strong></div>`},
+  <div class="panel">${res("Monthly increase",moR(quoteMo()))}</div>`},
 {t:"Bill review",h:"Lower the bill",body:()=>`
-  <p class="say">“Give me five minutes — let me see what I can do to bring your bill down.”</p>
+  ${say(["Give me five minutes — let me see what I can do to bring your bill down."])}
   <div class="lbl">Goal</div>
   <ul class="notes"><li>Find savings in the safe 5 minutes</li><li>Use the savings to add perks, hotspot, etc.</li></ul>
-  <div class="row" style="margin-top:16px">${money("saved","Monthly savings found",S.saved)}</div>`},
+  <div class="row sp">${money("saved","Monthly savings found",S.saved,"/mo")}</div>`},
 {t:"Watch + tablet",h:"Bring out watch and tablet",body:()=>`
-  <p class="say">“Both of these are <b>free</b> — you just pay the line of service and taxes: <b>$7.50/mo</b> for the watch, <b>$11/mo</b> for the tablet. And with the watch, you get <b>free AirPods</b>.”</p>
+  ${say(["Both of these are <b>free</b> — you just pay the line of service and taxes: <b>$7.50/mo</b> for the watch, <b>$11/mo</b> for the tablet.","And with the watch, you get <b>free AirPods</b>."])}
   <div class="items">${tog("watch","Watch added · free AirPods","+$7.50/mo")}${tog("tab","Tablet added","+$11/mo")}</div>
-  ${S.watch||S.tab?`<div class="lbl">Retail price (for tax)</div><div class="row">${S.watch?money("watchR","Watch",S.watchR):""}${S.tab?money("tabR","Tablet",S.tabR):""}</div>`:""}
-  <div class="total"><span>Total monthly increase</span><strong>${totMo()}</strong></div>`},
+  ${S.watch||S.tab?`<div class="lbl">Retail price · for tax</div><div class="row">${S.watch?money("watchR","Watch",S.watchR):""}${S.tab?money("tabR","Tablet",S.tabR):""}</div>`:""}
+  <div class="panel">${res("Total monthly increase",moR(totMo()))}</div>`},
 {t:"Accessories",h:"Quote 3 accessories",body:()=>{
   const sel=ACC.filter(a=>S.acc[a.k]).map(a=>a.n.toLowerCase());
   return `
-  <p class="say">“${sel.length?`With your ${list(sel)}, you’re`:"You’re"} out the door at <b data-v="otd">${f2(calc().otd)}</b>.”</p>
-  <div class="lbl">Device retail price (for tax)</div>
-  ${S.phones.map((r,i)=>`<div class="dev">${money("ph"+i,S.phones.length>1?`Phone ${i+1}`:"Phone",r)}${S.phones.length>1?`<button class="x" data-rm="${i}" aria-label="Remove phone ${i+1}">×</button>`:"<span></span>"}</div>`).join("")}
+  ${say([`${sel.length?`With your ${list(sel)}, you’re`:"You’re"} out the door at <b data-v="otd">${f2(calc().otd)}</b>.`])}
+  <div class="lbl">Device retail price · for tax</div>
+  ${S.phones.map((r,i)=>`<div class="dev">${money("ph"+i,S.phones.length>1?`Phone ${i+1}`:"Phone",r)}${S.phones.length>1?`<button type="button" class="x" data-rm="${i}" aria-label="Remove phone ${i+1}">×</button>`:"<span></span>"}</div>`).join("")}
   ${S.watch?`<div class="dev">${money("watchR","Watch",S.watchR)}<span></span></div>`:""}
   ${S.tab?`<div class="dev">${money("tabR","Tablet",S.tabR)}<span></span></div>`:""}
-  <button class="addph" data-addph="1">+ Add another phone</button>
+  <button type="button" class="addph" data-addph="1">+ Add another phone</button>
   <div class="lbl">Bundle</div>
   <div class="items">${ACC.map(a=>box(`data-acc="${a.k}"`,S.acc[a.k],a.n,"$"+a.p)).join("")}</div>
-  <div class="rep" data-v="brk">${brk()}</div>
-  ${otdRow()}`}},
+  <div class="panel">${ph("Breakdown")}<div data-v="brk">${brk()}</div>${res("Out the door",f2(calc().otd),' data-v="otd"')}</div>`}},
 {t:"Add-ons",h:"Block, cable + JLab",body:()=>`
-  <p class="say">“Want the charging block and cable too? Get the block and the cable is <b>50% off</b> — and doing both makes the 5th one free.”</p>
+  ${say(["Want the charging block and cable too?","Get the block and the cable is <b>50% off</b> — and doing both makes the 5th one free."])}
   <div class="items">${ADD.map(a=>box(`data-add="${a.k}"`,S.add[a.k],a.n,was(a.p,addP(a)))).join("")}</div>
-  <p class="say sub">“JLab headphones are <b>25% off</b> too — <b>$31.50</b> or <b>$45.75</b>.”</p>
+  ${say(["JLab headphones are <b>25% off</b> too — <b>$31.50</b> or <b>$45.75</b>."]," sub")}
   <div class="items">${Object.keys(JL).map(k=>pick("jl",k,JL[k].n,was(JL[k].p,JL[k].p*(1-JL_OFF)))).join("")}</div>
-  <div class="rep">${tierNote()}</div>
-  ${otdRow()}`},
+  <div class="panel">${ph("Bundle savings")}${tierNote()}${res("Out the door",f2(calc().otd),' data-v="otd"')}</div>`},
 {t:"Setup",h:"Find existing perks",body:()=>`
-  <p class="say">“While this sets up — do you already pay for any streaming? I can put Netflix and HBO Max on your bill for <b>$13/mo</b>, Disney+, Hulu and ESPN+ for <b>$12/mo</b>, or both with the Fans package for <b>$25/mo</b>.”</p>
+  ${say(["While this sets up — do you already pay for any streaming?","I can put Netflix and HBO Max on your bill for <b>$13/mo</b>, Disney+, Hulu and ESPN+ for <b>$12/mo</b>, or both with the Fans package for <b>$25/mo</b>."])}
   <div class="lbl">Tap what they already have</div>
-  <div class="items">${PERKS.map(p=>box(`data-perk="${p}"`,S.perks[p],p)).join("")}</div>
+  <div class="tags">${PERKS.map(p=>tag(`data-perk="${p}"`,S.perks[p],p)).join("")}</div>
   <div class="lbl">Perks added</div>
-  <div class="items">${tog("pkN","Netflix + HBO Max","$13/mo")}${tog("pkD","Disney+ + Hulu + ESPN+","$12/mo")}</div>
+  <div class="items">${tog("pkN","Netflix + HBO Max","+$13/mo")}${tog("pkD","Disney+ + Hulu + ESPN+","+$12/mo")}</div>
   ${perkPitch()}
-  <div class="total"><span>Total monthly increase</span><strong>${totMo()}</strong></div>`},
+  <div class="panel">${res("Total monthly increase",moR(totMo()))}</div>`},
 {t:"Home internet",h:"Pitch VHI",body:()=>`
-  <p class="say">“Last thing — let me check if your address qualifies for Verizon Home Internet.”</p>
+  ${say(["Last thing — let me check if your address qualifies for Verizon Home Internet."])}
   <ul class="notes"><li>Only pitch if the address qualifies</li></ul>
-  <div class="items" style="margin-top:14px">${tog("vhiQ","Address qualifies")}</div>
-  ${S.vhiQ?`<div class="lbl">Service</div><div class="items">${pick("vhiT","5g","5G Home")}${pick("vhiT","fios","Fios")}</div>`:""}
-  ${S.vhiQ&&S.vhiT==="5g"?`<p class="say sub">“With 5G Home you also get to pick: a <b class="w">Samsung 43" 4K TV with a soundbar</b>, or a <b class="w">$200 Target gift card</b>.”</p>
+  <div class="items sp">${tog("vhiQ","Address qualifies")}</div>
+  ${S.vhiQ?`<div class="lbl">Service</div><div class="items two">${pick("vhiT","5g","5G Home")}${pick("vhiT","fios","Fios")}</div>`:""}
+  ${S.vhiQ&&S.vhiT==="5g"?`${say([`With 5G Home you also get to pick: a <b class="w">Samsung 43" 4K TV with a soundbar</b>, or a <b>$200</b> <b class="w">Target gift card</b>.`]," sub")}
   <div class="lbl">Choice offer · pick one</div><div class="items">${OFFERS.map(o=>pick("vhiO",o.k,o.n)).join("")}</div>`:""}
   ${S.vhiQ?`<div class="lbl">Result</div><div class="items">${tog("vhi","Customer signed up")}</div>`:""}
-  ${S.vhi&&!S.vhiT?`<div class="rep warn">Pick 5G Home or Fios.</div>`:""}
-  ${needOffer()?`<div class="rep warn">Pick a choice offer — every 5G Home sale gets one.</div>`:""}`},
+  ${S.vhi&&!S.vhiT?`<div class="note warn">Pick 5G Home or Fios.</div>`:""}
+  ${needOffer()?`<div class="note warn">Pick a choice offer — every 5G Home sale gets one.</div>`:""}`},
 {t:"Recap",h:"Deal recap",body:()=>{
   const c=calc(), sv=+S.saved||0;
   const open=OPEN.filter(o=>o[0]());
@@ -258,11 +388,10 @@ const STEPS=[
   const add=[...ADD.filter(a=>S.add[a.k]).map(a=>a.n+(addP(a)<a.p?" (50% off)":"")),S.jl&&JL[S.jl].n+" (25% off)"].filter(Boolean).join(", ")||"None";
   const pk=PERKS.filter(p=>S.perks[p]).join(", ")||"None";
   const rows=[["Promo amount",m(S.credit)],["Phone + BYOD",fmtMo(phone().n)],["VMP",S.vmp?"Yes · $19/mo":"No"],["Watch / tablet",[S.watch&&"Watch (free AirPods)",S.tab&&"Tablet"].filter(Boolean).join(" + ")||"None"],["Perks added",perkName()],["Bill savings found",sv>0?f2(sv)+"/mo":"None"],["Lines",String(c.lines)],["Device retail",f2(c.retail)],["Accessories",acc],["Add-ons",add],["Already has",pk],["VHI",vhiTxt()]];
-  return `<div class="total first"><span>Out the door</span><strong>${f2(c.otd)}</strong></div>
-  <div class="total"><span>Total monthly increase</span><strong>${totMo()}</strong></div>
-  ${sv>0&&!noPhone()?`<div class="total"><span>Net after savings</span><strong>${(totV()-sv<0?"−":"")+f2(Math.abs(totV()-sv))}/mo</strong></div>`:""}
+  return `<div class="panel">${res("Out the door",f2(c.otd))}${res("Total monthly increase",moR(totMo()))}
+  ${sv>0&&!noPhone()?res("Net after savings",(totV()-sv<0?"−":"+")+f2(Math.abs(totV()-sv))+"<small>/mo</small>",""," s"):""}</div>
   <div class="lbl">Still on the table · tap to go back</div>
-  ${open.length?`<div class="miss">${open.map(o=>`<button data-go="${o[2]}">${typeof o[1]==="function"?o[1]():o[1]}</button>`).join("")}</div>`:`<p class="ok">Everything’s on the deal.</p>`}
+  ${open.length?`<div class="miss">${open.map(o=>`<button type="button" data-go="${o[2]}">${typeof o[1]==="function"?o[1]():o[1]}</button>`).join("")}</div>`:`<p class="ok">Everything’s on the deal.</p>`}
   <div class="lbl">Deal details</div>
   <div class="sum">${rows.map(r=>`<div><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join("")}</div>`}}
 ];
@@ -272,10 +401,10 @@ const main=document.getElementById("main"),chips=document.getElementById("chips"
 let shown=-1;
 function render(){
   const st=STEPS[S.step], moved=S.step!==shown; shown=S.step;
-  chips.innerHTML=STEPS.map((x,i)=>`<button class="chip ${i===S.step?"on":i<S.step?"done":""}" data-go="${i}">${x.t}</button>`).join("");
-  main.innerHTML=`<section class="card${moved?" anim":""}"><p class="num">Step ${S.step+1} of ${STEPS.length}</p><h2>${st.h}</h2>${st.body()}</section>`;
+  chips.innerHTML=STEPS.map((x,i)=>`<button type="button" class="tab${i===S.step?" on":i<S.step?" done":""}" data-go="${i}"${i===S.step?' aria-current="step"':""}><i>${i+1}</i>${x.t}</button>`).join("");
+  main.innerHTML=`<section class="card${moved?" anim":""}" style="--p:${(S.step+1)/STEPS.length}"><p class="eyebrow">Step <b>${S.step+1}</b> of ${STEPS.length} · ${st.t}</p><h2>${st.h}</h2>${st.body()}</section>`;
   document.getElementById("back").disabled=S.step===0;
-  document.getElementById("next").textContent=S.step===STEPS.length-1?"New customer":"Next";
+  document.getElementById("next").innerHTML=S.step===STEPS.length-1?"New customer":`Next<span class="to">${STEPS[S.step+1].t}</span>`;
   if(moved){const on=chips.querySelector(".on");if(on)chips.scrollLeft=on.offsetLeft-(chips.clientWidth-on.offsetWidth)/2}
   save();
 }
@@ -284,6 +413,7 @@ function live(){
   main.querySelectorAll('[data-v="otd"]').forEach(e=>e.textContent=o);
   main.querySelectorAll('[data-v="credit"]').forEach(e=>e.textContent=m(S.credit));
   main.querySelectorAll('[data-v="inc"]').forEach(e=>e.textContent=quoteMo());
+  main.querySelectorAll('[data-v="incR"]').forEach(e=>e.innerHTML=moR(quoteMo()));
   const mb=main.querySelector('[data-v="mob"]');if(mb)mb.innerHTML=mob();
   const b=main.querySelector('[data-v="brk"]');if(b)b.innerHTML=brk();
 }
