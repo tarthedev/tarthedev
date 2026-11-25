@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upgrade Sales Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a coach in your pocket on the sales floor — fast, glanceable, confident.
+   IDEA: a cue card deck; one card per beat of the sale, tap through like cooking mode.
+   PICTURE: the current card itself, with the line to say set large.
+   COLOUR and TYPE: white ground, black ink, one bold red for the line to say and totals; Inter Tight + Inter.
+   LAYOUT: progress chips on top, one card, sticky Back / Next at the thumb. */
+:root{color-scheme:light;--bg:#fff;--card:#f6f6f6;--card2:#fff;--ink:#000;--soft:#333;--rose:#ee0000;--dusk:#6f7171;--line:#d8dada}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:light}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+header{padding:18px max(5vw,16px) 8px;max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{font:700 20px/1.1 "Inter Tight",sans-serif;margin:0;color:var(--ink)}
+.reset{background:none;border:1px solid var(--line);color:var(--soft);border-radius:999px;padding:8px 14px;font:500 14px Inter;min-height:40px;cursor:pointer}
+.chips{position:relative;display:flex;gap:6px;overflow-x:auto;padding:14px 0 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);border-radius:999px;padding:8px 12px;font:500 13px Inter;background:var(--card);color:var(--soft);cursor:pointer;min-height:36px}
+.chip.done{background:var(--card);color:var(--dusk)}
+.chip.on{background:#000;color:#fff}
+main{max-width:760px;margin:0 auto;padding:8px max(5vw,16px) 120px}
+.card{background:var(--card);border-top:4px solid var(--rose);border-radius:22px;padding:clamp(20px,4vw,32px)}
+.card.anim{animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.card.anim{animation:none}}
+.num{color:var(--dusk);font:500 14px Inter;margin:0 0 6px}
+h2{font:700 clamp(28px,6vw,40px)/1.05 "Inter Tight",sans-serif;margin:0 0 18px;text-wrap:balance}
+.say{border-left:4px solid var(--rose);padding:4px 0 4px 16px;margin:0 0 20px;font:400 clamp(21px,4.6vw,26px)/1.35 "Inter Tight",sans-serif;color:var(--ink)}
+.say b{color:var(--rose);font-weight:700;white-space:nowrap}
+.lbl{font:600 13px Inter;color:var(--dusk);margin:20px 0 8px}
+ul.notes{margin:0;padding-left:20px;color:var(--soft)}
+ul.notes li{margin:4px 0}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:8px}
+label.f{display:block;font:500 14px Inter;color:var(--soft)}
+.money{display:flex;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:12px;margin-top:6px;padding-left:12px}
+.money span{color:var(--dusk)}
+input[type=number]{width:100%;background:none;border:0;color:var(--ink);font:500 18px Inter;padding:12px 12px 12px 4px;min-height:48px;outline:none}
+.money:focus-within{border-color:var(--rose)}
+.dev{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin-top:10px}
+.x{background:var(--card2);border:1px solid var(--line);color:var(--soft);border-radius:12px;min-width:48px;min-height:50px;font:500 20px Inter;cursor:pointer}
+.addph{margin-top:10px;background:none;border:1px dashed var(--dusk);color:var(--soft);border-radius:12px;min-height:48px;width:100%;font:500 15px Inter;cursor:pointer}
+.items{display:grid;gap:8px;margin-top:8px}
+.item{display:flex;align-items:center;gap:12px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-height:52px;cursor:pointer;color:var(--ink);font:500 16px Inter;text-align:left;width:100%}
+.item .p{margin-left:auto;color:var(--soft);white-space:nowrap}
+.item .box{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--dusk);display:grid;place-items:center;font-size:14px;color:#fff}
+.item.on{border-color:var(--rose)}
+.item.on .box{background:var(--rose);border-color:var(--rose)}
+.item.on .box::after{content:"✓"}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.total strong{font:700 clamp(28px,7vw,36px) "Inter Tight";color:var(--rose);white-space:nowrap}
+.total.first{margin-top:0;padding-top:0;border-top:0}
+.rep{background:var(--card2);border:1px dashed var(--dusk);border-radius:14px;padding:12px 14px;color:var(--soft);margin-top:16px}
+.rep b{color:var(--rose)}
+.brk div{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
+.brk div span:last-child{white-space:nowrap;color:var(--ink)}
+.sum{display:grid;gap:2px}
+.sum div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.sum div span:last-child{color:var(--rose);font-weight:600;text-align:right}
+.miss{display:flex;flex-wrap:wrap;gap:8px}
+.miss button{background:var(--card2);border:1px solid var(--rose);color:var(--rose);border-radius:999px;padding:8px 14px;min-height:40px;font:500 14px Inter;cursor:pointer}
+.ok{color:var(--soft);margin:0}
+nav.go{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:24px max(5vw,16px) calc(16px + env(safe-area-inset-bottom))}
+nav.go div{max-width:760px;margin:0 auto;display:flex;gap:10px}
+nav.go button{flex:1;min-height:54px;border-radius:16px;border:0;font:600 17px Inter;cursor:pointer}
+#back{background:var(--card2);color:var(--ink);border:2px solid #000 !important;flex:0 0 34%}
+#next{background:var(--rose);color:#fff}
+button:focus-visible,.item:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+button:disabled{opacity:.35}
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><h1>Upgrade sales flow</h1><button class="reset" id="reset">New customer</button></div>
+  <div class="chips" id="chips"></div>
+</header>
+<main id="main"></main>
+<nav class="go"><div><button id="back">Back</button><button id="next">Next</button></div></nav>
+
+<script>
+{
+const TAX=0.0725, SETUP=39.99, TIERS={3:15,4:25,5:55};
+const MONTHS=36, BYOD=5, VMP_MO=19, WATCH_MO=7.5, TAB_MO=11, FANS_MO=25;
+const ACC=[{k:"sp",n:"Screen protector",p:70},{k:"lp",n:"Lens protectors",p:40},{k:"cs",n:"Case",p:60}];
+const ADD=[{k:"cb",n:"Charging block",p:40},{k:"cl",n:"Cable",p:40}];
+const PERKS=["Disney+","Hulu","ESPN+","Netflix","HBO Max"];
+const PK={pkN:{n:"Netflix + HBO Max",p:13,has:["Netflix","HBO Max"]},pkD:{n:"Disney+ + Hulu + ESPN+",p:12,has:["Disney+","Hulu","ESPN+"]}};
+const KEY="salesflow3";
+const fresh=()=>({step:0,credit:"",phones:[""],watchR:"",tabR:"",saved:"",acc:{sp:1,lp:1,cs:1},add:{},perks:{},vmp:1,watch:0,tab:0,pkN:0,pkD:0,vhiQ:0,vhi:0});
+let S;
+try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){S=fresh()}
+if(!Array.isArray(S.phones)||!S.phones.length)S.phones=[""];
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const m=v=>v===""||v==null?"$__":"$"+Number(v).toLocaleString();
+const f2=n=>"$"+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const list=a=>a.length<2?(a[0]||""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+const money=(id,lab,val)=>`<label class="f">${lab}<div class="money"><span>$</span><input type="number" inputmode="decimal" id="${id}" value="${esc(val)}" placeholder="0"></div></label>`;
+const box=(attr,on,name,price)=>`<button class="item ${on?"on":""}" ${attr} aria-pressed="${on?"true":"false"}"><span class="box"></span>${name}${price?`<span class="p">${price}</span>`:""}</button>`;
+const tog=(key,name,price)=>box(`data-t="${key}"`,S[key],name,price);
+
+// ---- Out the door ----
+const itemCount=(add=S.add)=>ACC.filter(a=>S.acc[a.k]).length+ADD.filter(a=>add[a.k]).length;
+const bundleOff=(add=S.add)=>TIERS[itemCount(add)]||0;
+function calc(add=S.add){
+  const devs=S.phones.map(r=>+r||0);
+  if(S.watch)devs.push(+S.watchR||0);
+  if(S.tab)devs.push(+S.tabR||0);
+  const lines=devs.length;
+  const retail=devs.reduce((t,r)=>t+r,0);
+  const devTax=retail*TAX;
+  const setup=SETUP*lines;
+  const off=bundleOff(add);
+  const gear=ACC.reduce((t,a)=>t+(S.acc[a.k]?a.p:0),0)+ADD.reduce((t,a)=>t+(add[a.k]?a.p:0),0)-off;
+  const otherTax=(setup+gear)*TAX;
+  return {lines,retail,devTax,setup,gear,off,otherTax,otd:devTax+setup+gear+otherTax};
+}
+const brk=()=>{const c=calc();return `<div class="lbl" style="margin-top:0">Rep note · not for customer</div><div class="brk">
+  <div><span>Tax on ${c.lines} device${c.lines>1?"s":""} (${f2(c.retail)} retail)</span><span>${f2(c.devTax)}</span></div>
+  <div><span>Setup · ${c.lines} × $39.99</span><span>${f2(c.setup)}</span></div>
+  <div><span>Accessories + add-ons${c.off?` (−$${c.off} bundle)`:""}</span><span>${f2(c.gear)}</span></div>
+  <div><span>Tax on setup + accessories</span><span>${f2(c.otherTax)}</span></div></div>`};
+const otdRow=()=>`<div class="total"><span>Out the door</span><strong data-v="otd">${f2(calc().otd)}</strong></div>`;
+const tierNote=()=>{
+  const miss=ADD.filter(a=>!S.add[a.k]);
+  const delta=calc({cb:1,cl:1}).otd-calc().otd;
+  return `<div class="lbl" style="margin-top:0">Rep note · not for customer</div><div class="brk">
+  <div><span>3 items</span><span>saves $15</span></div><div><span>4 items</span><span>saves $25</span></div><div><span>5 items</span><span>saves $55</span></div>
+  <div><span><b>${itemCount()} selected</b></span><span><b>−$${bundleOff()}</b></span></div>
+  ${miss.length?`<div><span><b>Adding ${miss.length===2?"both":"the "+miss[0].n.toLowerCase()}</b></span><span><b>+${f2(delta)} out the door</b></span></div>`:""}</div>`};
+
+// ---- Monthly ----
+const noPhone=()=>S.phones[0]==="";
+const phone=()=>{const r=+S.phones[0]||0,p=+S.credit||0;return {r,p,a:r/MONTHS,b:p/MONTHS,n:Math.max(0,r-p)/MONTHS+BYOD}};
+const fmtMo=v=>noPhone()?"$__/mo":f2(v)+"/mo";
+const vmpMo=()=>S.vmp?VMP_MO:0;
+const perkMo=()=>S.pkN&&S.pkD?FANS_MO:(S.pkN?PK.pkN.p:0)+(S.pkD?PK.pkD.p:0);
+const quoteV=()=>phone().n+vmpMo();
+const totV=()=>quoteV()+(S.watch?WATCH_MO:0)+(S.tab?TAB_MO:0)+perkMo();
+const quoteMo=()=>fmtMo(quoteV());
+const totMo=()=>fmtMo(totV());
+const perkName=()=>S.pkN&&S.pkD?"Fans package · $25/mo":S.pkN?"Netflix + HBO Max · $13/mo":S.pkD?"Disney+ + Hulu + ESPN+ · $12/mo":"None";
+const mob=()=>{const x=phone();return `<div class="lbl" style="margin-top:0">Rep note · 36 monthly payments</div><div class="brk">
+  <div><span>${f2(x.r)} retail ÷ 36</span><span>${f2(x.a)}/mo</span></div>
+  <div><span>${f2(x.p)} promo ÷ 36</span><span>−${f2(x.b)}/mo</span></div>
+  <div><span>BYOD</span><span>+$5.00/mo</span></div>
+  <div><span>${S.vmp?"VMP · quoted in":"VMP · declined"}</span><span>${S.vmp?"+$19.00/mo":"$0.00"}</span></div></div>`};
+const perkPitch=()=>{
+  const t=[];
+  for(const k of ["pkN","pkD"]){const hit=PK[k].has.filter(p=>S.perks[p]);if(!S[k]&&hit.length)t.push(`Pitch <b>${PK[k].n}</b> · they already pay for ${list(hit)}`)}
+  const sv=+S.saved||0;
+  if(sv>0)t.push(`Savings found · <b>${f2(sv)}/mo</b> to put toward perks`);
+  if(S.pkN&&S.pkD)t.push(`<b>Fans package</b> · both for $25/mo`);
+  return t.length?`<div class="rep">${t.join("<br>")}</div>`:"";
+};
+
+// ---- Recap: what's still on the table ----
+const OPEN=[
+  [()=>!S.vmp,"VMP",1],
+  ...ACC.map(a=>[()=>!S.acc[a.k],a.n,4]),
+  ...ADD.map(a=>[()=>!S.add[a.k],a.n,5]),
+  [()=>!S.watch,"Watch",3],[()=>!S.tab,"Tablet",3],
+  [()=>!S.pkN,"Netflix + HBO Max",6],[()=>!S.pkD,"Disney+ + Hulu + ESPN+",6],
+  [()=>!S.vhi,()=>S.vhiQ?"Home internet":"Home internet · check address",7]
+];
+
+const STEPS=[
+{t:"Upgrade",h:"Position BYOD",body:()=>`
+  <p class="say">“Okay, you get <b data-v="credit">${m(S.credit)}</b> off the upgrade. Your total monthly goes up <b data-v="inc">${quoteMo()}</b>. No trade required — keep your old phone.”</p>
+  <div class="row">${money("ph0","Phone retail price",S.phones[0])}${money("credit","Promo amount",S.credit)}</div>
+  <div class="rep" data-v="mob">${mob()}</div>
+  <div class="total"><span>Monthly increase${S.vmp?" · with VMP":""}</span><strong data-v="inc">${quoteMo()}</strong></div>`},
+{t:"Protection",h:"Quote with VMP",body:()=>`
+  <p class="say">“That’s with protection — an extra <b>$19/mo</b>. You can’t add it later, and if the device breaks you’d pay full retail, usually <b>$1,200+</b>. If after 90 days you find you don’t need it, come in and we’ll take it off.”</p>
+  <div class="items">${tog("vmp","Customer kept VMP","+$19/mo")}</div>
+  <div class="total"><span>Monthly increase</span><strong>${quoteMo()}</strong></div>`},
+{t:"Bill review",h:"Lower the bill",body:()=>`
+  <p class="say">“Give me five minutes — let me see what I can do to bring your bill down.”</p>
+  <div class="lbl">Goal</div>
+  <ul class="notes"><li>Find savings in the safe 5 minutes</li><li>Use the savings to add perks, hotspot, etc.</li></ul>
+  <div class="row" style="margin-top:16px">${money("saved","Monthly savings found",S.saved)}</div>`},
+{t:"Watch + tablet",h:"Bring out watch and tablet",body:()=>`
+  <p class="say">“Both of these are <b>free</b> — you just pay the line of service and taxes: <b>$7.50/mo</b> for the watch, <b>$11/mo</b> for the tablet.”</p>
+  <div class="items">${tog("watch","Watch added","+$7.50/mo")}${tog("tab","Tablet added","+$11/mo")}</div>
+  ${S.watch||S.tab?`<div class="lbl">Retail price (for tax)</div><div class="row">${S.watch?money("watchR","Watch",S.watchR):""}${S.tab?money("tabR","Tablet",S.tabR):""}</div>`:""}
+  <div class="total"><span>Total monthly increase</span><strong>${totMo()}</strong></div>`},
+{t:"Accessories",h:"Quote 3 accessories",body:()=>{
+  const sel=ACC.filter(a=>S.acc[a.k]).map(a=>a.n.toLowerCase());
+  return `
+  <p class="say">“${sel.length?`With your ${list(sel)}, you’re`:"You’re"} out the door at <b data-v="otd">${f2(calc().otd)}</b>.”</p>
+  <div class="lbl">Device retail price (for tax)</div>
+  ${S.phones.map((r,i)=>`<div class="dev">${money("ph"+i,S.phones.length>1?`Phone ${i+1}`:"Phone",r)}${S.phones.length>1?`<button class="x" data-rm="${i}" aria-label="Remove phone ${i+1}">×</button>`:"<span></span>"}</div>`).join("")}
+  ${S.watch?`<div class="dev">${money("watchR","Watch",S.watchR)}<span></span></div>`:""}
+  ${S.tab?`<div class="dev">${money("tabR","Tablet",S.tabR)}<span></span></div>`:""}
+  <button class="addph" data-addph="1">+ Add another phone</button>
+  <div class="lbl">Bundle</div>
+  <div class="items">${ACC.map(a=>box(`data-acc="${a.k}"`,S.acc[a.k],a.n,"$"+a.p)).join("")}</div>
+  <div class="rep" data-v="brk">${brk()}</div>
+  ${otdRow()}`}},
+{t:"Add-ons",h:"Charging block + cable",body:()=>`
+  <p class="say">“Want the charging block and cable too? Doing both makes the 5th one free.”</p>
+  <div class="items">${ADD.map(a=>box(`data-add="${a.k}"`,S.add[a.k],a.n,"$"+a.p)).join("")}</div>
+  <div class="rep">${tierNote()}</div>
+  ${otdRow()}`},
+{t:"Setup",h:"Find existing perks",body:()=>`
+  <p class="say">“While this sets up — do you already pay for any streaming? I can put Netflix and HBO Max on your bill for <b>$13/mo</b>, Disney+, Hulu and ESPN+ for <b>$12/mo</b>, or both with the Fans package for <b>$25/mo</b>.”</p>
+  <div class="lbl">Tap what they already have</div>
+  <div class="items">${PERKS.map(p=>box(`data-perk="${p}"`,S.perks[p],p)).join("")}</div>
+  <div class="lbl">Perks added</div>
+  <div class="items">${tog("pkN","Netflix + HBO Max","$13/mo")}${tog("pkD","Disney+ + Hulu + ESPN+","$12/mo")}</div>
+  ${perkPitch()}
+  <div class="total"><span>Total monthly increase</span><strong>${totMo()}</strong></div>`},
+{t:"Home internet",h:"Pitch VHI",body:()=>`
+  <p class="say">“Last thing — let me check if your address qualifies for Verizon Home Internet.”</p>
+  <ul class="notes"><li>Only pitch if the address qualifies</li></ul>
+  <div class="items" style="margin-top:14px">${tog("vhiQ","Address qualifies")}${S.vhiQ?tog("vhi","Customer signed up"):""}</div>`},
+{t:"Recap",h:"Deal recap",body:()=>{
+  const c=calc(), sv=+S.saved||0;
+  const open=OPEN.filter(o=>o[0]());
+  const acc=ACC.filter(a=>S.acc[a.k]).map(a=>a.n).join(", ")||"None";
+  const add=ADD.filter(a=>S.add[a.k]).map(a=>a.n).join(", ")||"None";
+  const pk=PERKS.filter(p=>S.perks[p]).join(", ")||"None";
+  const rows=[["Promo amount",m(S.credit)],["Phone + BYOD",fmtMo(phone().n)],["VMP",S.vmp?"Yes · $19/mo":"No"],["Watch / tablet",[S.watch&&"Watch",S.tab&&"Tablet"].filter(Boolean).join(" + ")||"None"],["Perks added",perkName()],["Bill savings found",sv>0?f2(sv)+"/mo":"None"],["Lines",String(c.lines)],["Device retail",f2(c.retail)],["Accessories",acc],["Add-ons",add],["Already has",pk],["VHI",S.vhi?"Signed up":S.vhiQ?"Qualifies · not sold":"Not checked / doesn’t qualify"]];
+  return `<div class="total first"><span>Out the door</span><strong>${f2(c.otd)}</strong></div>
+  <div class="total"><span>Total monthly increase</span><strong>${totMo()}</strong></div>
+  ${sv>0&&!noPhone()?`<div class="total"><span>Net after savings</span><strong>${(totV()-sv<0?"−":"")+f2(Math.abs(totV()-sv))}/mo</strong></div>`:""}
+  <div class="lbl">Still on the table · tap to go back</div>
+  ${open.length?`<div class="miss">${open.map(o=>`<button data-go="${o[2]}">${typeof o[1]==="function"?o[1]():o[1]}</button>`).join("")}</div>`:`<p class="ok">Everything’s on the deal.</p>`}
+  <div class="lbl">Deal details</div>
+  <div class="sum">${rows.map(r=>`<div><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join("")}</div>`}}
+];
+if(!(S.step>=0&&S.step<STEPS.length))S.step=0;
+
+const main=document.getElementById("main"),chips=document.getElementById("chips");
+let shown=-1;
+function render(){
+  const st=STEPS[S.step], moved=S.step!==shown; shown=S.step;
+  chips.innerHTML=STEPS.map((x,i)=>`<button class="chip ${i===S.step?"on":i<S.step?"done":""}" data-go="${i}">${x.t}</button>`).join("");
+  main.innerHTML=`<section class="card${moved?" anim":""}"><p class="num">Step ${S.step+1} of ${STEPS.length}</p><h2>${st.h}</h2>${st.body()}</section>`;
+  document.getElementById("back").disabled=S.step===0;
+  document.getElementById("next").textContent=S.step===STEPS.length-1?"New customer":"Next";
+  if(moved){const on=chips.querySelector(".on");if(on)chips.scrollLeft=on.offsetLeft-(chips.clientWidth-on.offsetWidth)/2}
+  save();
+}
+function live(){
+  const o=f2(calc().otd);
+  main.querySelectorAll('[data-v="otd"]').forEach(e=>e.textContent=o);
+  main.querySelectorAll('[data-v="credit"]').forEach(e=>e.textContent=m(S.credit));
+  main.querySelectorAll('[data-v="inc"]').forEach(e=>e.textContent=quoteMo());
+  const mb=main.querySelector('[data-v="mob"]');if(mb)mb.innerHTML=mob();
+  const b=main.querySelector('[data-v="brk"]');if(b)b.innerHTML=brk();
+}
+function go(i){S.step=Math.max(0,Math.min(STEPS.length-1,i));render();window.scrollTo(0,0)}
+function reset(){
+  const dirty=S.credit!==""||S.phones.some(v=>v!=="");
+  if(dirty&&!confirm("Start a new customer? This clears the current deal."))return;
+  S=fresh();shown=-1;render();window.scrollTo(0,0);
+}
+
+document.getElementById("back").onclick=()=>go(S.step-1);
+document.getElementById("next").onclick=()=>S.step===STEPS.length-1?reset():go(S.step+1);
+document.getElementById("reset").onclick=reset;
+chips.onclick=e=>{const b=e.target.closest("[data-go]");if(b)go(+b.dataset.go)};
+main.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  const d=b.dataset;
+  if(d.go!=null){go(+d.go);return}
+  if(d.t){S[d.t]=S[d.t]?0:1;if(d.t==="vhi"&&S.vhi)S.vhiQ=1;if(d.t==="vhiQ"&&!S.vhiQ)S.vhi=0}
+  else if(d.acc)S.acc[d.acc]=S.acc[d.acc]?0:1;
+  else if(d.add)S.add[d.add]=S.add[d.add]?0:1;
+  else if(d.perk)S.perks[d.perk]=S.perks[d.perk]?0:1;
+  else if(d.addph)S.phones.push("");
+  else if(d.rm!=null)S.phones.splice(+d.rm,1);
+  else return;
+  render();
+});
+main.addEventListener("input",e=>{
+  const t=e.target;if(!t.id)return;
+  if(/^ph\d+$/.test(t.id))S.phones[+t.id.slice(2)]=t.value;
+  else S[t.id]=t.value;
+  save();live();
+});
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  if(e.key==="ArrowRight")go(S.step+1);
+  if(e.key==="ArrowLeft")go(S.step-1);
+});
+render();
+}
+</script>
+</body>
+</html>
