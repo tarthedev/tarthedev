@@ -215,7 +215,7 @@ nav.go button{height:52px;border-radius:var(--r);font:600 16px/1 var(--font);let
 <script>
 {
 const TAX=0.0725, SETUP=39.99, TIERS={3:15,4:25,5:55};
-const MONTHS=36, BYOD=5, VMP_MO=19, WATCH_MO=7.5, TAB_MO=11, FANS_MO=25;
+const MONTHS=36, BYOD=5, VMP_MO=19, WATCH_MO=7.5, TAB_MO=10, FANS_MO=25;
 const ACC=[{k:"sp",n:"Screen protector",p:70},{k:"lp",n:"Lens protectors",p:40},{k:"cs",n:"Case",p:60}];
 const ADD=[{k:"cb",n:"Charging block",p:40},{k:"cl",n:"Cable",p:40}];
 const PERKS=["Disney+","Hulu","ESPN+","Netflix","HBO Max"];
@@ -341,8 +341,8 @@ const STEPS=[
   <ul class="notes"><li>Find savings in the safe 5 minutes</li><li>Use the savings to add perks, hotspot, etc.</li></ul>
   <div class="row sp">${money("saved","Monthly savings found",S.saved,"/mo")}</div>`},
 {t:"Watch + tablet",h:"Bring out watch and tablet",body:()=>`
-  ${say(["Both of these are <b>free</b> — you just pay the line of service and taxes: <b>$7.50/mo</b> for the watch, <b>$11/mo</b> for the tablet.","And with the watch, you get <b>free AirPods</b>."])}
-  <div class="items">${tog("watch","Watch added · free AirPods","+$7.50/mo")}${tog("tab","Tablet added","+$11/mo")}</div>
+  ${say(["Both of these are <b>free</b> — you just pay the line of service and taxes: <b>$7.50/mo</b> for the watch, <b>$10/mo</b> for the tablet.","And with the watch, you get <b>free AirPods</b>."])}
+  <div class="items">${tog("watch","Watch added · free AirPods","+$7.50/mo")}${tog("tab","Tablet added","+$10/mo")}</div>
   ${S.watch||S.tab?`<div class="lbl">Retail price · for tax</div><div class="row">${S.watch?money("watchR","Watch",S.watchR):""}${S.tab?money("tabR","Tablet",S.tabR):""}</div>`:""}
   <div class="panel">${res("Total monthly increase",moR(totMo()))}</div>`},
 {t:"Accessories",h:"Quote 3 accessories",body:()=>{
