@@ -239,11 +239,15 @@ const PK={pkN:{n:"Netflix + HBO Max",p:13,has:["Netflix","HBO Max"]},pkD:{n:"Dis
 const CABLE_OFF=.5, JL_OFF=.25;
 const JL={"42":{n:"JLab · $42 option",p:42},"61":{n:"JLab · $61 option",p:61}};
 const OFFERS=[{k:"tv",n:"Samsung 43\" 4K TV + soundbar"},{k:"gc",n:"$200 Target gift card"}];
+const PLANS=[{k:"5g",n:"5G Home"},{k:"5gp",n:"5G Home Plus"},{k:"5gu",n:"5G Home Ultimate"},{k:"lite",n:"VHI Lite"},{k:"litex",n:"VHI Lite Extra"}];
+const OFFER_PLANS=["5gp","5gu"]; // TV / gift card choice offer
 const KEY="salesflow3", REPKEY="salesflow-rep";
-const fresh=()=>({step:0,credit:"",phones:[""],watchR:"",tabR:"",saved:"",bill:"",devPay:"",payoff:"",other:"",acc:{sp:1,lp:1,cs:1},add:{},jl:"",perks:{},vmp:1,vmpHas:0,watch:0,tab:0,pkN:0,pkD:0,vhiQ:0,vhi:0,vhiT:"",vhiO:""});
+const fresh=()=>({step:0,credit:"",phones:[""],watchR:"",tabR:"",saved:"",bill:"",devPay:"",payoff:"",other:"",acc:{sp:1,lp:1,cs:1},add:{},jl:"",perks:{},vmp:1,vmpHas:0,watch:0,tab:0,pkN:0,pkD:0,vhiQ:0,vhi:0,vhiT:"",vhiO:"",inetNow:"",inetOurs:""});
 let S;
 try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){S=fresh()}
 if(!Array.isArray(S.phones)||!S.phones.length)S.phones=[""];
+if(!PLANS.some(p=>p.k===S.vhiT))S.vhiT="";
+if(!OFFER_PLANS.includes(S.vhiT))S.vhiO="";
 let REP=false; // rep-only math panels: collapsed unless the rep turns them on (remembered on this device)
 try{REP=localStorage.getItem(REPKEY)==="1"}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -309,11 +313,14 @@ const phone=()=>{const r=+S.phones[0]||0,p=+S.credit||0;return {r,p,a:r/MONTHS,b
 const fmtMo=v=>noPhone()?"$__/mo":f2(v)+"/mo";
 const vmpKey=()=>S.vmp?(S.vmpHas?"has":"new"):"none";
 const vmpMo=()=>vmpKey()==="new"?VMP_MO:0; // already-has VMP is in their current bill
-const perkMo=()=>S.pkN&&S.pkD?FANS_MO:(S.pkN?PK.pkN.p:0)+(S.pkD?PK.pkD.p:0);
+const disneyFree=()=>!!(S.vhi&&S.vhiT==="5gu"); // 5G Home Ultimate includes the Disney bundle
+const paidD=()=>S.pkD&&!disneyFree();
+const perkMo=()=>S.pkN&&paidD()?FANS_MO:(S.pkN?PK.pkN.p:0)+(paidD()?PK.pkD.p:0);
 const quoteV=()=>phone().n+vmpMo();
 const totV=()=>quoteV()+(S.watch?WATCH_MO:0)+(S.tab?TAB_MO:0)+perkMo();
 const incV=()=>totV()+pos(S.other)-pos(S.devPay)-pos(S.saved); // total change to their monthly bill
-const perkName=()=>S.pkN&&S.pkD?"Fans package · $25/mo":S.pkN?"Netflix + HBO Max · $13/mo":S.pkD?"Disney+ + Hulu + ESPN+ · $12/mo":"None";
+const perkName=()=>{const d=paidD(),dz=S.pkD&&disneyFree()?" · Disney free with Ultimate":"";
+  return S.pkN&&d?"Fans package · $25/mo":S.pkN?"Netflix + HBO Max · $13/mo"+dz:d?"Disney+ + Hulu + ESPN+ · $12/mo":dz?dz.slice(3):"None"};
 const incSay=()=>{const v=incV(),n=noPhone();return `Your total monthly goes ${!n&&v<0?"down":"up"} <b>${n?"$__/mo":f2(Math.abs(v))+"/mo"}</b>.`};
 const moInner=()=>{
   const v=incV(),n=noPhone(),b=pos(S.bill);
@@ -339,7 +346,8 @@ const perkPitch=()=>{
   for(const k of ["pkN","pkD"]){const hit=PK[k].has.filter(p=>S.perks[p]);if(!S[k]&&hit.length)t.push(`Pitch <b>${PK[k].n}</b> · they already pay for ${list(hit)}`)}
   const sv=+S.saved||0;
   if(sv>0)t.push(`Savings found · <b>${f2(sv)}/mo</b> to put toward perks`);
-  if(S.pkN&&S.pkD)t.push(`<b>Fans package</b> · both for $25/mo`);
+  if(S.pkN&&paidD())t.push(`<b>Fans package</b> · both for $25/mo`);
+  if(disneyFree())t.push(`<b>Disney bundle</b> · free with 5G Home Ultimate, don’t charge the $12 perk`);
   return t;
 };
 const monthRep=()=>repBox("Monthly math",`<div data-v="mob">${mob()}</div>`);
@@ -351,16 +359,27 @@ const OPEN=[
   ...ADD.map(a=>[()=>!S.add[a.k],a.n,5]),
   [()=>!S.jl,"JLab headphones",5],
   [()=>!S.watch,"Watch · free AirPods",3],[()=>!S.tab,"Tablet",3],
-  [()=>!S.pkN,"Netflix + HBO Max",6],[()=>!S.pkD,"Disney+ + Hulu + ESPN+",6],
+  [()=>!S.pkN,"Netflix + HBO Max",6],[()=>!S.pkD&&!disneyFree(),"Disney+ + Hulu + ESPN+",6],
   [()=>!S.vhi,()=>S.vhiQ?"Home internet":"Home internet · check address",7],
-  [()=>S.vhi&&!S.vhiT,"Pick 5G Home or Fios",7],
-  [()=>needOffer(),"Pick 5G Home choice offer",7]
+  [()=>S.vhi&&!S.vhiT,"Pick an internet plan",7],
+  [()=>needOffer(),"Pick TV or gift card",7]
 ];
-const needOffer=()=>S.vhi&&S.vhiT==="5g"&&!S.vhiO;
+const planName=()=>(PLANS.find(p=>p.k===S.vhiT)||{}).n||"";
+const offerPlan=()=>OFFER_PLANS.includes(S.vhiT);
+const needOffer=()=>S.vhi&&offerPlan()&&!S.vhiO;
+// their current internet vs ours — kept separate from the phone bill total
+const netInner=()=>{
+  const now=pos(S.inetNow),ours=pos(S.inetOurs),both=S.inetNow!==""&&S.inetOurs!=="",d=now-ours;
+  const lab=!both?"Internet savings":d>0?"Internet savings":d<0?"Internet costs more":"Same price as now";
+  const val=!both?`<span class="nil">$__/mo</span>`:`${d<0?"+":""}${f2(Math.abs(d))}<small>/mo</small>`;
+  return res(lab,val)+ln("Their internet now","",S.inetNow===""?"$__/mo":f2(now)+"/mo")
+    +ln(planName()||"Verizon","with us",S.inetOurs===""?"$__/mo":f2(ours)+"/mo")
+    +(S.vhiT==="5gu"?ln("Disney bundle","Disney+, Hulu, ESPN+","Included"):"");
+};
 const vhiTxt=()=>{
   if(!S.vhiQ)return "Not checked / doesn’t qualify";
-  const t={"5g":"5G Home",fios:"Fios"}[S.vhiT]||"", o=(OFFERS.find(x=>x.k===S.vhiO)||{}).n||"";
-  return S.vhi?["Signed up",t,S.vhiT==="5g"?(o||"offer not picked"):""].filter(Boolean).join(" · "):"Qualifies · not sold"+(t?" · "+t:"");
+  const t=planName(), o=(OFFERS.find(x=>x.k===S.vhiO)||{}).n||"";
+  return S.vhi?["Signed up",t,offerPlan()?(o||"offer not picked"):"",S.vhiT==="5gu"?"Disney free":""].filter(Boolean).join(" · "):"Qualifies · not sold"+(t?" · "+t:"");
 };
 
 const STEPS=[
@@ -413,20 +432,26 @@ const STEPS=[
   <div class="lbl">Tap what they already have</div>
   <div class="tags">${PERKS.map(p=>tag(`data-perk="${p}"`,S.perks[p],p)).join("")}</div>
   <div class="lbl">Perks added</div>
-  <div class="items">${tog("pkN","Netflix + HBO Max","+$13/mo")}${tog("pkD","Disney+ + Hulu + ESPN+","+$12/mo")}</div>
+  <div class="items">${tog("pkN","Netflix + HBO Max","+$13/mo")}${tog("pkD","Disney+ + Hulu + ESPN+",disneyFree()?"Free with Ultimate":"+$12/mo")}</div>
   <div class="panel" data-v="mo">${moInner()}</div>
   ${repBox(pp.length?`${pp.length} pitch note${pp.length>1?"s":""} · monthly math`:"Monthly math",
     (pp.length?`<div class="sub">Pitch notes</div>${pp.map(x=>`<div class="ln t"><span class="k">${x}</span></div>`).join("")}<div class="sub">Monthly math</div>`:"")+`<div data-v="mob">${mob()}</div>`)}`}},
-{t:"Home internet",h:"Pitch VHI",body:()=>`
+{t:"Home internet",h:"Pitch VHI",body:()=>{const pl=S.vhiT,pn=planName(),pitch=[];
+  if(pl==="5gu")pitch.push(`With 5G Home Ultimate, you get the <b class="w">Disney bundle</b> — Disney+, Hulu and ESPN+ — <b>free</b>.`);
+  if(offerPlan())pitch.push(`${pl==="5gu"?"And you":`With ${pn} you also`} get to pick: a <b class="w">Samsung 43" 4K TV with a soundbar</b>, or a <b>$200</b> <b class="w">Target gift card</b>.`);
+  return `
   ${say(["Last thing — let me check if your address qualifies for Verizon Home Internet."])}
   <ul class="notes"><li>Only pitch if the address qualifies</li></ul>
   <div class="items sp">${tog("vhiQ","Address qualifies")}</div>
-  ${S.vhiQ?`<div class="lbl">Service</div><div class="items two">${pick("vhiT","5g","5G Home")}${pick("vhiT","fios","Fios")}</div>`:""}
-  ${S.vhiQ&&S.vhiT==="5g"?`${say([`With 5G Home you also get to pick: a <b class="w">Samsung 43" 4K TV with a soundbar</b>, or a <b>$200</b> <b class="w">Target gift card</b>.`]," sub")}
-  <div class="lbl">Choice offer · pick one</div><div class="items">${OFFERS.map(o=>pick("vhiO",o.k,o.n)).join("")}</div>`:""}
+  ${S.vhiQ?`<div class="lbl">Plan</div><div class="items">${PLANS.map(p=>pick("vhiT",p.k,p.n)).join("")}</div>`:""}
+  ${S.vhiQ&&pl?`<div class="lbl">Their internet vs ours</div>
+  <div class="row">${money("inetNow","Their internet now",S.inetNow,"/mo")}${money("inetOurs",`${pn} price`,S.inetOurs,"/mo")}</div>
+  <div class="panel" data-v="net">${netInner()}</div>`:""}
+  ${S.vhiQ&&pitch.length?say(pitch," sub"):""}
+  ${S.vhiQ&&offerPlan()?`<div class="lbl">Choice offer · pick one</div><div class="items">${OFFERS.map(o=>pick("vhiO",o.k,o.n)).join("")}</div>`:""}
   ${S.vhiQ?`<div class="lbl">Result</div><div class="items">${tog("vhi","Customer signed up")}</div>`:""}
-  ${S.vhi&&!S.vhiT?`<div class="note warn">Pick 5G Home or Fios.</div>`:""}
-  ${needOffer()?`<div class="note warn">Pick a choice offer — every 5G Home sale gets one.</div>`:""}`},
+  ${S.vhi&&!pl?`<div class="note warn">Pick an internet plan.</div>`:""}
+  ${needOffer()?`<div class="note warn">Pick a choice offer — every ${pn} sale gets one.</div>`:""}`}},
 {t:"Recap",h:"Deal recap",body:()=>{
   const c=calc(), sv=pos(S.saved), bl=pos(S.bill), dp=pos(S.devPay), ot=pos(S.other);
   const open=OPEN.filter(o=>o[0]());
@@ -436,8 +461,9 @@ const STEPS=[
   const rows=[["Promo amount",m(S.credit)],["Phone + taxes est.",fmtMo(phone().n)],["VMP",{new:"New · $19/mo",has:"Already has",none:"No"}[vmpKey()]],["Watch / tablet",[S.watch&&"Watch (free AirPods)",S.tab&&"Tablet"].filter(Boolean).join(" + ")||"None"],["Perks added",perkName()],
     ...(bl?[["Current bill",f2(bl)+"/mo"]]:[]),...(dp?[["Device payment ending",f2(dp)+"/mo"]]:[]),...(ot?[["Other charges added",f2(ot)+"/mo"]]:[]),
     ["Bill savings found",sv>0?f2(sv)+"/mo":"None"],...(c.pay?[["Device payoff",f2(c.pay)]]:[]),
-    ["Lines",String(c.lines)],["Device retail",f2(c.retail)],["Accessories",acc],["Add-ons",add],["Already has",pk],["VHI",vhiTxt()]];
+    ["Lines",String(c.lines)],["Device retail",f2(c.retail)],["Accessories",acc],["Add-ons",add],["Already has",pk],["VHI",vhiTxt()],...(S.inetNow!==""?[["Internet now",f2(pos(S.inetNow))+"/mo"]]:[]),...(S.inetOurs!==""?[["Internet with us",f2(pos(S.inetOurs))+"/mo"]]:[])];
   return `<div class="panel">${otdInner()}${moInner()}</div>
+  ${S.vhiQ&&S.vhiT&&(S.inetNow!==""||S.inetOurs!=="")?`<div class="panel">${netInner()}</div>`:""}
   <div class="lbl">Still on the table · tap to go back</div>
   ${open.length?`<div class="miss">${open.map(o=>`<button type="button" data-go="${o[2]}">${typeof o[1]==="function"?o[1]():o[1]}</button>`).join("")}</div>`:`<p class="ok">Everything’s on the deal.</p>`}
   ${repBox("Deal details",`<div class="sum">${rows.map(r=>`<div><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join("")}</div>`)}`}}
@@ -456,7 +482,7 @@ function render(){
   save();
 }
 // regions that update while the rep types (none of them contain inputs)
-const LIVE={credit:()=>m(S.credit),incS:incSay,otd:()=>f2(calc().otd),mo:moInner,otdB:()=>otdInner(),both:()=>moInner()+otdInner(" s"),mob,brk};
+const LIVE={credit:()=>m(S.credit),incS:incSay,otd:()=>f2(calc().otd),mo:moInner,otdB:()=>otdInner(),both:()=>moInner()+otdInner(" s"),mob,brk,net:()=>netInner()};
 function live(){main.querySelectorAll("[data-v]").forEach(e=>{const f=LIVE[e.dataset.v];if(f)e.innerHTML=f()})}
 function go(i){S.step=Math.max(0,Math.min(STEPS.length-1,i));render();window.scrollTo(0,0)}
 function reset(){
@@ -479,7 +505,7 @@ main.addEventListener("click",e=>{
     return;
   }
   if(d.t){S[d.t]=S[d.t]?0:1;if(d.t==="vhi"&&S.vhi)S.vhiQ=1;if(d.t==="vhiQ"&&!S.vhiQ){S.vhi=0;S.vhiT="";S.vhiO=""}}
-  else if(d.set){S[d.set]=S[d.set]===d.val?"":d.val;if(d.set==="vhiT"&&S.vhiT!=="5g")S.vhiO=""}
+  else if(d.set){S[d.set]=S[d.set]===d.val?"":d.val;if(d.set==="vhiT"&&!OFFER_PLANS.includes(S.vhiT))S.vhiO=""}
   else if(d.vmp){S.vmp=d.vmp==="none"?0:1;S.vmpHas=d.vmp==="has"?1:0}
   else if(d.acc)S.acc[d.acc]=S.acc[d.acc]?0:1;
   else if(d.add)S.add[d.add]=S.add[d.add]?0:1;
