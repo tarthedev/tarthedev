@@ -89,7 +89,7 @@ h2{margin:0 0 18px;font:700 24px/1.15 var(--font-d);letter-spacing:-.022em;text-
 .say.sub{margin-top:26px}
 
 /* ---------- Inputs ---------- */
-.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));align-items:end;gap:12px}
 .row.sp,.items.sp{margin-top:22px}
 label.f{display:block;font:500 13px/1.2 var(--font);color:var(--text-2)}
 .money{display:flex;align-items:center;gap:4px;height:52px;margin-top:8px;padding:0 14px;background:var(--raised);border:1px solid var(--line-2);border-radius:var(--r);transition:border-color .15s,box-shadow .15s,background-color .15s}
@@ -113,13 +113,13 @@ label.f{display:block;font:500 13px/1.2 var(--font);color:var(--text-2)}
 .item{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:12px 14px;border-radius:var(--r);border:1px solid var(--line);background:var(--raised);color:var(--text);font:500 15px/1.3 var(--font);text-align:left;transition:background-color .15s,border-color .15s,transform .1s}
 .item .nm{flex:1}
 .item .box{flex:none;display:grid;place-items:center;width:20px;height:20px;border-radius:6px;border:1.5px solid rgba(255,255,255,.28);transition:background-color .15s,border-color .15s}
-.item[data-set] .box{border-radius:50%}
+.item[data-set] .box,.item[data-vmp] .box{border-radius:50%}
 .item .p{flex:none;padding-left:8px;font:500 14px/1 var(--font);font-variant-numeric:tabular-nums;color:var(--text-2);white-space:nowrap}
 .item .p s{margin-right:6px;font-weight:400;color:var(--text-4)}
 .item.on{border-color:var(--red-edge);background:var(--red-wash)}
 .item.on .box{background:var(--red);border-color:var(--red)}
 .item.on .box::after{content:"";width:9px;height:5px;margin-top:-2px;border:solid #fff;border-width:0 0 2px 2px;transform:rotate(-45deg)}
-.item[data-set].on .box::after{width:8px;height:8px;margin:0;border:0;border-radius:50%;background:#fff;transform:none}
+.item[data-set].on .box::after,.item[data-vmp].on .box::after{width:8px;height:8px;margin:0;border:0;border-radius:50%;background:#fff;transform:none}
 .item.on .p{color:var(--text)}
 .tags{display:flex;flex-wrap:wrap;gap:8px}
 .tag{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--raised);color:var(--text-2);font:500 14px/1 var(--font);transition:background-color .15s,border-color .15s,color .15s,transform .1s}
@@ -179,11 +179,27 @@ nav.go button{height:52px;border-radius:var(--r);font:600 16px/1 var(--font);let
 #next .to{overflow:hidden;text-overflow:ellipsis;font-weight:500;color:rgba(255,255,255,.72)}
 #next .to::before{content:"·";margin:0 7px}
 
+/* ---------- Rep-only disclosure (collapsed by default) ---------- */
+.panel.rep>.ph{width:100%;min-height:46px;padding:12px 0;border:0;background:none;text-align:left;cursor:pointer}
+.panel.rep>.ph>span{flex:1}
+.ph .chev{flex:none;width:7px;height:7px;margin:0 3px 3px 2px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(-45deg);transition:transform .15s}
+.panel.rep.open>.ph .chev{transform:rotate(45deg);margin-bottom:5px}
+.panel.rep .rb{display:none}
+.panel.rep.open .rb{display:block}
+.rb>:last-child{padding-bottom:14px}
+.rb .sum div:last-child{border-bottom:0}
+.rb .sub{padding:14px 0 4px;border-top:1px solid var(--line);font:600 10.5px/1.2 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+.rb .sub+.ln,.rb .sub+[data-v]>.ln:first-child{border-top:0}
+.ln.nbl{padding:12px 0 14px}
+.ln.nbl .k{color:var(--text-2)}
+.ln.nbl .v{font-size:17px}
+
 /* ---------- States ---------- */
 @media(hover:hover){
   .reset:hover,.x:hover{background:var(--raised-hi);border-color:var(--line-3)}
   .tab:hover{color:var(--text);border-color:var(--line-2)}
   .tab.on:hover{border-color:var(--line-3)}
+  .panel.rep>.ph:hover{color:var(--text-2)}
   .item:hover,.tag:hover{background:var(--raised-hi);border-color:var(--line-3)}
   .item.on:hover,.tag.on:hover{background:rgba(238,0,0,.13);border-color:var(--red)}
   .money:hover:not(:focus-within){border-color:var(--line-3)}
@@ -223,16 +239,19 @@ const PK={pkN:{n:"Netflix + HBO Max",p:13,has:["Netflix","HBO Max"]},pkD:{n:"Dis
 const CABLE_OFF=.5, JL_OFF=.25;
 const JL={"42":{n:"JLab · $42 option",p:42},"61":{n:"JLab · $61 option",p:61}};
 const OFFERS=[{k:"tv",n:"Samsung 43\" 4K TV + soundbar"},{k:"gc",n:"$200 Target gift card"}];
-const KEY="salesflow3";
-const fresh=()=>({step:0,credit:"",phones:[""],watchR:"",tabR:"",saved:"",acc:{sp:1,lp:1,cs:1},add:{},jl:"",perks:{},vmp:1,watch:0,tab:0,pkN:0,pkD:0,vhiQ:0,vhi:0,vhiT:"",vhiO:""});
+const KEY="salesflow3", REPKEY="salesflow-rep";
+const fresh=()=>({step:0,credit:"",phones:[""],watchR:"",tabR:"",saved:"",bill:"",devPay:"",payoff:"",other:"",acc:{sp:1,lp:1,cs:1},add:{},jl:"",perks:{},vmp:1,vmpHas:0,watch:0,tab:0,pkN:0,pkD:0,vhiQ:0,vhi:0,vhiT:"",vhiO:""});
 let S;
 try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){S=fresh()}
 if(!Array.isArray(S.phones)||!S.phones.length)S.phones=[""];
+let REP=false; // rep-only math panels: collapsed unless the rep turns them on (remembered on this device)
+try{REP=localStorage.getItem(REPKEY)==="1"}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const m=v=>v===""||v==null?"$__":"$"+Number(v).toLocaleString();
 const f2=n=>"$"+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const list=a=>a.length<2?(a[0]||""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+const pos=v=>Math.max(0,+v||0);
 
 // ---- UI building blocks (presentation only) ----
 const say=(lines,c="")=>`<p class="say${c}">${lines.map(l=>`<span>${l}</span>`).join("")}</p>`;
@@ -241,10 +260,9 @@ const box=(attr,on,name,price)=>`<button type="button" class="item${on?" on":""}
 const tog=(key,name,price)=>box(`data-t="${key}"`,S[key],name,price);
 const pick=(key,val,name,price)=>box(`data-set="${key}" data-val="${val}"`,S[key]===val,name,price);
 const tag=(attr,on,name)=>`<button type="button" class="tag${on?" on":""}" ${attr} aria-pressed="${on?"true":"false"}">${name}</button>`;
-const ph=t=>`<div class="ph"><span>${t}</span><em>Rep only</em></div>`;
+const repBox=(title,inner)=>`<div class="panel rep${REP?" open":""}"><button type="button" class="ph" data-rep aria-expanded="${REP}"><span>${title}</span><em>Rep only</em><i class="chev" aria-hidden="true"></i></button><div class="rb">${inner}</div></div>`;
 const ln=(k,d,v,c)=>`<div class="ln${c?" "+c:""}"><span class="k">${k}</span><span class="d">${d||""}</span><span class="v">${v}</span></div>`;
 const res=(lab,val,attr="",c="")=>`<div class="result${c}"><div class="rl">${lab}</div><strong${attr}>${val}</strong></div>`;
-const moR=s=>s.includes("__")?`<span class="nil">${s}</span>`:"+"+s.replace("/mo","<small>/mo</small>");
 const px=n=>Number.isInteger(n)?"$"+n:f2(n);
 const was=(full,now)=>now<full?`<s>$${full}</s>${px(now)}`:"$"+full;
 
@@ -264,12 +282,15 @@ function calc(add=S.add){
   const off=bundleOff(add);
   const gear=ACC.reduce((t,a)=>t+(S.acc[a.k]?a.p:0),0)+ADD.reduce((t,a)=>t+(add[a.k]?addP(a,add):0),0)+jlP()-off;
   const otherTax=(setup+gear)*TAX;
-  return {lines,retail,devTax,setup,gear,off,otherTax,otd:devTax+setup+gear+otherTax};
+  const pay=pos(S.payoff); // device payoff balance: due today, not taxed
+  return {lines,retail,devTax,setup,gear,off,otherTax,pay,otd:devTax+setup+gear+otherTax+pay};
 }
 const brk=()=>{const c=calc();return ln("Device tax",`${c.lines} device${c.lines>1?"s":""} · ${f2(c.retail)} retail`,f2(c.devTax))
   +ln("Setup",`${c.lines} × $39.99`,f2(c.setup))
   +ln("Accessories + add-ons",c.off?`−$${c.off} bundle`:"",f2(c.gear))
-  +ln("Tax","on setup + accessories",f2(c.otherTax))};
+  +ln("Tax","on setup + accessories",f2(c.otherTax))
+  +(c.pay?ln("Device payoff","remaining balance",f2(c.pay)):"")};
+const otdInner=(c="")=>res("Est. out the door",f2(calc().otd),"",c);
 const tierNote=()=>{
   const miss=ADD.filter(a=>!S.add[a.k]);
   const r2=v=>Math.round(v*100)/100, delta=r2(calc({cb:1,cl:1}).otd)-r2(calc().otd); // match the totals as displayed
@@ -286,25 +307,42 @@ const tierNote=()=>{
 const noPhone=()=>S.phones[0]==="";
 const phone=()=>{const r=+S.phones[0]||0,p=+S.credit||0;return {r,p,a:r/MONTHS,b:p/MONTHS,n:Math.max(0,r-p)/MONTHS+BYOD}};
 const fmtMo=v=>noPhone()?"$__/mo":f2(v)+"/mo";
-const vmpMo=()=>S.vmp?VMP_MO:0;
+const vmpKey=()=>S.vmp?(S.vmpHas?"has":"new"):"none";
+const vmpMo=()=>vmpKey()==="new"?VMP_MO:0; // already-has VMP is in their current bill
 const perkMo=()=>S.pkN&&S.pkD?FANS_MO:(S.pkN?PK.pkN.p:0)+(S.pkD?PK.pkD.p:0);
 const quoteV=()=>phone().n+vmpMo();
 const totV=()=>quoteV()+(S.watch?WATCH_MO:0)+(S.tab?TAB_MO:0)+perkMo();
-const quoteMo=()=>fmtMo(quoteV());
-const totMo=()=>fmtMo(totV());
+const incV=()=>totV()+pos(S.other)-pos(S.devPay)-pos(S.saved); // total change to their monthly bill
 const perkName=()=>S.pkN&&S.pkD?"Fans package · $25/mo":S.pkN?"Netflix + HBO Max · $13/mo":S.pkD?"Disney+ + Hulu + ESPN+ · $12/mo":"None";
-const mob=()=>{const x=phone();return ln("Retail",`${f2(x.r)} ÷ 36`,`${f2(x.a)}/mo`)
-  +ln("Promo",`${f2(x.p)} ÷ 36`,`−${f2(x.b)}/mo`)
-  +ln("BYOD","","+$5.00/mo")
-  +ln("VMP",S.vmp?"quoted in":"declined",S.vmp?"+$19.00/mo":"$0.00",S.vmp?"":"dim")};
+const incSay=()=>{const v=incV(),n=noPhone();return `Your total monthly goes ${!n&&v<0?"down":"up"} <b>${n?"$__/mo":f2(Math.abs(v))+"/mo"}</b>.`};
+const moInner=()=>{
+  const v=incV(),n=noPhone(),b=pos(S.bill);
+  const lab=`Total monthly ${!n&&v<0?"decrease":"increase"}${S.vmp?"<span>With VMP</span>":""}`;
+  const val=n?`<span class="nil">$__/mo</span>`:`${v<0?"−":"+"}${f2(Math.abs(v))}<small>/mo</small>`;
+  return res(lab,val)+(b?ln("Est. new bill",`now ${f2(b)}/mo`,n?"$__/mo":f2(b+v)+"/mo","nbl"):"");
+};
+const mob=()=>{const x=phone(),k=vmpKey(),L=[
+  ln("Retail",`${f2(x.r)} ÷ 36`,`${f2(x.a)}/mo`),
+  ln("Promo",`${f2(x.p)} ÷ 36`,`−${f2(x.b)}/mo`),
+  ln("BYOD","",`+${f2(BYOD)}/mo`),
+  ln("VMP",{new:"new",has:"already on their bill",none:"declined"}[k],k==="new"?`+${f2(VMP_MO)}/mo`:"$0.00",k==="new"?"":"dim")];
+  if(S.watch)L.push(ln("Watch line","",`+${f2(WATCH_MO)}/mo`));
+  if(S.tab)L.push(ln("Tablet line","",`+${f2(TAB_MO)}/mo`));
+  const pm=perkMo();if(pm)L.push(ln("Perks",perkName().split(" · ")[0],`+${f2(pm)}/mo`));
+  const o=pos(S.other),dp=pos(S.devPay),sv=pos(S.saved);
+  if(o)L.push(ln("Other charges","added",`+${f2(o)}/mo`));
+  if(dp)L.push(ln("Device payment","ending",`−${f2(dp)}/mo`));
+  if(sv)L.push(ln("Savings found","",`−${f2(sv)}/mo`));
+  return L.join("")};
 const perkPitch=()=>{
   const t=[];
   for(const k of ["pkN","pkD"]){const hit=PK[k].has.filter(p=>S.perks[p]);if(!S[k]&&hit.length)t.push(`Pitch <b>${PK[k].n}</b> · they already pay for ${list(hit)}`)}
   const sv=+S.saved||0;
   if(sv>0)t.push(`Savings found · <b>${f2(sv)}/mo</b> to put toward perks`);
   if(S.pkN&&S.pkD)t.push(`<b>Fans package</b> · both for $25/mo`);
-  return t.length?`<div class="panel">${ph("Pitch notes")}${t.map(x=>`<div class="ln t"><span class="k">${x}</span></div>`).join("")}</div>`:"";
+  return t;
 };
+const monthRep=()=>repBox("Monthly math",`<div data-v="mob">${mob()}</div>`);
 
 // ---- Recap: what's still on the table ----
 const OPEN=[
@@ -327,24 +365,29 @@ const vhiTxt=()=>{
 
 const STEPS=[
 {t:"Upgrade",h:"Position BYOD",body:()=>`
-  ${say([`Okay, you get <b data-v="credit">${m(S.credit)}</b> off the upgrade.`,`Your total monthly goes up <b data-v="inc">${quoteMo()}</b>.`,"No trade required — keep your old phone."])}
+  ${say([`Okay, you get <b data-v="credit">${m(S.credit)}</b> off the upgrade.`,`<span data-v="incS">${incSay()}</span>`,"No trade required — keep your old phone."])}
   <div class="row">${money("ph0","Phone retail price",S.phones[0])}${money("credit","Promo amount",S.credit)}</div>
-  <div class="panel">${ph("36 monthly payments")}<div data-v="mob">${mob()}</div>
-  ${res(`Monthly increase${S.vmp?"<span>With VMP</span>":""}`,moR(quoteMo()),' data-v="incR"')}</div>`},
-{t:"Protection",h:"Quote with VMP",body:()=>`
+  <div class="panel" data-v="mo">${moInner()}</div>
+  ${monthRep()}`},
+{t:"Protection",h:"Quote with VMP",body:()=>{const k=vmpKey();return `
   ${say(["That’s with protection — an extra <b>$19/mo</b>.","You can’t add it later, and if the device breaks you’d pay full retail, usually <b>$1,200+</b>.","If after 90 days you find you don’t need it, come in and we’ll take it off."])}
-  <div class="items">${tog("vmp","Customer kept VMP","+$19/mo")}</div>
-  <div class="panel">${res("Monthly increase",moR(quoteMo()))}</div>`},
+  <div class="items">${box('data-vmp="new"',k==="new","Adding VMP","+$19/mo")}${box('data-vmp="has"',k==="has","Already has VMP","no change")}${box('data-vmp="none"',k==="none","No VMP")}</div>
+  <div class="panel" data-v="mo">${moInner()}</div>
+  ${monthRep()}`}},
 {t:"Bill review",h:"Lower the bill",body:()=>`
   ${say(["Give me five minutes — let me see what I can do to bring your bill down."])}
   <div class="lbl">Goal</div>
   <ul class="notes"><li>Find savings in the safe 5 minutes</li><li>Use the savings to add perks, hotspot, etc.</li></ul>
-  <div class="row sp">${money("saved","Monthly savings found",S.saved,"/mo")}</div>`},
+  <div class="lbl">Their bill today</div>
+  <div class="row">${money("bill","Current bill",S.bill,"/mo")}${money("devPay","Device payment ending",S.devPay,"/mo")}${money("other","Other charges added",S.other,"/mo")}${money("saved","Savings found",S.saved,"/mo")}${money("payoff","Payoff balance",S.payoff)}</div>
+  <div class="panel" data-v="both">${moInner()}${otdInner(" s")}</div>
+  ${monthRep()}`},
 {t:"Watch + tablet",h:"Bring out watch and tablet",body:()=>`
   ${say(["Both of these are <b>free</b> — you just pay the line of service and taxes: <b>$7.50/mo</b> for the watch, <b>$10/mo</b> for the tablet.","And with the watch, you get <b>free AirPods</b>."])}
   <div class="items">${tog("watch","Watch added · free AirPods","+$7.50/mo")}${tog("tab","Tablet added","+$10/mo")}</div>
   ${S.watch||S.tab?`<div class="lbl">Retail price · for tax</div><div class="row">${S.watch?money("watchR","Watch",S.watchR):""}${S.tab?money("tabR","Tablet",S.tabR):""}</div>`:""}
-  <div class="panel">${res("Total monthly increase",moR(totMo()))}</div>`},
+  <div class="panel" data-v="mo">${moInner()}</div>
+  ${monthRep()}`},
 {t:"Accessories",h:"Quote 3 accessories",body:()=>{
   const sel=ACC.filter(a=>S.acc[a.k]).map(a=>a.n.toLowerCase());
   return `
@@ -356,21 +399,24 @@ const STEPS=[
   <button type="button" class="addph" data-addph="1">+ Add another phone</button>
   <div class="lbl">Bundle</div>
   <div class="items">${ACC.map(a=>box(`data-acc="${a.k}"`,S.acc[a.k],a.n,"$"+a.p)).join("")}</div>
-  <div class="panel">${ph("Breakdown")}<div data-v="brk">${brk()}</div>${res("Out the door",f2(calc().otd),' data-v="otd"')}</div>`}},
+  <div class="panel" data-v="otdB">${otdInner()}</div>
+  ${repBox("Out-the-door math",`<div data-v="brk">${brk()}</div>`)}`}},
 {t:"Add-ons",h:"Block, cable + JLab",body:()=>`
   ${say(["Want the charging block and cable too?","Get the block and the cable is <b>50% off</b> — and doing both makes the 5th one free."])}
   <div class="items">${ADD.map(a=>box(`data-add="${a.k}"`,S.add[a.k],a.n,was(a.p,addP(a)))).join("")}</div>
   ${say(["JLab headphones are <b>25% off</b> too — <b>$31.50</b> or <b>$45.75</b>."]," sub")}
   <div class="items">${Object.keys(JL).map(k=>pick("jl",k,JL[k].n,was(JL[k].p,JL[k].p*(1-JL_OFF)))).join("")}</div>
-  <div class="panel">${ph("Bundle savings")}${tierNote()}${res("Out the door",f2(calc().otd),' data-v="otd"')}</div>`},
-{t:"Setup",h:"Find existing perks",body:()=>`
+  <div class="panel" data-v="otdB">${otdInner()}</div>
+  ${repBox("Bundle savings",tierNote())}`},
+{t:"Setup",h:"Find existing perks",body:()=>{const pp=perkPitch();return `
   ${say(["While this sets up — do you already pay for any streaming?","I can put Netflix and HBO Max on your bill for <b>$13/mo</b>, Disney+, Hulu and ESPN+ for <b>$12/mo</b>, or both with the Fans package for <b>$25/mo</b>."])}
   <div class="lbl">Tap what they already have</div>
   <div class="tags">${PERKS.map(p=>tag(`data-perk="${p}"`,S.perks[p],p)).join("")}</div>
   <div class="lbl">Perks added</div>
   <div class="items">${tog("pkN","Netflix + HBO Max","+$13/mo")}${tog("pkD","Disney+ + Hulu + ESPN+","+$12/mo")}</div>
-  ${perkPitch()}
-  <div class="panel">${res("Total monthly increase",moR(totMo()))}</div>`},
+  <div class="panel" data-v="mo">${moInner()}</div>
+  ${repBox(pp.length?`${pp.length} pitch note${pp.length>1?"s":""} · monthly math`:"Monthly math",
+    (pp.length?`<div class="sub">Pitch notes</div>${pp.map(x=>`<div class="ln t"><span class="k">${x}</span></div>`).join("")}<div class="sub">Monthly math</div>`:"")+`<div data-v="mob">${mob()}</div>`)}`}},
 {t:"Home internet",h:"Pitch VHI",body:()=>`
   ${say(["Last thing — let me check if your address qualifies for Verizon Home Internet."])}
   <ul class="notes"><li>Only pitch if the address qualifies</li></ul>
@@ -382,18 +428,19 @@ const STEPS=[
   ${S.vhi&&!S.vhiT?`<div class="note warn">Pick 5G Home or Fios.</div>`:""}
   ${needOffer()?`<div class="note warn">Pick a choice offer — every 5G Home sale gets one.</div>`:""}`},
 {t:"Recap",h:"Deal recap",body:()=>{
-  const c=calc(), sv=+S.saved||0;
+  const c=calc(), sv=pos(S.saved), bl=pos(S.bill), dp=pos(S.devPay), ot=pos(S.other);
   const open=OPEN.filter(o=>o[0]());
   const acc=ACC.filter(a=>S.acc[a.k]).map(a=>a.n).join(", ")||"None";
   const add=[...ADD.filter(a=>S.add[a.k]).map(a=>a.n+(addP(a)<a.p?" (50% off)":"")),S.jl&&JL[S.jl].n+" (25% off)"].filter(Boolean).join(", ")||"None";
   const pk=PERKS.filter(p=>S.perks[p]).join(", ")||"None";
-  const rows=[["Promo amount",m(S.credit)],["Phone + BYOD",fmtMo(phone().n)],["VMP",S.vmp?"Yes · $19/mo":"No"],["Watch / tablet",[S.watch&&"Watch (free AirPods)",S.tab&&"Tablet"].filter(Boolean).join(" + ")||"None"],["Perks added",perkName()],["Bill savings found",sv>0?f2(sv)+"/mo":"None"],["Lines",String(c.lines)],["Device retail",f2(c.retail)],["Accessories",acc],["Add-ons",add],["Already has",pk],["VHI",vhiTxt()]];
-  return `<div class="panel">${res("Out the door",f2(c.otd))}${res("Total monthly increase",moR(totMo()))}
-  ${sv>0&&!noPhone()?res("Net after savings",(totV()-sv<0?"−":"+")+f2(Math.abs(totV()-sv))+"<small>/mo</small>",""," s"):""}</div>
+  const rows=[["Promo amount",m(S.credit)],["Phone + BYOD",fmtMo(phone().n)],["VMP",{new:"New · $19/mo",has:"Already has",none:"No"}[vmpKey()]],["Watch / tablet",[S.watch&&"Watch (free AirPods)",S.tab&&"Tablet"].filter(Boolean).join(" + ")||"None"],["Perks added",perkName()],
+    ...(bl?[["Current bill",f2(bl)+"/mo"]]:[]),...(dp?[["Device payment ending",f2(dp)+"/mo"]]:[]),...(ot?[["Other charges added",f2(ot)+"/mo"]]:[]),
+    ["Bill savings found",sv>0?f2(sv)+"/mo":"None"],...(c.pay?[["Device payoff",f2(c.pay)]]:[]),
+    ["Lines",String(c.lines)],["Device retail",f2(c.retail)],["Accessories",acc],["Add-ons",add],["Already has",pk],["VHI",vhiTxt()]];
+  return `<div class="panel">${otdInner()}${moInner()}</div>
   <div class="lbl">Still on the table · tap to go back</div>
   ${open.length?`<div class="miss">${open.map(o=>`<button type="button" data-go="${o[2]}">${typeof o[1]==="function"?o[1]():o[1]}</button>`).join("")}</div>`:`<p class="ok">Everything’s on the deal.</p>`}
-  <div class="lbl">Deal details</div>
-  <div class="sum">${rows.map(r=>`<div><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join("")}</div>`}}
+  ${repBox("Deal details",`<div class="sum">${rows.map(r=>`<div><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join("")}</div>`)}`}}
 ];
 if(!(S.step>=0&&S.step<STEPS.length))S.step=0;
 
@@ -408,15 +455,9 @@ function render(){
   if(moved){const on=chips.querySelector(".on");if(on)chips.scrollLeft=on.offsetLeft-(chips.clientWidth-on.offsetWidth)/2}
   save();
 }
-function live(){
-  const o=f2(calc().otd);
-  main.querySelectorAll('[data-v="otd"]').forEach(e=>e.textContent=o);
-  main.querySelectorAll('[data-v="credit"]').forEach(e=>e.textContent=m(S.credit));
-  main.querySelectorAll('[data-v="inc"]').forEach(e=>e.textContent=quoteMo());
-  main.querySelectorAll('[data-v="incR"]').forEach(e=>e.innerHTML=moR(quoteMo()));
-  const mb=main.querySelector('[data-v="mob"]');if(mb)mb.innerHTML=mob();
-  const b=main.querySelector('[data-v="brk"]');if(b)b.innerHTML=brk();
-}
+// regions that update while the rep types (none of them contain inputs)
+const LIVE={credit:()=>m(S.credit),incS:incSay,otd:()=>f2(calc().otd),mo:moInner,otdB:()=>otdInner(),both:()=>moInner()+otdInner(" s"),mob,brk};
+function live(){main.querySelectorAll("[data-v]").forEach(e=>{const f=LIVE[e.dataset.v];if(f)e.innerHTML=f()})}
 function go(i){S.step=Math.max(0,Math.min(STEPS.length-1,i));render();window.scrollTo(0,0)}
 function reset(){
   const dirty=S.credit!==""||S.phones.some(v=>v!=="");
@@ -432,8 +473,14 @@ main.addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b)return;
   const d=b.dataset;
   if(d.go!=null){go(+d.go);return}
+  if(d.rep!=null){
+    REP=!REP;try{localStorage.setItem(REPKEY,REP?"1":"0")}catch(err){}
+    main.querySelectorAll(".panel.rep").forEach(p=>{p.classList.toggle("open",REP);p.querySelector(".ph").setAttribute("aria-expanded",String(REP))});
+    return;
+  }
   if(d.t){S[d.t]=S[d.t]?0:1;if(d.t==="vhi"&&S.vhi)S.vhiQ=1;if(d.t==="vhiQ"&&!S.vhiQ){S.vhi=0;S.vhiT="";S.vhiO=""}}
   else if(d.set){S[d.set]=S[d.set]===d.val?"":d.val;if(d.set==="vhiT"&&S.vhiT!=="5g")S.vhiO=""}
+  else if(d.vmp){S.vmp=d.vmp==="none"?0:1;S.vmpHas=d.vmp==="has"?1:0}
   else if(d.acc)S.acc[d.acc]=S.acc[d.acc]?0:1;
   else if(d.add)S.add[d.add]=S.add[d.add]?0:1;
   else if(d.perk)S.perks[d.perk]=S.perks[d.perk]?0:1;
