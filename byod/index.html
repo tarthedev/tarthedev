@@ -150,7 +150,6 @@ label.f{display:block;font:500 13px/1.2 var(--font);color:var(--text-2)}
 .result strong{display:block;margin-top:8px;font:700 34px/1 var(--font-d);letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--red-ink);white-space:nowrap}
 .result small{margin-left:3px;font:600 15px/1 var(--font);letter-spacing:0;color:var(--text-2)}
 .result .nil{color:var(--text-4)}
-.result.s strong{font-size:24px}
 
 /* ---------- Notes ---------- */
 ul.notes{display:grid;gap:8px;margin:0;padding:0;list-style:none}
@@ -190,9 +189,6 @@ nav.go button{height:52px;border-radius:var(--r);font:600 16px/1 var(--font);let
 .rb .sum div:last-child{border-bottom:0}
 .rb .sub{padding:14px 0 4px;border-top:1px solid var(--line);font:600 10.5px/1.2 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
 .rb .sub+.ln,.rb .sub+[data-v]>.ln:first-child{border-top:0}
-.ln.nbl{padding:12px 0 14px}
-.ln.nbl .k{color:var(--text-2)}
-.ln.nbl .v{font-size:17px}
 
 /* ---------- States ---------- */
 @media(hover:hover){
@@ -242,9 +238,12 @@ const OFFERS=[{k:"tv",n:"Samsung 43\" 4K TV + soundbar"},{k:"gc",n:"$200 Target 
 const PLANS=[{k:"5g",n:"5G Home"},{k:"5gp",n:"5G Home Plus"},{k:"5gu",n:"5G Home Ultimate"},{k:"lite",n:"VHI Lite"},{k:"litex",n:"VHI Lite Extra"}];
 const OFFER_PLANS=["5gp","5gu"]; // TV / gift card choice offer
 const KEY="salesflow3", REPKEY="salesflow-rep";
-const fresh=()=>({step:0,credit:"",phones:[""],watchR:"",tabR:"",saved:"",bill:"",devPay:"",payoff:"",other:"",acc:{sp:1,lp:1,cs:1},add:{},jl:"",perks:{},vmp:1,vmpHas:0,watch:0,tab:0,pkN:0,pkD:0,vhiQ:0,vhi:0,vhiT:"",vhiO:"",inetNow:"",inetOurs:""});
+const fresh=()=>({step:0,credit:"",phones:[""],watchR:"",tabR:"",acc:{sp:1,lp:1,cs:1},add:{},jl:"",perks:{},vmp:1,vmpHas:0,watch:0,tab:0,pkN:0,pkD:0,vhiQ:0,vhi:0,vhiT:"",vhiO:"",inetNow:"",inetOurs:""});
 let S;
-try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){S=fresh()}
+let raw;try{raw=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+if(!raw||typeof raw!=="object")raw={};
+S=Object.assign(fresh(),raw);
+if("saved" in raw){if(S.step>2)S.step--;for(const k of ["bill","devPay","payoff","other","saved"])delete S[k]} // deal saved before the Bill review page was removed
 if(!Array.isArray(S.phones)||!S.phones.length)S.phones=[""];
 if(!PLANS.some(p=>p.k===S.vhiT))S.vhiT="";
 if(!OFFER_PLANS.includes(S.vhiT))S.vhiO="";
@@ -286,14 +285,12 @@ function calc(add=S.add){
   const off=bundleOff(add);
   const gear=ACC.reduce((t,a)=>t+(S.acc[a.k]?a.p:0),0)+ADD.reduce((t,a)=>t+(add[a.k]?addP(a,add):0),0)+jlP()-off;
   const otherTax=(setup+gear)*TAX;
-  const pay=pos(S.payoff); // device payoff balance: due today, not taxed
-  return {lines,retail,devTax,setup,gear,off,otherTax,pay,otd:devTax+setup+gear+otherTax+pay};
+  return {lines,retail,devTax,setup,gear,off,otherTax,otd:devTax+setup+gear+otherTax};
 }
 const brk=()=>{const c=calc();return ln("Device tax",`${c.lines} device${c.lines>1?"s":""} · ${f2(c.retail)} retail`,f2(c.devTax))
   +ln("Setup",`${c.lines} × $39.99`,f2(c.setup))
   +ln("Accessories + add-ons",c.off?`−$${c.off} bundle`:"",f2(c.gear))
-  +ln("Tax","on setup + accessories",f2(c.otherTax))
-  +(c.pay?ln("Device payoff","remaining balance",f2(c.pay)):"")};
+  +ln("Tax","on setup + accessories",f2(c.otherTax))};
 const otdInner=(c="")=>res("Est. out the door",f2(calc().otd),"",c);
 const tierNote=()=>{
   const miss=ADD.filter(a=>!S.add[a.k]);
@@ -318,15 +315,15 @@ const paidD=()=>S.pkD&&!disneyFree();
 const perkMo=()=>S.pkN&&paidD()?FANS_MO:(S.pkN?PK.pkN.p:0)+(paidD()?PK.pkD.p:0);
 const quoteV=()=>phone().n+vmpMo();
 const totV=()=>quoteV()+(S.watch?WATCH_MO:0)+(S.tab?TAB_MO:0)+perkMo();
-const incV=()=>totV()+pos(S.other)-pos(S.devPay)-pos(S.saved); // total change to their monthly bill
+const incV=()=>totV(); // total change to their monthly bill
 const perkName=()=>{const d=paidD(),dz=S.pkD&&disneyFree()?" · Disney free with Ultimate":"";
   return S.pkN&&d?"Fans package · $25/mo":S.pkN?"Netflix + HBO Max · $13/mo"+dz:d?"Disney+ + Hulu + ESPN+ · $12/mo":dz?dz.slice(3):"None"};
 const incSay=()=>{const v=incV(),n=noPhone();return `Your total monthly goes ${!n&&v<0?"down":"up"} <b>${n?"$__/mo":f2(Math.abs(v))+"/mo"}</b>.`};
 const moInner=()=>{
-  const v=incV(),n=noPhone(),b=pos(S.bill);
+  const v=incV(),n=noPhone();
   const lab=`Total monthly ${!n&&v<0?"decrease":"increase"}${S.vmp?"<span>With VMP</span>":""}`;
   const val=n?`<span class="nil">$__/mo</span>`:`${v<0?"−":"+"}${f2(Math.abs(v))}<small>/mo</small>`;
-  return res(lab,val)+(b?ln("Est. new bill",`now ${f2(b)}/mo`,n?"$__/mo":f2(b+v)+"/mo","nbl"):"");
+  return res(lab,val);
 };
 const mob=()=>{const x=phone(),k=vmpKey(),L=[
   ln("Retail",`${f2(x.r)} ÷ 36`,`${f2(x.a)}/mo`),
@@ -336,16 +333,10 @@ const mob=()=>{const x=phone(),k=vmpKey(),L=[
   if(S.watch)L.push(ln("Watch line","",`+${f2(WATCH_MO)}/mo`));
   if(S.tab)L.push(ln("Tablet line","",`+${f2(TAB_MO)}/mo`));
   const pm=perkMo();if(pm)L.push(ln("Perks",perkName().split(" · ")[0],`+${f2(pm)}/mo`));
-  const o=pos(S.other),dp=pos(S.devPay),sv=pos(S.saved);
-  if(o)L.push(ln("Other charges","added",`+${f2(o)}/mo`));
-  if(dp)L.push(ln("Device payment","ending",`−${f2(dp)}/mo`));
-  if(sv)L.push(ln("Savings found","",`−${f2(sv)}/mo`));
   return L.join("")};
 const perkPitch=()=>{
   const t=[];
   for(const k of ["pkN","pkD"]){const hit=PK[k].has.filter(p=>S.perks[p]);if(!S[k]&&hit.length)t.push(`Pitch <b>${PK[k].n}</b> · they already pay for ${list(hit)}`)}
-  const sv=+S.saved||0;
-  if(sv>0)t.push(`Savings found · <b>${f2(sv)}/mo</b> to put toward perks`);
   if(S.pkN&&paidD())t.push(`<b>Fans package</b> · both for $25/mo`);
   if(disneyFree())t.push(`<b>Disney bundle</b> · free with 5G Home Ultimate, don’t charge the $12 perk`);
   return t;
@@ -354,15 +345,15 @@ const monthRep=()=>repBox("Monthly math",`<div data-v="mob">${mob()}</div>`);
 
 // ---- Recap: what's still on the table ----
 const OPEN=[
-  [()=>!S.vmp,"VMP",1],
-  ...ACC.map(a=>[()=>!S.acc[a.k],a.n,4]),
-  ...ADD.map(a=>[()=>!S.add[a.k],a.n,5]),
-  [()=>!S.jl,"JLab headphones",5],
-  [()=>!S.watch,"Watch · free AirPods",3],[()=>!S.tab,"Tablet",3],
-  [()=>!S.pkN,"Netflix + HBO Max",6],[()=>!S.pkD&&!disneyFree(),"Disney+ + Hulu + ESPN+",6],
-  [()=>!S.vhi,()=>S.vhiQ?"Home internet":"Home internet · check address",7],
-  [()=>S.vhi&&!S.vhiT,"Pick an internet plan",7],
-  [()=>needOffer(),"Pick TV or gift card",7]
+  [()=>!S.vmp,"VMP","Protection"],
+  ...ACC.map(a=>[()=>!S.acc[a.k],a.n,"Accessories"]),
+  ...ADD.map(a=>[()=>!S.add[a.k],a.n,"Add-ons"]),
+  [()=>!S.jl,"JLab headphones","Add-ons"],
+  [()=>!S.watch,"Watch · free AirPods","Watch + tablet"],[()=>!S.tab,"Tablet","Watch + tablet"],
+  [()=>!S.pkN,"Netflix + HBO Max","Setup"],[()=>!S.pkD&&!disneyFree(),"Disney+ + Hulu + ESPN+","Setup"],
+  [()=>!S.vhi,()=>S.vhiQ?"Home internet":"Home internet · check address","Home internet"],
+  [()=>S.vhi&&!S.vhiT,"Pick an internet plan","Home internet"],
+  [()=>needOffer(),"Pick TV or gift card","Home internet"]
 ];
 const planName=()=>(PLANS.find(p=>p.k===S.vhiT)||{}).n||"";
 const offerPlan=()=>OFFER_PLANS.includes(S.vhiT);
@@ -393,14 +384,6 @@ const STEPS=[
   <div class="items">${box('data-vmp="new"',k==="new","Adding VMP","+$19/mo")}${box('data-vmp="has"',k==="has","Already has VMP","no change")}${box('data-vmp="none"',k==="none","No VMP")}</div>
   <div class="panel" data-v="mo">${moInner()}</div>
   ${monthRep()}`}},
-{t:"Bill review",h:"Lower the bill",body:()=>`
-  ${say(["Give me five minutes — let me see what I can do to bring your bill down."])}
-  <div class="lbl">Goal</div>
-  <ul class="notes"><li>Find savings in the safe 5 minutes</li><li>Use the savings to add perks, hotspot, etc.</li></ul>
-  <div class="lbl">Their bill today</div>
-  <div class="row">${money("bill","Current bill",S.bill,"/mo")}${money("devPay","Device payment ending",S.devPay,"/mo")}${money("other","Other charges added",S.other,"/mo")}${money("saved","Savings found",S.saved,"/mo")}${money("payoff","Payoff balance",S.payoff)}</div>
-  <div class="panel" data-v="both">${moInner()}${otdInner(" s")}</div>
-  ${monthRep()}`},
 {t:"Watch + tablet",h:"Bring out watch and tablet",body:()=>`
   ${say(["Both of these are <b>free</b> — you just pay the line of service and taxes: <b>$7.50/mo</b> for the watch, <b>$10/mo</b> for the tablet.","And with the watch, you get <b>free AirPods</b>."])}
   <div class="items">${tog("watch","Watch added · free AirPods","+$7.50/mo")}${tog("tab","Tablet added","+$10/mo")}</div>
@@ -453,19 +436,17 @@ const STEPS=[
   ${S.vhi&&!pl?`<div class="note warn">Pick an internet plan.</div>`:""}
   ${needOffer()?`<div class="note warn">Pick a choice offer — every ${pn} sale gets one.</div>`:""}`}},
 {t:"Recap",h:"Deal recap",body:()=>{
-  const c=calc(), sv=pos(S.saved), bl=pos(S.bill), dp=pos(S.devPay), ot=pos(S.other);
+  const c=calc();
   const open=OPEN.filter(o=>o[0]());
   const acc=ACC.filter(a=>S.acc[a.k]).map(a=>a.n).join(", ")||"None";
   const add=[...ADD.filter(a=>S.add[a.k]).map(a=>a.n+(addP(a)<a.p?" (50% off)":"")),S.jl&&JL[S.jl].n+" (25% off)"].filter(Boolean).join(", ")||"None";
   const pk=PERKS.filter(p=>S.perks[p]).join(", ")||"None";
   const rows=[["Promo amount",m(S.credit)],["Phone + taxes est.",fmtMo(phone().n)],["VMP",{new:"New · $19/mo",has:"Already has",none:"No"}[vmpKey()]],["Watch / tablet",[S.watch&&"Watch (free AirPods)",S.tab&&"Tablet"].filter(Boolean).join(" + ")||"None"],["Perks added",perkName()],
-    ...(bl?[["Current bill",f2(bl)+"/mo"]]:[]),...(dp?[["Device payment ending",f2(dp)+"/mo"]]:[]),...(ot?[["Other charges added",f2(ot)+"/mo"]]:[]),
-    ["Bill savings found",sv>0?f2(sv)+"/mo":"None"],...(c.pay?[["Device payoff",f2(c.pay)]]:[]),
     ["Lines",String(c.lines)],["Device retail",f2(c.retail)],["Accessories",acc],["Add-ons",add],["Already has",pk],["VHI",vhiTxt()],...(S.inetNow!==""?[["Internet now",f2(pos(S.inetNow))+"/mo"]]:[]),...(S.inetOurs!==""?[["Internet with us",f2(pos(S.inetOurs))+"/mo"]]:[])];
   return `<div class="panel">${otdInner()}${moInner()}</div>
   ${S.vhiQ&&S.vhiT&&(S.inetNow!==""||S.inetOurs!=="")?`<div class="panel">${netInner()}</div>`:""}
   <div class="lbl">Still on the table · tap to go back</div>
-  ${open.length?`<div class="miss">${open.map(o=>`<button type="button" data-go="${o[2]}">${typeof o[1]==="function"?o[1]():o[1]}</button>`).join("")}</div>`:`<p class="ok">Everything’s on the deal.</p>`}
+  ${open.length?`<div class="miss">${open.map(o=>`<button type="button" data-go="${STEPS.findIndex(x=>x.t===o[2])}">${typeof o[1]==="function"?o[1]():o[1]}</button>`).join("")}</div>`:`<p class="ok">Everything’s on the deal.</p>`}
   ${repBox("Deal details",`<div class="sum">${rows.map(r=>`<div><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join("")}</div>`)}`}}
 ];
 if(!(S.step>=0&&S.step<STEPS.length))S.step=0;
@@ -482,7 +463,7 @@ function render(){
   save();
 }
 // regions that update while the rep types (none of them contain inputs)
-const LIVE={credit:()=>m(S.credit),incS:incSay,otd:()=>f2(calc().otd),mo:moInner,otdB:()=>otdInner(),both:()=>moInner()+otdInner(" s"),mob,brk,net:()=>netInner()};
+const LIVE={credit:()=>m(S.credit),incS:incSay,otd:()=>f2(calc().otd),mo:moInner,otdB:()=>otdInner(),mob,brk,net:()=>netInner()};
 function live(){main.querySelectorAll("[data-v]").forEach(e=>{const f=LIVE[e.dataset.v];if(f)e.innerHTML=f()})}
 function go(i){S.step=Math.max(0,Math.min(STEPS.length-1,i));render();window.scrollTo(0,0)}
 function reset(){
