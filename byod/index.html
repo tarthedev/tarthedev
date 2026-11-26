@@ -8,10 +8,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Sales Flow">
-<title>Upgrade Sales Flow</title>
+<meta name="apple-mobile-web-app-title" content="Upgrade Flow">
+<title>Upgrade Flow</title>
 <style>
-/* Upgrade sales flow — design system
+/* Upgrade Flow — design system
    Mood: a premium internal sales tool. Dark neutral surfaces, one accent, nothing decorative.
    Surfaces: page (--bg) → card (--card) → raised controls (--raised: inputs, options, tabs)
              and recessed readouts (--well: calculation panels and results).
@@ -222,8 +222,8 @@ nav.go button{height:52px;border-radius:var(--r);font:600 16px/1 var(--font);let
 </head>
 <body>
 <header>
-  <div class="bar"><h1>Upgrade sales flow</h1><button class="reset" id="reset" type="button">New customer</button></div>
-  <nav class="tabs" id="chips" aria-label="Sales flow steps"></nav>
+  <div class="bar"><h1>Upgrade Flow</h1><button class="reset" id="reset" type="button">New customer</button></div>
+  <nav class="tabs" id="chips" aria-label="Upgrade Flow steps"></nav>
 </header>
 <main id="main"></main>
 <nav class="go" aria-label="Step navigation"><div><button id="back" type="button">Back</button><button id="next" type="button">Next</button></div></nav>
@@ -231,7 +231,7 @@ nav.go button{height:52px;border-radius:var(--r);font:600 16px/1 var(--font);let
 <script>
 {
 const TAX=0.0725, SETUP=39.99, TIERS={3:15,4:25,5:55};
-const MONTHS=36, BYOD=5, VMP_MO=19, WATCH_MO=7.5, TAB_MO=10, FANS_MO=25;
+const MONTHS=36, TAX_EST=5, VMP_MO=19, WATCH_MO=7.5, TAB_MO=10, FANS_MO=25;
 const ACC=[{k:"sp",n:"Screen protector",p:70},{k:"lp",n:"Lens protectors",p:40},{k:"cs",n:"Case",p:60}];
 const ADD=[{k:"cb",n:"Charging block",p:40},{k:"cl",n:"Cable",p:40}];
 const PERKS=["Disney+","Hulu","ESPN+","Netflix","HBO Max"];
@@ -305,7 +305,7 @@ const tierNote=()=>{
 
 // ---- Monthly ----
 const noPhone=()=>S.phones[0]==="";
-const phone=()=>{const r=+S.phones[0]||0,p=+S.credit||0;return {r,p,a:r/MONTHS,b:p/MONTHS,n:Math.max(0,r-p)/MONTHS+BYOD}};
+const phone=()=>{const r=+S.phones[0]||0,p=+S.credit||0;return {r,p,a:r/MONTHS,b:p/MONTHS,n:Math.max(0,r-p)/MONTHS+TAX_EST}};
 const fmtMo=v=>noPhone()?"$__/mo":f2(v)+"/mo";
 const vmpKey=()=>S.vmp?(S.vmpHas?"has":"new"):"none";
 const vmpMo=()=>vmpKey()==="new"?VMP_MO:0; // already-has VMP is in their current bill
@@ -324,7 +324,7 @@ const moInner=()=>{
 const mob=()=>{const x=phone(),k=vmpKey(),L=[
   ln("Retail",`${f2(x.r)} ÷ 36`,`${f2(x.a)}/mo`),
   ln("Promo",`${f2(x.p)} ÷ 36`,`−${f2(x.b)}/mo`),
-  ln("BYOD","",`+${f2(BYOD)}/mo`),
+  ln("Taxes and surcharges estimate","",`+${f2(TAX_EST)}/mo`),
   ln("VMP",{new:"new",has:"already on their bill",none:"declined"}[k],k==="new"?`+${f2(VMP_MO)}/mo`:"$0.00",k==="new"?"":"dim")];
   if(S.watch)L.push(ln("Watch line","",`+${f2(WATCH_MO)}/mo`));
   if(S.tab)L.push(ln("Tablet line","",`+${f2(TAB_MO)}/mo`));
@@ -364,7 +364,7 @@ const vhiTxt=()=>{
 };
 
 const STEPS=[
-{t:"Upgrade",h:"Position BYOD",body:()=>`
+{t:"Upgrade",h:"Position the upgrade",body:()=>`
   ${say([`Okay, you get <b data-v="credit">${m(S.credit)}</b> off the upgrade.`,`<span data-v="incS">${incSay()}</span>`,"No trade required — keep your old phone."])}
   <div class="row">${money("ph0","Phone retail price",S.phones[0])}${money("credit","Promo amount",S.credit)}</div>
   <div class="panel" data-v="mo">${moInner()}</div>
@@ -433,7 +433,7 @@ const STEPS=[
   const acc=ACC.filter(a=>S.acc[a.k]).map(a=>a.n).join(", ")||"None";
   const add=[...ADD.filter(a=>S.add[a.k]).map(a=>a.n+(addP(a)<a.p?" (50% off)":"")),S.jl&&JL[S.jl].n+" (25% off)"].filter(Boolean).join(", ")||"None";
   const pk=PERKS.filter(p=>S.perks[p]).join(", ")||"None";
-  const rows=[["Promo amount",m(S.credit)],["Phone + BYOD",fmtMo(phone().n)],["VMP",{new:"New · $19/mo",has:"Already has",none:"No"}[vmpKey()]],["Watch / tablet",[S.watch&&"Watch (free AirPods)",S.tab&&"Tablet"].filter(Boolean).join(" + ")||"None"],["Perks added",perkName()],
+  const rows=[["Promo amount",m(S.credit)],["Phone + taxes est.",fmtMo(phone().n)],["VMP",{new:"New · $19/mo",has:"Already has",none:"No"}[vmpKey()]],["Watch / tablet",[S.watch&&"Watch (free AirPods)",S.tab&&"Tablet"].filter(Boolean).join(" + ")||"None"],["Perks added",perkName()],
     ...(bl?[["Current bill",f2(bl)+"/mo"]]:[]),...(dp?[["Device payment ending",f2(dp)+"/mo"]]:[]),...(ot?[["Other charges added",f2(ot)+"/mo"]]:[]),
     ["Bill savings found",sv>0?f2(sv)+"/mo":"None"],...(c.pay?[["Device payoff",f2(c.pay)]]:[]),
     ["Lines",String(c.lines)],["Device retail",f2(c.retail)],["Accessories",acc],["Add-ons",add],["Already has",pk],["VHI",vhiTxt()]];
